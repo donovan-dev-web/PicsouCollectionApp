@@ -1,0 +1,286 @@
+<!DOCTYPE html><html class="dark" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Picsou Collection - Accueil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wght@700;800;900&amp;family=Hanken+Grotesk:wght@400&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-highest": "#353534",
+                "tertiary-container": "#ade1ff",
+                "outline-variant": "#4c4733",
+                "error": "#ffb4ab",
+                "background": "#131313",
+                "secondary-fixed": "#ffdad7",
+                "tertiary-fixed": "#c2e8ff",
+                "on-tertiary-fixed": "#001e2b",
+                "text-secondary": "#b0b0b0",
+                "error-container": "#93000a",
+                "on-secondary": "#68000c",
+                "surface-raised": "#1e1e1e",
+                "secondary-fixed-dim": "#ffb3ae",
+                "on-secondary-fixed-variant": "#930015",
+                "on-primary-container": "#715e00",
+                "on-error": "#690005",
+                "on-primary-fixed-variant": "#544600",
+                "accent-gold": "#fdd835",
+                "primary-fixed": "#ffe16e",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-dim": "#131313",
+                "surface-container-low": "#1c1b1b",
+                "on-secondary-container": "#ffa8a3",
+                "on-surface-variant": "#cfc6ac",
+                "on-tertiary-fixed-variant": "#004d67",
+                "surface-bright": "#393939",
+                "inverse-surface": "#e5e2e1",
+                "tertiary": "#eff8ff",
+                "secondary-container": "#a00118",
+                "on-primary": "#3a3000",
+                "surface-container-high": "#2a2a2a",
+                "outline": "#989079",
+                "inverse-on-surface": "#313030",
+                "status-missing": "#66bb6a",
+                "primary": "#fff6e2",
+                "on-background": "#e5e2e1",
+                "status-owned": "#ff5252",
+                "on-primary-fixed": "#221b00",
+                "primary-container": "#fdd835",
+                "surface-overlay": "#2c2c2c",
+                "surface-variant": "#353534",
+                "on-secondary-fixed": "#410004",
+                "tertiary-fixed-dim": "#75d1ff",
+                "inverse-primary": "#705d00",
+                "surface": "#131313",
+                "on-tertiary-container": "#006789",
+                "surface-container": "#201f1f",
+                "on-tertiary": "#003548",
+                "text-primary": "#ffffff",
+                "secondary": "#ffb3ae",
+                "on-surface": "#e5e2e1",
+                "primary-fixed-dim": "#e8c41d",
+                "on-error-container": "#ffdad6",
+                "surface-tint": "#e8c41d"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "gutter-list": "12px",
+                "base": "8px",
+                "card-padding": "16px",
+                "touch-target": "48px"
+        },
+        "fontFamily": {
+                "body-md": [
+                        "hankenGrotesk", "sans-serif"
+                ],
+                "label-md": [
+                        "jetbrainsMono", "monospace"
+                ],
+                "body-lg": [
+                        "hankenGrotesk", "sans-serif"
+                ],
+                "headline-sm": [
+                        "anybody", "sans-serif"
+                ],
+                "headline-lg": [
+                        "anybody", "sans-serif"
+                ],
+                "label-lg": [
+                        "jetbrainsMono", "monospace"
+                ],
+                "numeric-hero": [
+                        "anybody", "sans-serif"
+                ],
+                "headline-md": [
+                        "anybody", "sans-serif"
+                ],
+                "display-lg": [
+                        "anybody", "sans-serif"
+                ]
+        },
+        "fontSize": {
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "numeric-hero": [
+                        "64px",
+                        {
+                                "lineHeight": "64px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "900"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "800"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-[72px] pb-[88px] selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target bg-surface-container border-b border-outline-variant/10">
+<button aria-label="Menu" class="w-12 h-12 flex items-center justify-center text-primary-fixed hover:bg-surface-variant/50 rounded-full active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-[24px] leading-[32px] font-bold text-primary-fixed">Picsou Collection</h1>
+<button aria-label="Scanner de code-barres" class="w-12 h-12 flex items-center justify-center text-primary-fixed hover:bg-surface-variant/50 rounded-full active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="flex-grow px-margin-mobile py-6 flex flex-col gap-8 max-w-md mx-auto w-full">
+<!-- Collection Summary Widget -->
+<section class="bg-surface-container rounded-xl border border-outline/10 p-6 flex flex-col items-center justify-center text-center shadow-sm">
+<p class="font-label-lg text-[16px] leading-[20px] tracking-[0.5px] font-semibold text-tertiary-fixed-dim mb-2 uppercase">Total en Collection</p>
+<div class="font-numeric-hero text-[64px] leading-[64px] font-black text-primary-fixed-dim drop-shadow-sm">
+                1,247
+            </div>
+<p class="font-body-md text-[16px] text-on-surface-variant mt-1">magazines référencés</p>
+</section>
+<!-- Primary Action Buttons -->
+<section class="grid grid-cols-2 gap-4">
+<button class="bg-primary text-on-primary rounded-xl h-32 flex flex-col items-center justify-center gap-3 shadow-md active:bg-on-primary-fixed-variant transition-colors duration-200">
+<span class="material-symbols-outlined text-4xl" data-icon="qr_code_scanner" data-weight="fill">qr_code_scanner</span>
+<span class="font-headline-sm text-[20px] font-bold">SCANNER</span>
+</button>
+<button class="bg-tertiary-container text-on-tertiary-container rounded-xl h-32 flex flex-col items-center justify-center gap-3 shadow-sm border border-tertiary/20 active:bg-tertiary-fixed-dim transition-colors duration-200">
+<span class="material-symbols-outlined text-4xl" data-icon="add_circle" data-weight="fill">add_circle</span>
+<span class="font-headline-sm text-[20px] font-bold">AJOUTER</span>
+</button>
+</section>
+<!-- Recent Additions -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end mb-2">
+<h2 class="font-headline-md text-[24px] font-bold text-on-surface">Ajouts récents</h2>
+<a class="font-label-md text-[14px] text-tertiary-fixed-dim font-semibold hover:underline" href="#">Voir tout</a>
+</div>
+<!-- List View -->
+<ul class="flex flex-col gap-gutter-list">
+<!-- Card 1 -->
+<li class="bg-surface-container rounded-lg border border-outline/10 p-card-padding flex gap-4 items-center relative overflow-hidden">
+<div class="w-16 h-24 bg-surface-variant rounded flex-shrink-0 relative overflow-hidden border border-outline/5">
+<img class="w-full h-full object-cover" data-alt="Cover of a vintage comic book featuring a famous cartoon duck character exploring an ancient ruins set in a jungle. High contrast colors, classic comic illustration style, slightly weathered edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDS1_G0hW5Or9eYN-T5f5nW2DbYC4iJgWfWbBmZqrQ_Y88JrsBks2ORsSTSX2d6EtAtG6JEg6L_Jnv3lPtEoh2HScMVrpcyXn4Xf9tOz36JMXOxdys_Gs2bt0e2n7Y4wR397IutN_a2dqp1QHHpQMWcFJN0cevCXgFrzGzQBk7cGOHitVqIUxI_PbaeFblf4bIr57gTDbleeBD8CdkAim7za1XSEi1fh4oFX3ki6Rg8PIMIUlksrCqt">
+</div>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-headline-sm text-[20px] font-bold text-on-surface leading-tight">#3452</span>
+<span class="px-2 py-1 bg-surface-variant text-tertiary-fixed-dim rounded text-[10px] font-label-lg font-bold">FR</span>
+</div>
+<h3 class="font-body-lg text-[18px] text-on-surface-variant line-clamp-2 mt-1">Le Trésor de la Sierra Sombre</h3>
+<p class="font-label-md text-[14px] text-outline mt-2">Ajouté il y a 2h</p>
+</div>
+</li>
+<!-- Card 2 -->
+<li class="bg-surface-container rounded-lg border border-outline/10 p-card-padding flex gap-4 items-center relative overflow-hidden">
+<div class="w-16 h-24 bg-surface-variant rounded flex-shrink-0 relative overflow-hidden border border-outline/5">
+<img class="w-full h-full object-cover" data-alt="Cover of a classic European comic book showing a wealthy duck character standing proudly in front of a giant vault filled with gold coins. Bright yellow and orange tones, clean line art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjY1IwyHGZMFJCMs_k3i1bz1pO6PFXX8DD5KsdJ6SgrKk0lk2uLBUppiGZIIrxbAb4wOZpcxqAtrmewzDUnCsqjXtZYewq0a03TzsiTCGzmUhz7u1ofw7f4__71Xr8ivSy84lFJApIrMYCKWR-9ZJA_uyC6O8V512h-KEQiUrWTFwDpXxI1IJJsD6b5hArYY7n-j4xGPsxVAmqv9ttv2mnq5bLr7Kh9SdrdGksdmi4p5IXezXcvKIn">
+</div>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-headline-sm text-[20px] font-bold text-on-surface leading-tight">#128</span>
+<span class="px-2 py-1 bg-surface-variant text-tertiary-fixed-dim rounded text-[10px] font-label-lg font-bold">1998</span>
+</div>
+<h3 class="font-body-lg text-[18px] text-on-surface-variant line-clamp-2 mt-1">Picsou Magazine Hors-Série</h3>
+<p class="font-label-md text-[14px] text-outline mt-2">Ajouté hier</p>
+</div>
+</li>
+</ul>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base pb-safe h-16 bg-surface border-t border-surface-container-low rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden">
+<!-- Active Tab: Accueil -->
+<button aria-current="page" class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full px-5 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill">home</span>
+<span class="font-label-md text-[14px] font-medium mt-1">Accueil</span>
+</button>
+<!-- Inactive Tab: Ma Collection -->
+<button class="flex flex-col items-center justify-center text-surface-variant px-5 py-1 hover:bg-surface-container-highest rounded-full active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="library_books">library_books</span>
+<span class="font-label-md text-[14px] font-medium mt-1">Ma Collection</span>
+</button>
+<!-- Inactive Tab: Paramètres -->
+<button class="flex flex-col items-center justify-center text-surface-variant px-5 py-1 hover:bg-surface-container-highest rounded-full active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-[14px] font-medium mt-1">Paramètres</span>
+</button>
+</nav>
+</body></html>

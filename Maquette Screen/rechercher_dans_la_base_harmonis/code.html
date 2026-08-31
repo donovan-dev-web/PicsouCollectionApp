@@ -1,0 +1,387 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Picsou Collection - Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wght@400;700;800;900&amp;family=Hanken+Grotesk:wght@400;600&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "tertiary-fixed": "#cfe5ff",
+                "surface-dim": "#cfdce4",
+                "on-tertiary-fixed": "#001d34",
+                "surface-variant": "#d7e4ec",
+                "surface-container": "#e3f0f8",
+                "on-error-container": "#93000a",
+                "error": "#ba1a1a",
+                "on-secondary-fixed-variant": "#93000e",
+                "on-surface-variant": "#4c4733",
+                "inverse-surface": "#263238",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed": "#221b00",
+                "outline": "#7e7761",
+                "on-tertiary-fixed-variant": "#004a78",
+                "surface-container-high": "#ddeaf2",
+                "error-container": "#ffdad6",
+                "tertiary": "#00629e",
+                "primary-fixed": "#ffe16e",
+                "inverse-on-surface": "#e6f3fb",
+                "surface-container-low": "#e9f6fd",
+                "surface-bright": "#f4faff",
+                "outline-variant": "#cfc6ac",
+                "on-secondary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-background": "#111d23",
+                "tertiary-fixed-dim": "#99cbff",
+                "primary": "#705d00",
+                "on-error": "#ffffff",
+                "primary-container": "#fdd835",
+                "primary-fixed-dim": "#e8c41d",
+                "surface-container-highest": "#d7e4ec",
+                "status-owned": "#C62828",
+                "secondary-fixed-dim": "#ffb4ac",
+                "on-primary-container": "#715e00",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-container": "#00639f",
+                "surface": "#f4faff",
+                "surface-tint": "#705d00",
+                "on-secondary-container": "#fffbff",
+                "on-primary-fixed-variant": "#544600",
+                "secondary": "#b51a1e",
+                "secondary-fixed": "#ffdad6",
+                "on-surface": "#111d23",
+                "on-secondary-fixed": "#410003",
+                "inverse-primary": "#e8c41d",
+                "surface-duck-egg": "#E1F5FE",
+                "status-missing": "#2E7D32",
+                "background": "#f4faff",
+                "secondary-container": "#d93633",
+                "tertiary-container": "#c0ddff",
+                "status-warning": "#FF8F00"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "base": "8px",
+                "margin-mobile": "16px",
+                "touch-target": "48px",
+                "card-padding": "16px",
+                "gutter-list": "12px"
+        },
+        "fontFamily": {
+                "headline-lg": [
+                        "anybody"
+                ],
+                "label-md": [
+                        "jetbrainsMono"
+                ],
+                "body-lg": [
+                        "hankenGrotesk"
+                ],
+                "numeric-hero": [
+                        "anybody"
+                ],
+                "display-lg": [
+                        "anybody"
+                ],
+                "label-lg": [
+                        "jetbrainsMono"
+                ],
+                "body-md": [
+                        "hankenGrotesk"
+                ],
+                "headline-md": [
+                        "anybody"
+                ],
+                "headline-sm": [
+                        "anybody"
+                ]
+        },
+        "fontSize": {
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "numeric-hero": [
+                        "64px",
+                        {
+                                "lineHeight": "64px",
+                                "fontWeight": "900"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "800"
+                        }
+                ],
+                "label-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "700"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+          .glass-panel {
+              background: rgba(244, 250, 255, 0.7);
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(0, 0, 0, 0.05);
+          }
+          
+          input[type="range"]::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background: #705d00;
+              cursor: pointer;
+          }
+          input[type="range"]::-moz-range-thumb {
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background: #705d00;
+              cursor: pointer;
+              border: none;
+          }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-safe antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target bg-surface-container border-b border-outline-variant/10 md:hidden">
+<button class="text-on-surface-variant hover:bg-surface-variant/20 p-2 rounded-full active:scale-95 transition-transform duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Picsou Collection</h1>
+<button class="text-on-surface-variant hover:bg-surface-variant/20 p-2 rounded-full active:scale-95 transition-transform duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+</button>
+</header>
+<!-- Desktop Nav Placeholder (Hidden on Mobile) -->
+<header class="hidden md:flex fixed top-0 left-0 w-full z-50 justify-between items-center px-6 h-16 bg-surface-container-highest border-b border-outline-variant/10 glass-panel">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Picsou Collection</h1>
+<nav class="flex gap-6">
+<a class="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors" href="#">Home</a>
+<a class="font-label-lg text-label-lg text-primary" href="#">Collection</a>
+<a class="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+<button class="bg-primary-container text-on-primary-container font-label-lg text-label-lg px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+            Scan
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-[72px] pb-[80px] md:pt-24 max-w-[1200px] mx-auto px-margin-mobile md:px-6">
+<!-- Search Hero Section -->
+<section class="mb-8">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-tertiary transition-colors" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/30 text-on-surface font-body-lg text-body-lg rounded-lg py-4 pl-12 pr-4 focus:outline-none focus:border-tertiary focus:ring-1 focus:ring-tertiary transition-all placeholder:text-on-surface-variant/50 shadow-sm" placeholder="Search by title, character, or issue number..." type="text">
+</div>
+</section>
+<!-- Advanced Filters Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-gutter-list mb-8">
+<!-- Publication Types (Chips) -->
+<div class="md:col-span-12 lg:col-span-6 bg-surface-container-low border border-outline-variant/20 rounded-xl p-card-padding shadow-sm">
+<h2 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Publication Type</h2>
+<div class="flex flex-wrap gap-2">
+<button class="font-label-md text-label-md px-3 py-1.5 rounded-full border border-primary/30 bg-surface-duck-egg text-tertiary transition-colors">Picsou Magazine</button>
+<button class="font-label-md text-label-md px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface hover:border-outline-variant bg-surface-container-lowest transition-colors">Mickey Parade</button>
+<button class="font-label-md text-label-md px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface hover:border-outline-variant bg-surface-container-lowest transition-colors">Super Picsou Géant</button>
+<button class="font-label-md text-label-md px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface hover:border-outline-variant bg-surface-container-lowest transition-colors">Trésors de Picsou</button>
+</div>
+</div>
+<!-- Status Checkboxes -->
+<div class="md:col-span-6 lg:col-span-3 bg-surface-container-low border border-outline-variant/20 rounded-xl p-card-padding shadow-sm flex flex-col justify-center">
+<h2 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Vault Status</h2>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center w-5 h-5 rounded border border-outline-variant/50 bg-surface-container-lowest group-hover:border-primary transition-colors">
+<input checked="" class="sr-only peer" type="checkbox">
+<span class="material-symbols-outlined text-[16px] text-surface-container-lowest opacity-0 peer-checked:opacity-100 peer-checked:bg-status-owned peer-checked:text-white w-full h-full rounded flex items-center justify-center transition-all" data-icon="check">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Owned</span>
+<div class="ml-auto w-2 h-2 rounded-full bg-status-owned/80"></div>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center w-5 h-5 rounded border border-outline-variant/50 bg-surface-container-lowest group-hover:border-primary transition-colors">
+<input class="sr-only peer" type="checkbox">
+<span class="material-symbols-outlined text-[16px] text-surface-container-lowest opacity-0 peer-checked:opacity-100 peer-checked:bg-status-missing peer-checked:text-white w-full h-full rounded flex items-center justify-center transition-all" data-icon="check">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Missing</span>
+<div class="ml-auto w-2 h-2 rounded-full bg-status-missing/80"></div>
+</label>
+</div>
+</div>
+<!-- Year Range Slider -->
+<div class="md:col-span-6 lg:col-span-3 bg-surface-container-low border border-outline-variant/20 rounded-xl p-card-padding shadow-sm flex flex-col justify-center">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Era Range</h2>
+<span class="font-label-md text-label-md text-primary font-bold">1970 - 2023</span>
+</div>
+<div class="relative w-full h-2 bg-outline-variant/30 rounded-full">
+<div class="absolute top-0 left-1/4 right-1/4 h-full bg-primary/50 rounded-full"></div>
+<input class="absolute top-1/2 -translate-y-1/2 w-full appearance-none bg-transparent pointer-events-none [&amp;::-webkit-slider-thumb]:pointer-events-auto" max="2023" min="1950" type="range" value="1970">
+<!-- Second thumb would require JS or a complex CSS setup for a true range slider, using single for visual demo -->
+</div>
+<div class="flex justify-between mt-2 font-label-md text-[10px] text-on-surface-variant">
+<span>1950</span>
+<span>2024</span>
+</div>
+</div>
+</section>
+<!-- Results Header -->
+<div class="flex justify-between items-end mb-4 border-b border-outline-variant/20 pb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Search Results <span class="text-on-surface-variant font-body-md text-body-md ml-2">(142 matches)</span></h3>
+<button class="text-on-surface-variant hover:text-primary flex items-center gap-1 font-label-md text-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="sort">sort</span> Sort
+            </button>
+</div>
+<!-- Results List (Glassmorphism Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter-list">
+<!-- Result Item 1 (Owned) -->
+<article class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden group cursor-pointer relative hover:border-primary/50 transition-colors shadow-sm">
+<div class="absolute top-2 right-2 z-20 flex gap-2">
+<span class="bg-error-container text-on-error-container border border-status-owned/30 font-label-md text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">OWNED</span>
+</div>
+<div class="h-48 relative w-full overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A detailed digital render of a classic comic book cover featuring Scrooge McDuck in a dark, atmospheric setting. The cover is slightly weathered, bathed in dramatic cinematic lighting with deep shadows and glowing gold accents. The overall aesthetic is dark, premium, and collector-focused, fitting a high-end digital vault interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlAlGnAqrEljhZctaqqyJPgCcu_0E7ks9tviUDLPxGc1-gIdtmeZ7AynoLOfB_evHkZfj2FLg9AzG41w6t5ZCjnt2H-5xW6F_9DzlTE-UlFCQTAtJpNQJKyM3bcUftVJgz-ealGeQYFT3j95fcDs7tx6rXoqs1lUowHwE4EA9as0_oZluHVvc5j68LSyBBGHpzHJpl6niYZJMIT4o5q3HH9egpOOnJqMt26SSjXtRXmPeAqSsGnQ7t">
+</div>
+<div class="p-4 relative z-20 bg-surface-container-lowest">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md text-primary">Picsou Magazine</span>
+<span class="font-numeric-hero text-[32px] leading-none text-on-surface-variant/50">#124</span>
+</div>
+<h4 class="font-headline-sm text-[18px] text-on-surface truncate mb-2">Le Trésor de Crésus</h4>
+<div class="flex justify-between items-center mt-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Pub: 1982</span>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Result Item 2 (Missing) -->
+<article class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden group cursor-pointer relative hover:border-primary/50 transition-colors shadow-sm">
+<div class="absolute top-2 right-2 z-20 flex gap-2">
+<span class="bg-surface-container-highest text-status-missing border border-status-missing/30 font-label-md text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">MISSING</span>
+</div>
+<div class="h-48 relative w-full overflow-hidden bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-outline/50" data-icon="menu_book">menu_book</span>
+</div>
+<div class="p-4 relative z-20 bg-surface-container-lowest">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md text-primary">Mickey Parade</span>
+<span class="font-numeric-hero text-[32px] leading-none text-on-surface-variant/50">#68</span>
+</div>
+<h4 class="font-headline-sm text-[18px] text-on-surface truncate mb-2">Mystère au Château</h4>
+<div class="flex justify-between items-center mt-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Pub: 1985</span>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Result Item 3 (Owned) -->
+<article class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden group cursor-pointer relative hover:border-primary/50 transition-colors shadow-sm">
+<div class="absolute top-2 right-2 z-20 flex gap-2">
+<span class="bg-error-container text-on-error-container border border-status-owned/30 font-label-md text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">OWNED</span>
+</div>
+<div class="h-48 relative w-full overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A detailed digital render of a classic comic book cover featuring Donald Duck in a dark, atmospheric setting. The cover is pristine, illuminated by dramatic spotlighting against a deep black void. High-contrast colors with glowing neon accents fit the elite, tech-forward digital vault design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhv4XZPfen3PDnsJquDx1fu0VyLFqgVrVOnQRNd6jiFjQrBZYz0er3VvQEqFkYIWiNut-G1udxOp8IDCTD5KK1lTJerburniAawwDIZZS5lu8-ie1R4M9aKn6Z1dnRKmT2OEpMQLvzZqW4bQoCFAS4Xb5pNSrGixN-64H1NrcZicWsmcWrWaBl-eIPzABQlV4639X5s0czqDX9gKpXQSukfoZwL7KKc9o1xGQxsI8Q-7JcRC3-iIyE">
+</div>
+<div class="p-4 relative z-20 bg-surface-container-lowest">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md text-primary">Super Picsou Géant</span>
+<span class="font-numeric-hero text-[32px] leading-none text-on-surface-variant/50">#15</span>
+</div>
+<h4 class="font-headline-sm text-[18px] text-on-surface truncate mb-2">La Quête du Sou fétiche</h4>
+<div class="flex justify-between items-center mt-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Pub: 1992</span>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base pb-safe h-16 bg-surface border-t border-surface-container-low rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-variant active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined fill" data-icon="library_books" data-weight="fill">library_books</span>
+<span class="font-label-md text-label-md mt-1">Collection</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-variant active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html><html class="dark" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Paramètres - Picsou Collection</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wght@700;800;900&amp;family=Hanken+Grotesk:wght@400&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-highest": "#353534",
+                "tertiary-container": "#ade1ff",
+                "outline-variant": "#4c4733",
+                "error": "#ffb4ab",
+                "background": "#131313",
+                "secondary-fixed": "#ffdad7",
+                "tertiary-fixed": "#c2e8ff",
+                "on-tertiary-fixed": "#001e2b",
+                "text-secondary": "#b0b0b0",
+                "error-container": "#93000a",
+                "on-secondary": "#68000c",
+                "surface-raised": "#1e1e1e",
+                "secondary-fixed-dim": "#ffb3ae",
+                "on-secondary-fixed-variant": "#930015",
+                "on-primary-container": "#715e00",
+                "on-error": "#690005",
+                "on-primary-fixed-variant": "#544600",
+                "accent-gold": "#fdd835",
+                "primary-fixed": "#ffe16e",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-dim": "#131313",
+                "surface-container-low": "#1c1b1b",
+                "on-secondary-container": "#ffa8a3",
+                "on-surface-variant": "#cfc6ac",
+                "on-tertiary-fixed-variant": "#004d67",
+                "surface-bright": "#393939",
+                "inverse-surface": "#e5e2e1",
+                "tertiary": "#eff8ff",
+                "secondary-container": "#a00118",
+                "on-primary": "#3a3000",
+                "surface-container-high": "#2a2a2a",
+                "outline": "#989079",
+                "inverse-on-surface": "#313030",
+                "status-missing": "#66bb6a",
+                "primary": "#fff6e2",
+                "on-background": "#e5e2e1",
+                "status-owned": "#ff5252",
+                "on-primary-fixed": "#221b00",
+                "primary-container": "#fdd835",
+                "surface-overlay": "#2c2c2c",
+                "surface-variant": "#353534",
+                "on-secondary-fixed": "#410004",
+                "tertiary-fixed-dim": "#75d1ff",
+                "inverse-primary": "#705d00",
+                "surface": "#131313",
+                "on-tertiary-container": "#006789",
+                "surface-container": "#201f1f",
+                "on-tertiary": "#003548",
+                "text-primary": "#ffffff",
+                "secondary": "#ffb3ae",
+                "on-surface": "#e5e2e1",
+                "primary-fixed-dim": "#e8c41d",
+                "on-error-container": "#ffdad6",
+                "surface-tint": "#e8c41d"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "gutter-list": "12px",
+                "base": "8px",
+                "card-padding": "16px",
+                "touch-target": "48px"
+        },
+        "fontFamily": {
+                "body-md": [
+                        "hankenGrotesk"
+                ],
+                "label-md": [
+                        "jetbrainsMono"
+                ],
+                "body-lg": [
+                        "hankenGrotesk"
+                ],
+                "headline-sm": [
+                        "anybody"
+                ],
+                "headline-lg": [
+                        "anybody"
+                ],
+                "label-lg": [
+                        "jetbrainsMono"
+                ],
+                "numeric-hero": [
+                        "anybody"
+                ],
+                "headline-md": [
+                        "anybody"
+                ],
+                "display-lg": [
+                        "anybody"
+                ]
+        },
+        "fontSize": {
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "numeric-hero": [
+                        "64px",
+                        {
+                                "lineHeight": "64px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "900"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "800"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-[56px] pb-[64px] md:pt-[64px] md:pb-0 font-body-md text-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-container dark:bg-surface-container-highest docked full-width top-0 border-b border-outline-variant/10 fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target">
+<button aria-label="Menu" class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant/50 dark:hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-full p-2 w-touch-target h-touch-target flex items-center justify-center -ml-2">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed flex-1 text-center truncate px-2">
+            Paramètres
+        </h1>
+<div class="w-touch-target h-touch-target"></div> <!-- Placeholder for symmetry if no trailing icon -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-2xl mx-auto px-margin-mobile py-6 flex flex-col gap-6">
+<!-- App Identity & Stats Header -->
+<section class="flex flex-col items-center justify-center py-4">
+<div class="w-24 h-24 rounded-2xl bg-primary-container flex items-center justify-center mb-4 shadow-sm border border-outline-variant/20">
+<span class="material-symbols-outlined text-[48px] text-on-primary-container icon-filled" data-icon="library_books">library_books</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface text-center mb-1">Picsou Collection</h2>
+<p class="font-label-lg text-label-lg text-on-surface-variant text-center mb-6">v2.4.1 (Build 409)</p>
+<!-- Data Statistics Bento Grid -->
+<div class="grid grid-cols-2 gap-4 w-full mt-2">
+<div class="bg-surface-container-high rounded-xl p-card-padding flex flex-col items-center justify-center border border-outline-variant/20">
+<span class="font-numeric-hero text-numeric-hero text-primary tracking-tight">842</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mt-1">Magazines</span>
+</div>
+<div class="bg-surface-container-high rounded-xl p-card-padding flex flex-col items-center justify-center border border-outline-variant/20">
+<span class="font-numeric-hero text-numeric-hero text-secondary tracking-tight">15</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mt-1">Manquants</span>
+</div>
+</div>
+</section>
+<!-- Data Management Section -->
+<section class="flex flex-col gap-4 mt-4">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant/30 pb-2 mb-2">Gestion des données</h3>
+<button class="w-full bg-primary-container hover:bg-primary-container/90 text-on-primary-container rounded-xl min-h-touch-target px-card-padding flex items-center justify-between active:scale-[0.98] transition-transform duration-150 border border-on-primary-container/10 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined icon-filled group-hover:scale-110 transition-transform" data-icon="upload">upload</span>
+<span class="font-label-lg text-label-lg">Exporter la collection</span>
+</div>
+<span class="font-label-md text-label-md opacity-70">JSON / CSV</span>
+</button>
+<button class="w-full bg-surface-container-highest hover:bg-surface-variant text-on-surface rounded-xl min-h-touch-target px-card-padding flex items-center justify-between active:scale-[0.98] transition-transform duration-150 border border-outline-variant/20 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="download">download</span>
+<span class="font-label-lg text-label-lg">Importer une collection</span>
+</div>
+</button>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm px-2 text-center mt-1">
+                L'importation écrasera les données actuelles si des doublons sont trouvés.
+            </p>
+</section>
+<!-- Preferences Section (Example to fill out the settings screen) -->
+<section class="flex flex-col gap-2 mt-6 mb-8">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant/30 pb-2 mb-2">Préférences</h3>
+<div class="w-full bg-surface-container rounded-xl px-card-padding py-3 flex items-center justify-between border border-outline-variant/10">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Mode sombre</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Système par défaut</span>
+</div>
+<!-- CSS Toggle Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value="">
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tertiary"></div>
+</label>
+</div>
+<div class="w-full bg-surface-container rounded-xl px-card-padding py-3 flex items-center justify-between border border-outline-variant/10">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Langue</span>
+</div>
+<div class="flex items-center gap-1 text-tertiary">
+<span class="font-label-lg text-label-lg">Français</span>
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Visible on Mobile, Hidden on md+) -->
+<nav class="md:hidden bg-surface dark:bg-inverse-surface docked full-width bottom-0 rounded-t-xl bg-surface-container-low dark:bg-inverse-surface fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base pb-safe h-16 shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
+<a aria-label="Home" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-container-highest active:scale-90 transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-md text-label-md text-[10px]">Accueil</span>
+</a>
+<a aria-label="Collection" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-container-highest active:scale-90 transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="library_books">library_books</span>
+<span class="font-label-md text-label-md text-[10px]">Collection</span>
+</a>
+<!-- Active Tab: Settings -->
+<a aria-current="page" aria-label="Settings" class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-container-highest active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1 icon-filled" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md text-[10px] font-bold">Paramètres</span>
+</a>
+</nav>
+</body></html>

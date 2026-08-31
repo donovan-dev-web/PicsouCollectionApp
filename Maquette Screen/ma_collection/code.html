@@ -1,0 +1,337 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ma Collection - Picsou</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,100..900;1,100..900&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#e3f0f8",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#ffdad6",
+                      "surface": "#f4faff",
+                      "inverse-on-surface": "#e6f3fb",
+                      "secondary": "#b51a1e",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#705d00",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#fffbff",
+                      "background": "#f4faff",
+                      "secondary-container": "#d93633",
+                      "surface-variant": "#d7e4ec",
+                      "on-secondary-fixed": "#410003",
+                      "inverse-primary": "#e8c41d",
+                      "surface-dim": "#cfdce4",
+                      "primary-fixed": "#ffe16e",
+                      "tertiary-fixed": "#cfe5ff",
+                      "status-warning": "#FF8F00",
+                      "tertiary": "#00629e",
+                      "status-owned": "#C62828",
+                      "on-tertiary-container": "#00639f",
+                      "outline-variant": "#cfc6ac",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#ddeaf2",
+                      "surface-container-low": "#e9f6fd",
+                      "on-primary-fixed-variant": "#544600",
+                      "on-tertiary-fixed-variant": "#004a78",
+                      "tertiary-container": "#c0ddff",
+                      "tertiary-fixed-dim": "#99cbff",
+                      "surface-duck-egg": "#E1F5FE",
+                      "primary-container": "#fdd835",
+                      "on-secondary-fixed-variant": "#93000e",
+                      "status-missing": "#2E7D32",
+                      "surface-bright": "#f4faff",
+                      "inverse-surface": "#263238",
+                      "surface-container-highest": "#d7e4ec",
+                      "on-tertiary-fixed": "#001d34",
+                      "primary": "#705d00",
+                      "primary-fixed-dim": "#e8c41d",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#221b00",
+                      "secondary-fixed-dim": "#ffb4ac",
+                      "outline": "#7e7761",
+                      "on-error": "#ffffff",
+                      "on-surface-variant": "#4c4733",
+                      "on-surface": "#111d23",
+                      "on-background": "#111d23",
+                      "on-primary-container": "#715e00",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "16px",
+                      "gutter-list": "12px",
+                      "touch-target": "48px",
+                      "margin-mobile": "16px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Hanken Grotesk", "sans-serif"
+                      ],
+                      "headline-sm": [
+                              "Anybody", "sans-serif"
+                      ],
+                      "label-lg": [
+                              "JetBrains Mono", "monospace"
+                      ],
+                      "headline-lg": [
+                              "Anybody", "sans-serif"
+                      ],
+                      "numeric-hero": [
+                              "Anybody", "sans-serif"
+                      ],
+                      "headline-md": [
+                              "Anybody", "sans-serif"
+                      ],
+                      "display-lg": [
+                              "Anybody", "sans-serif"
+                      ],
+                      "body-lg": [
+                              "Hanken Grotesk", "sans-serif"
+                      ],
+                      "label-md": [
+                              "JetBrains Mono", "monospace"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "numeric-hero": [
+                              "64px",
+                              {
+                                      "lineHeight": "64px",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "52px",
+                                      "letterSpacing": "-1px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+          .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+          }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-[80px] pt-[64px]">
+<!-- TopAppBar -->
+<header class="bg-surface-container dark:bg-surface-container-highest border-b border-outline-variant/10 fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target">
+<button class="text-on-surface-variant hover:bg-surface-variant/50 active:scale-95 transition-transform duration-150 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Picsou Collection</h1>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 active:scale-95 transition-transform duration-150 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">barcode_scanner</span>
+</button>
+</header>
+<main class="max-w-4xl mx-auto px-margin-mobile py-6">
+<!-- Search and Filter Bar -->
+<div class="flex gap-3 mb-6">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-2 border-outline-variant rounded-lg leading-5 bg-surface-container-lowest placeholder-on-surface-variant focus:outline-none focus:ring-0 focus:border-tertiary sm:text-sm font-label-md transition-colors text-on-surface" placeholder="Rechercher (ex: Picsou Mag 547)" type="text">
+</div>
+<button class="flex items-center justify-center px-4 py-2 border-2 border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-variant/50 transition-colors focus:outline-none focus:border-tertiary">
+<span class="material-symbols-outlined mr-2">filter_list</span>
+<span class="font-label-md">Filtres</span>
+</button>
+</div>
+<!-- Collection List -->
+<div class="flex flex-col gap-gutter-list">
+<!-- Item 1 -->
+<div class="flex bg-surface-container-lowest border border-outline-variant/10 rounded-lg p-3 hover:bg-surface-variant/20 transition-colors cursor-pointer group">
+<div class="w-20 h-28 bg-surface-variant rounded flex-shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A brightly colored comic book cover featuring Scrooge McDuck holding a large bag of money. The artwork is classic, highly detailed, and nostalgic. The lighting is bright and flat, characteristic of vintage comic printing. The background is a solid, vibrant blue." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyzo-iuNszIsy-c4keeF2VnP8rF0nsvkv2eNOWyG2ga-WkOeMmzWlc1jbq4oNx5lxFoPWNnKKbryfFdzgQpFb9LhpbSeyzPq-lEzgwe4eDpo_YwHZlVNg9njfwyWAAEQeICJ7ya7osq-q7opOyEGQRFQu2_WFipjxJsFk5byveGOt_vwZxgCZsOqRTSXLADCiMDVuNKkJb5-m1Ey34WTfNLx9GUpkOMAKWMZgo9RuFDa-FCoZ_SsuK">
+</div>
+<div class="ml-4 flex flex-col justify-center flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Picsou Magazine</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Édition Standard</p>
+</div>
+<span class="font-numeric-hero text-[32px] font-black text-primary leading-none">547</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-duck-egg text-tertiary font-label-md text-label-md">
+                            1 exemplaire
+                        </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-status-owned/10 text-status-owned font-label-md text-label-md border border-status-owned/20">
+                            Possédé
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex bg-surface-container-lowest border border-outline-variant/10 rounded-lg p-3 hover:bg-surface-variant/20 transition-colors cursor-pointer group">
+<div class="w-20 h-28 bg-surface-variant rounded flex-shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A vintage comic book cover displaying Donald Duck in an adventurer's outfit looking surprised. The style is classic comic art with bold outlines and flat colors. The overall tone is action-oriented and playful. The background features a generic jungle scene in muted greens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5uOs5TP4Dixqv-1JBbMBdbyiMQyMryWHEwHgvUWTLgQadRFAiPI90BPIMtU-JEDvpMHsch56oc9AL9cPrphxIdD-5-fBRZ_EXK5p_6U6FCPwUwKWocgyf-eAB259Q62PEKA-yt9AjKA1X9sAg0SyWEJ76UhVlBFREtMpv-kAd_dG0UulA8ePb_Tj5HjbCUXusU_-aPip0N9E_woPmZDvf7hbfKgGItxYmUKOW0XyOGBCcvsIQishU">
+</div>
+<div class="ml-4 flex flex-col justify-center flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Super Picsou Géant</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Réédition 2015</p>
+</div>
+<span class="font-numeric-hero text-[32px] font-black text-primary leading-none">184</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-duck-egg text-tertiary font-label-md text-label-md">
+                            2 exemplaires
+                        </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-status-owned/10 text-status-owned font-label-md text-label-md border border-status-owned/20">
+                            Possédé
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex bg-surface-container-lowest border border-outline-variant/10 rounded-lg p-3 hover:bg-surface-variant/20 transition-colors cursor-pointer group">
+<div class="w-20 h-28 bg-surface-variant rounded flex-shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A slightly worn comic book cover of Mickey Mouse solving a mystery. The cover has a slight yellowing effect simulating age. The illustration is detailed with deep shadows. The background is a dark, moody cityscape." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCauxpheMPXn_qrCHVncgDWgla9Zo0tFjodc38gqc0Yujl58J17mitBKKAU8fSMKnjTdYW9tPw2sT7LndG9A0VwQqtHbToRJLEBLnyZaIWuq44u4i7mo_O_TsR9IwPk2bI5La1aHuN5Iop8fiT8yquN0GBA06YvUrFvCxXLXu7vyURgjSLRGGeo2O3QmEaidtADaaruKg7RlcE0CJZ3EakGjUQigrpfVeR6y0Y2QRPkJKzOWkRU2qcy">
+</div>
+<div class="ml-4 flex flex-col justify-center flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mickey Parade Géant</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Édition Collector</p>
+</div>
+<span class="font-numeric-hero text-[32px] font-black text-primary leading-none">350</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-duck-egg text-tertiary font-label-md text-label-md">
+                            1 exemplaire
+                        </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-status-owned/10 text-status-owned font-label-md text-label-md border border-status-owned/20">
+                            Possédé
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 4 (Missing Example) -->
+<div class="flex bg-surface-container border border-outline-variant/30 rounded-lg p-3 opacity-75">
+<div class="w-20 h-28 bg-surface-variant/50 rounded flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-4xl">menu_book</span>
+</div>
+<div class="ml-4 flex flex-col justify-center flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface-variant">Picsou Magazine</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Édition Standard</p>
+</div>
+<span class="font-numeric-hero text-[32px] font-black text-outline-variant leading-none">548</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-status-missing/10 text-status-missing font-label-md text-label-md border border-status-missing/20">
+                            Manquant
+                        </span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base pb-safe h-16 rounded-t-xl md:hidden">
+<!-- Inactive -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-container-highest active:scale-90 transition-all duration-200 rounded-full">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</button>
+<!-- Active -->
+<button class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-5 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">library_books</span>
+<span class="font-label-md text-label-md mt-1">Collection</span>
+</button>
+<!-- Inactive -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-container-highest active:scale-90 transition-all duration-200 rounded-full">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</button>
+</nav>
+<!-- Floating Action Button (Scanner) -->
+<button class="fixed bottom-24 right-4 md:bottom-8 md:right-8 w-[64px] h-[64px] bg-primary-container text-on-primary-container rounded-2xl shadow-lg flex items-center justify-center hover:bg-primary hover:text-on-primary active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-[32px]">barcode_scanner</span>
+</button>
+</body></html>

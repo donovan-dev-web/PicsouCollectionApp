@@ -1,0 +1,315 @@
+<!DOCTYPE html><html class="dark" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Détails du Magazine - Picsou Collection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wght@700;800;900&amp;family=Hanken+Grotesk:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-highest": "#353534",
+                "tertiary-container": "#ade1ff",
+                "outline-variant": "#4c4733",
+                "error": "#ffb4ab",
+                "background": "#131313",
+                "secondary-fixed": "#ffdad7",
+                "tertiary-fixed": "#c2e8ff",
+                "on-tertiary-fixed": "#001e2b",
+                "text-secondary": "#b0b0b0",
+                "error-container": "#93000a",
+                "on-secondary": "#68000c",
+                "surface-raised": "#1e1e1e",
+                "secondary-fixed-dim": "#ffb3ae",
+                "on-secondary-fixed-variant": "#930015",
+                "on-primary-container": "#715e00",
+                "on-error": "#690005",
+                "on-primary-fixed-variant": "#544600",
+                "accent-gold": "#fdd835",
+                "primary-fixed": "#ffe16e",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-dim": "#131313",
+                "surface-container-low": "#1c1b1b",
+                "on-secondary-container": "#ffa8a3",
+                "on-surface-variant": "#cfc6ac",
+                "on-tertiary-fixed-variant": "#004d67",
+                "surface-bright": "#393939",
+                "inverse-surface": "#e5e2e1",
+                "tertiary": "#eff8ff",
+                "secondary-container": "#a00118",
+                "on-primary": "#3a3000",
+                "surface-container-high": "#2a2a2a",
+                "outline": "#989079",
+                "inverse-on-surface": "#313030",
+                "status-missing": "#66bb6a",
+                "primary": "#fff6e2",
+                "on-background": "#e5e2e1",
+                "status-owned": "#ff5252",
+                "on-primary-fixed": "#221b00",
+                "primary-container": "#fdd835",
+                "surface-overlay": "#2c2c2c",
+                "surface-variant": "#353534",
+                "on-secondary-fixed": "#410004",
+                "tertiary-fixed-dim": "#75d1ff",
+                "inverse-primary": "#705d00",
+                "surface": "#131313",
+                "on-tertiary-container": "#006789",
+                "surface-container": "#201f1f",
+                "on-tertiary": "#003548",
+                "text-primary": "#ffffff",
+                "secondary": "#ffb3ae",
+                "on-surface": "#e5e2e1",
+                "primary-fixed-dim": "#e8c41d",
+                "on-error-container": "#ffdad6",
+                "surface-tint": "#e8c41d"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "gutter-list": "12px",
+                "base": "8px",
+                "card-padding": "16px",
+                "touch-target": "48px"
+        },
+        "fontFamily": {
+                "body-md": [
+                        "hankenGrotesk"
+                ],
+                "label-md": [
+                        "jetbrainsMono"
+                ],
+                "body-lg": [
+                        "hankenGrotesk"
+                ],
+                "headline-sm": [
+                        "anybody"
+                ],
+                "headline-lg": [
+                        "anybody"
+                ],
+                "label-lg": [
+                        "jetbrainsMono"
+                ],
+                "numeric-hero": [
+                        "anybody"
+                ],
+                "headline-md": [
+                        "anybody"
+                ],
+                "display-lg": [
+                        "anybody"
+                ]
+        },
+        "fontSize": {
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "numeric-hero": [
+                        "64px",
+                        {
+                                "lineHeight": "64px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "900"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "800"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-[64px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target bg-surface-container border-b border-outline-variant/10 shadow-none">
+<button aria-label="Retour" class="w-touch-target h-touch-target flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back" data-weight="regular">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-fixed">Picsou Collection</h1>
+<button aria-label="Scanner" class="w-touch-target h-touch-target flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined" data-icon="barcode_scanner" data-weight="regular">barcode_scanner</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-[80px] px-margin-mobile max-w-4xl mx-auto space-y-6">
+<!-- Status Banner -->
+<div class="w-full bg-status-owned text-white rounded-lg p-4 flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined mr-3 text-2xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<h2 class="font-headline-lg text-headline-lg m-0 uppercase tracking-wide">DÉJÀ POSSÉDÉ</h2>
+</div>
+<!-- Issue Header: Number & Title -->
+<div class="flex flex-col items-center text-center space-y-2 mt-4">
+<div class="font-numeric-hero text-numeric-hero text-primary-fixed leading-none">
+                345
+            </div>
+<h1 class="font-display-lg text-display-lg text-on-surface">Super Picsou Géant</h1>
+</div>
+<!-- Metadata Chips -->
+<div class="flex flex-wrap justify-center gap-3">
+<div class="bg-surface-container-high text-tertiary-fixed font-label-md text-label-md px-4 py-2 rounded-full flex items-center border border-tertiary-fixed/20">
+<span class="material-symbols-outlined text-[16px] mr-1">language</span>
+                FR - Édition Française
+            </div>
+<div class="bg-surface-container-high text-tertiary-fixed font-label-md text-label-md px-4 py-2 rounded-full flex items-center border border-tertiary-fixed/20">
+<span class="material-symbols-outlined text-[16px] mr-1">calendar_today</span>
+                Juin 1998
+            </div>
+<div class="bg-surface-container-high text-tertiary-fixed font-label-md text-label-md px-4 py-2 rounded-full flex items-center border border-tertiary-fixed/20">
+<span class="material-symbols-outlined text-[16px] mr-1">book</span>
+                Bande Dessinée
+            </div>
+</div>
+<!-- Bento Grid for Details & Cover -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+<!-- Cover Image Container -->
+<div class="bg-surface-container-low rounded-xl p-card-padding border border-outline-variant/20 flex flex-col items-center justify-center min-h-[400px]">
+<img class="w-full max-w-[280px] h-auto object-cover rounded shadow-md border border-outline-variant/30" data-alt="A highly detailed comic book cover featuring Scrooge McDuck diving into his money bin. Bright yellow and primary colors dominate. Clear typography reads 'Super Picsou Géant 345'. The style is reminiscent of classic European comic art from the late 90s, high contrast, clean lines, well-lit studio photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh4rKUEYxCocVf9I8BkIpY1Pgm90xsuB4aiSPHXNbQ6U3W5R6rkDCn4VPO2Sml7zEa_Bf1CeGayb6QffiqfjC9yBfA2gVc4uYWxaz5rtJ6EDK7JQ_AYl8aOaYPP7di_PX9mitajitdKlVEErDna2UlEC6peQjWwvFlektHw6cSxKcczPXya0DcvDtQA_HVEgNFKc80XSBnaTzJpSHaCCNlWrZYPUiJrTOxKsULwmQJUqD5G5_FMB0V">
+</div>
+<!-- Details List -->
+<div class="bg-surface-container-low rounded-xl p-card-padding border border-outline-variant/20 flex flex-col space-y-gutter-list">
+<h3 class="font-headline-sm text-headline-sm text-primary-fixed mb-2 border-b border-outline-variant/20 pb-2">Informations Détaillées</h3>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Série</span>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Super Picsou Géant</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Éditeur</span>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Disney Hachette Presse</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Format</span>
+<span class="font-body-lg text-body-lg text-on-surface">Standard (19x27 cm)</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Pages</span>
+<span class="font-body-lg text-body-lg text-on-surface">244</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Code Barre</span>
+<span class="font-label-md text-label-md text-tertiary-fixed bg-surface-container-high px-2 py-1 rounded">3780123456789</span>
+</div>
+</div>
+</div>
+<!-- Exemplaires Section -->
+<div class="mt-8 mb-24">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center">
+<span class="material-symbols-outlined mr-2 text-primary-fixed" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    Exemplaires en collection
+                </h3>
+<button class="bg-primary-container text-on-primary-container font-label-lg text-label-lg px-4 py-2 rounded-full hover:bg-primary-container/90 transition-colors flex items-center shadow-sm">
+<span class="material-symbols-outlined mr-1 text-[18px]">add</span>
+                    Ajouter
+                </button>
+</div>
+<!-- List of Copies -->
+<div class="space-y-gutter-list">
+<!-- Copy 1 -->
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 bg-surface-container rounded flex items-center justify-center text-primary-fixed font-bold font-headline-sm border border-outline-variant/10">
+                            #1
+                        </div>
+<div>
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">Très Bon État (TBE)</div>
+<div class="font-label-md text-label-md text-on-surface-variant">Ajouté le 12/04/2023 • Brocante de Lille</div>
+</div>
+</div>
+<div class="flex space-x-2">
+<button aria-label="Éditer" class="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-tertiary-fixed transition-colors border border-outline-variant/10">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</div>
+</div>
+<!-- Copy 2 -->
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 bg-surface-container rounded flex items-center justify-center text-primary-fixed font-bold font-headline-sm border border-outline-variant/10">
+                            #2
+                        </div>
+<div>
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">État Moyen (EM)</div>
+<div class="font-label-md text-label-md text-on-surface-variant">Déchirure couverture. Acheté 0.50€</div>
+</div>
+</div>
+<div class="flex space-x-2">
+<button aria-label="Éditer" class="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-tertiary-fixed transition-colors border border-outline-variant/10">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Navigation omitted as per Shell Visibility Rule for Details screen (transactional/task-focused) -->
+</body></html>

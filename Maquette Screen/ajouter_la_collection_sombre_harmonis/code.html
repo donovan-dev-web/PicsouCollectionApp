@@ -1,0 +1,295 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ajouter à la collection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wght@400;700;800;900&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-variant": "#353534",
+                "primary": "#fff6e2",
+                "on-tertiary-fixed-variant": "#004d67",
+                "surface-container": "#201f1f",
+                "surface-container-low": "#1c1b1b",
+                "on-tertiary-fixed": "#001e2b",
+                "tertiary-fixed": "#c2e8ff",
+                "on-error-container": "#ffdad6",
+                "surface-dim": "#131313",
+                "surface": "#131313",
+                "inverse-surface": "#e5e2e1",
+                "surface-container-lowest": "#0e0e0e",
+                "on-surface-variant": "#cfc6ac",
+                "surface-raised": "#1e1e1e",
+                "on-error": "#690005",
+                "error-container": "#93000a",
+                "on-tertiary-container": "#006789",
+                "accent-gold": "#fdd835",
+                "on-secondary-container": "#ffa8a3",
+                "tertiary-fixed-dim": "#75d1ff",
+                "status-owned": "#ff5252",
+                "outline-variant": "#4c4733",
+                "secondary-container": "#a00118",
+                "primary-fixed-dim": "#e8c41d",
+                "inverse-on-surface": "#313030",
+                "primary-container": "#fdd835",
+                "text-primary": "#ffffff",
+                "surface-bright": "#393939",
+                "on-surface": "#e5e2e1",
+                "on-secondary": "#68000c",
+                "background": "#131313",
+                "tertiary": "#eff8ff",
+                "secondary": "#ffb3ae",
+                "secondary-fixed-dim": "#ffb3ae",
+                "text-secondary": "#b0b0b0",
+                "on-primary-fixed": "#221b00",
+                "surface-container-highest": "#353534",
+                "on-primary-fixed-variant": "#544600",
+                "on-primary": "#3a3000",
+                "surface-container-high": "#2a2a2a",
+                "status-missing": "#66bb6a",
+                "outline": "#989079",
+                "error": "#ffb4ab",
+                "tertiary-container": "#ade1ff",
+                "primary-fixed": "#ffe16e",
+                "on-secondary-fixed": "#410004",
+                "surface-tint": "#e8c41d",
+                "on-primary-container": "#715e00",
+                "on-secondary-fixed-variant": "#930015",
+                "inverse-primary": "#705d00",
+                "on-tertiary": "#003548",
+                "on-background": "#e5e2e1",
+                "secondary-fixed": "#ffdad7",
+                "surface-overlay": "#2c2c2c"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "card-padding": "16px",
+                "touch-target": "48px",
+                "gutter-list": "12px",
+                "base": "8px"
+        },
+        "fontFamily": {
+                "numeric-hero": [
+                        "anybody"
+                ],
+                "body-lg": [
+                        "hankenGrotesk"
+                ],
+                "label-md": [
+                        "jetbrainsMono"
+                ],
+                "headline-md": [
+                        "anybody"
+                ],
+                "display-lg": [
+                        "anybody"
+                ],
+                "headline-sm": [
+                        "anybody"
+                ],
+                "label-lg": [
+                        "jetbrainsMono"
+                ],
+                "headline-lg": [
+                        "anybody"
+                ],
+                "body-md": [
+                        "hankenGrotesk"
+                ]
+        },
+        "fontSize": {
+                "numeric-hero": [
+                        "64px",
+                        {
+                                "lineHeight": "64px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "900"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "800"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #353534; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4c4733; }
+        
+        body {
+            min-height: max(884px, 100dvh);
+        }
+</style>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Header (Transactional context: Close action) -->
+<header class="bg-surface-container flex items-center justify-between px-margin-mobile h-touch-target border-b border-outline-variant/10 shrink-0 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button aria-label="Close" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-primary-fixed">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary-fixed">Ajouter à la collection</h1>
+</div>
+<button aria-label="Help" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">help</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto px-margin-mobile py-6 flex flex-col gap-6 w-full max-w-2xl mx-auto pb-32">
+<!-- Scanner Hero Action -->
+<section class="flex flex-col gap-3">
+<h2 class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider">Fast Entry</h2>
+<button class="w-full bg-primary-container text-on-primary h-32 rounded-xl border border-primary/20 flex flex-col items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-[0_2px_10px_rgba(253,216,53,0.1)] hover:bg-primary-fixed relative overflow-hidden group">
+<span class="material-symbols-outlined text-[48px] relative z-10 group-hover:scale-110 transition-transform duration-300" data-weight="fill">barcode_scanner</span>
+<span class="font-headline-sm text-headline-sm relative z-10">Scan Barcode</span>
+</button>
+<p class="font-body-md text-body-md text-on-surface-variant text-center mt-1">Point your camera at the ISBN or issue barcode</p>
+</section>
+<div class="flex items-center gap-4 py-2">
+<div class="h-px bg-outline-variant/30 flex-1"></div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Or</span>
+<div class="h-px bg-outline-variant/30 flex-1"></div>
+</div>
+<!-- Manual Entry Form -->
+<section class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<h2 class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider">Manual Entry</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Fill out the details below to add an item manually.</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-card-padding flex flex-col gap-5 shadow-sm">
+<!-- Publication (Dropdown) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-semibold" for="publication">Publication</label>
+<div class="relative">
+<select class="w-full bg-[#0a0a0a] border-2 border-outline-variant/50 rounded-lg h-12 px-4 appearance-none font-body-md text-body-md text-text-primary focus:border-tertiary-fixed focus:ring-0 transition-colors" id="publication">
+<option disabled="" selected="" value="">Select Publication...</option>
+<option value="picsou_magazine">Picsou Magazine</option>
+<option value="super_picsou_geant">Super Picsou Géant</option>
+<option value="mickey_parade">Mickey Parade</option>
+<option value="le_journal_de_mickey">Le Journal de Mickey</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Issue Number & Edition Row -->
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-semibold" for="issue_number">Issue Number</label>
+<input class="w-full bg-[#0a0a0a] border-2 border-outline-variant/50 rounded-lg h-12 px-4 font-numeric-hero text-[24px] font-bold text-text-primary focus:border-tertiary-fixed focus:ring-0 transition-colors placeholder:font-body-md placeholder:font-normal placeholder:text-[16px] placeholder:text-text-secondary/50" id="issue_number" placeholder="e.g. 542" type="number">
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-semibold" for="edition">Edition / Variant</label>
+<input class="w-full bg-[#0a0a0a] border-2 border-outline-variant/50 rounded-lg h-12 px-4 font-body-md text-body-md text-text-primary focus:border-tertiary-fixed focus:ring-0 transition-colors placeholder:text-text-secondary/50" id="edition" placeholder="Standard" type="text">
+</div>
+</div>
+<!-- Country (Dropdown) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-semibold" for="country">Country</label>
+<div class="relative">
+<select class="w-full bg-[#0a0a0a] border-2 border-outline-variant/50 rounded-lg h-12 px-4 appearance-none font-body-md text-body-md text-text-primary focus:border-tertiary-fixed focus:ring-0 transition-colors" id="country">
+<option selected="" value="fr">France</option>
+<option value="us">United States</option>
+<option value="it">Italy</option>
+<option value="de">Germany</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Publication Date -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-semibold" for="pub_date">Publication Date</label>
+<div class="relative">
+<input class="w-full bg-[#0a0a0a] border-2 border-outline-variant/50 rounded-lg h-12 px-4 font-body-md text-body-md text-text-primary focus:border-tertiary-fixed focus:ring-0 transition-colors [&amp;::-webkit-calendar-picker-indicator]:opacity-0 [color-scheme:dark]" id="pub_date" type="date">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">calendar_today</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Bottom Action (Transactional: No Nav Shell) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container/90 backdrop-blur-md border-t border-outline-variant/10 p-4 pb-safe z-40">
+<div class="max-w-2xl mx-auto">
+<button class="w-full bg-primary-fixed text-on-primary-fixed h-touch-target rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-[0_0_15px_rgba(253,216,53,0.2)] hover:bg-primary-container">
+<span class="material-symbols-outlined" data-weight="fill">add_circle</span>
+            Ajouter à la collection
+        </button>
+</div>
+</div>
+</body></html>
