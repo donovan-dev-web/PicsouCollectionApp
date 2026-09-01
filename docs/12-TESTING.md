@@ -129,8 +129,11 @@ Tests sur **téléphone physique** avec de vrais magazines, notamment pour camé
 |---|---|
 | **Jest** | Framework de test (runner + assertions) |
 | **jest-expo** | Preset Jest pour React Native / Expo |
-| **React Native Testing Library** | Tests de composants et interactions |
-| **ts-jest** | Support TypeScript |
+| **@types/jest** | Types TS pour Jest (29.5.14, aligné Expo SDK 57) |
+| **react-test-renderer** | Rendu des composants en environnement de test |
+| **expo-doctor** | Vérification de la santé du projet / écosystème Expo (21 checks) |
+
+> **À venir** : React Native Testing Library (tests de composants interactifs) et `ts-jest` seront ajoutés quand les écrans seront développés (M-03).
 
 ---
 
@@ -157,25 +160,26 @@ Alternativement, les tests peuvent être co-localisés `collectionService.test.t
 
 ## 8. Niveau de couverture
 
-### 8.1 Seuils cibles (Jest `coverageThreshold`)
+### 8.1 Seuils (Jest `coverageThreshold` — config dans `package.json`)
 
-```js
-// jest.config.js (indicatif)
-coverageThreshold: {
-  global: {
-    lines: 80,
-    functions: 80,
-    branches: 70,
-    statements: 80,
-  },
-},
+```json
+"coverageThreshold": {
+  "global": {
+    "branches": 70,
+    "functions": 70,
+    "lines": 70,
+    "statements": 70
+  }
+}
 ```
 
-| Zone | Couverture cible |
-|---|---|
-| Global | ≥ 80 % |
-| Services / repositories | ≥ 85 % |
-| Composants critiques | ≥ 70 % |
+| Zone | Couverture actuelle | Couverture cible |
+|---|---|---|
+| Global | **70 %** (seuil CI) | ≥ 80 % |
+| Services / repositories | à consolider (M-02) | ≥ 85 % |
+| Composants critiques | à consolider (M-03) | ≥ 70 % |
+
+> État M-01 : 7 tests / 3 suites, **100 % de couverture** sur `src/`.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
@@ -209,22 +213,28 @@ Ces indicateurs sont rapportés dans les revues de PR et lors des milestones.
 ## 10. Commandes
 
 ```bash
-npm test                  # Exécute Jest en mode watch (développement)
+npm test                  # Exécute Jest (--watch en mode dev)
 npm test -- --ci          # Exécution CI non interactive
-npm test -- --coverage    # Génère le rapport de couverture
+npm run test:coverage     # Génère le rapport de couverture
 npm run typecheck         # Vérification TypeScript
 npm run lint              # Vérification ESLint
+npm run format:check      # Vérification Prettier
+npm run doctor            # Vérification écosystème Expo (expo-doctor)
 ```
 
-### Scripts dans `package.json` (indicatif)
+### Scripts dans `package.json` (réels)
 
 ```json
 {
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "expo lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "doctor": "expo-doctor"
   }
 }
 ```
@@ -237,9 +247,11 @@ La CI (voir `10-CI-CD.md`) exécute :
 
 1. `npm run typecheck` ;
 2. `npm run lint` ;
-3. `npm test -- --ci` ;
-4. `npm run test:coverage` ;
-5. Téléchargement du rapport de coverage.
+3. `npm run format:check` ;
+4. `npm run doctor` ;
+5. `npm test -- --ci` ;
+6. `npm run test:coverage` ;
+7. Téléchargement du rapport de coverage.
 
 **Règle :** une PR ne peut être fusionnée que si la CI est **verte** (incluant couverture ≥ seuils).
 

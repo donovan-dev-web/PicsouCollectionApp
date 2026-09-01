@@ -101,16 +101,17 @@ PicsouCollectionApp/
 │   └── design/                     ← Chartes, maquettes, marketing
 │
 ├── src/                            ← Code source (React Native + Expo)
-│   ├── database/          # SQLite, migrations, repositories
-│   ├── identification/    # Scan barcode, OCR, service
-│   ├── collection/        # Service de collection
-│   ├── backup/            # Export/import JSON
+│   ├── app/               # Expo Router (écrans + navigation)
+│   │   ├── _layout.tsx
+│   │   ├── index.tsx
+│   │   └── +not-found.tsx
+│   ├── constants/         # Thème & constantes (co-localisés avec leurs tests)
+│   ├── database/          # SQLite (initialisation, migrations)
 │   ├── store/             # Zustand stores
-│   ├── components/        # Composants réutilisables
-│   ├── theme/             # Design system
-│   ├── types/             # Types de domaine
-│   └── utils/             # Utilitaires
+│   └── __tests__/         # Tests Jest (co-localisés)
 │
+├── eas.json               # Profils EAS Build (development / preview / production)
+├── package.json           # Scripts & dépendances
 └── CONTRIBUTING.md        # Conventions de contribution
 ```
 
@@ -128,8 +129,8 @@ PicsouCollectionApp/
 | **Caméra** | `expo-camera` |
 | **OCR** | Google ML Kit Text Recognition |
 | **Fichiers** | `expo-file-system` + `expo-sharing` |
-| **Tests** | Jest + React Native Testing Library |
-| **Build / CI** | EAS Build + Git Flow |
+| **Tests** | Jest (`jest-expo`) + `expo-doctor` |
+| **Build / CI** | EAS Build (development / preview / production) + Git Flow, GitHub Actions |
 
 ---
 
@@ -138,7 +139,7 @@ PicsouCollectionApp/
 | Phase | Contenu | Statut |
 |---|---|---|
 | **0 — Cadrage** | Problème, offline, stack, UX | ✅ Terminé |
-| **1 — Initialisation** | Projet Expo, TypeScript, Router, SQLite | ⬜ À venir |
+| **1 — Initialisation** | Projet Expo, TypeScript, Router, SQLite, EAS, CI | ✅ Terminé — **v0.1.0** |
 | **2 — Base de données** | Migrations, repositories, gestion collection | ⬜ À venir |
 | **3 — Interface principale** | Accueil, collection, ajout, paramètres, navigation | ⬜ À venir |
 | **4 — Scan code-barres** | Intégration caméra, détection, recherche | ⬜ À venir |
