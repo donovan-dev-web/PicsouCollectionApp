@@ -115,6 +115,7 @@ create_milestone() {
   echo "  - milestone '$title' créé."
 }
 
+create_milestone "M-00 — Cadrage, conception & documentation" "Cadrage, docs, design, organisation (terminé)" "2026-08-31"
 create_milestone "M-01 — Initialisation technique" "Projet Expo opérationnel sur téléphone" "2026-09-30"
 create_milestone "M-02 — Base de données" "Persistance et CRUD collection" "2026-10-31"
 create_milestone "M-03 — Interface principale" "Écrans accueil, collection, paramètres" "2026-11-30"
@@ -172,12 +173,57 @@ declare -a ISSUES=(
   "US-QA-03|[Quality] Build de production|M-09 — Tests terrain & publication|epic/quality,priority-medium,to-do|En tant que **developpeur**, je veux **générer un build de production** afin de **préparer la publication Play Store**.|- EAS Build produit un AAB||- Le build local produit un APK||- L'application fonctionne en production"
 )
 
+# ---------------------------------------------------------
+# Issues complémentaires (hors user stories) :
+#   - DOC-* / DESIGN-* : cadrage, conception et documentation (M-00, terminé)
+#   - SETUP-*          : initialisation technique du projet (M-01)
+# ---------------------------------------------------------
+# Format: id|Titre|milestone|labels|description|tâches (||)
+declare -a ISSUES_EXTRA=(
+  # ---- M-00 — Cadrage, conception & documentation (terminé) ----
+  "DOC-01|Rédiger le glossaire (docs/00-GLOSSAIRE)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger et tenir à jour le glossaire du projet (domaine, technique, agile).|- Définir les termes du domaine (édition, exemplaire, publication, hors-série)||- Définir les termes techniques (migration, repository, OCR, EAN-13)||- Ajouter le glossaire à la table des docs du CONTRIBUTING"
+  "DOC-02|Rédiger la vision produit (docs/01-VISION)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le document de vision produit et les promesses.||- Définir le problème et la cible (collectionneurs Disney)||- Énoncer les promesses (rapidité, fiabilité, simplicité, souveraineté)"
+  "DOC-03|Rédiger le modèle conceptuel (docs/02)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le modèle conceptuel : entités et règles métier.||- Définir les entités (magazine, édition, exemplaire)||- Énoncer les règles métier clés"
+  "DOC-04|Rédiger la spécification technique (docs/03)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la spécification technique : stack React Native + Expo.||- Fixer la stack (Expo, TypeScript, SQLite, camera, OCR ML Kit, Zustand)||- Documenter les contraintes offline"
+  "DOC-05|Rédiger la spécification fonctionnelle (docs/04)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la spécification fonctionnelle (écrans, flux, règles).||- Décrire les écrans et parcours||- Clarifier le rôle du code-barres (retrouver, ne jamais créer)||- Documenter le scan en continu et les filtres utiles"
+  "DOC-06|Rédiger l'architecture logicielle (docs/05)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le document d'architecture.||- Décrire la couche database / repositories / services||- Décrire la navigation et la gestion d'état"
+  "DOC-07|Rédiger le modèle de données (docs/06)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le modèle de données.||- Définir les entités et leurs relations||- Justifier la simplification à 2 tables"
+  "DOC-08|Rédiger le schéma de base de données (docs/07)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le schéma SQLite (2 tables : magazines, collection_items).||- Documenter les tables, colonnes et contraintes||- Documenter PRAGMA user_version"
+  "DOC-09|Rédiger les user stories MVP (docs/08)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger les 27 user stories organisées par épique.||- Rédiger les critères d'acceptation||- Définir les priorités"
+  "DOC-10|Rédiger le workflow agile (docs/09-ISSUE)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger le document de gestion des issues, labels, milestones, kanban.||- Définir les labels, milestones et templates||- Documenter le déclenchement du Kanban"
+  "DOC-11|Rédiger la stratégie CI/CD (docs/10)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la stratégie CI/CD (GitHub Actions + EAS Build).||- Documenter le workflow CI||- Documenter les secrets et la protection de branches"
+  "DOC-12|Rédiger la roadmap (docs/11-ROADMAP)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la roadmap par phases.||- Définir les phases 0 à 9||- Associer user stories et critères de sortie"
+  "DOC-13|Rédiger la stratégie de tests (docs/12-TESTING)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la stratégie de tests (catégories A et B).||- Définir les catégories de tests||- Fixer les seuils de couverture"
+  "DOC-14|Rédiger la politique de confidentialité (docs/13-PRIVACY)|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la politique de confidentialité (100 % local).||- Documenter l'absence de serveur et d'images stockées"
+  "DOC-15|Rédiger les fichiers racine (README, CONTRIBUTING, SECURITY, CHANGELOG)|M-00 — Cadrage, conception & documentation|documentation,done|Créer et compléter les fichiers racine du dépôt.||- README aligné sur la doc||- CONTRIBUTING avec table des docs||- SECURITY et CHANGELOG initiaux"
+  "DESIGN-01|Définir le design system (clair & sombre)|M-00 — Cadrage, conception & documentation|enhancement,done|Définir le design system : chartes Vault & Venture (clair) et Obsidian Vault (sombre).||- Définir palette, typographies et composants||- Documenter les deux environnements visuels"
+  "DESIGN-02|Réaliser les maquettes (7 écrans × clair/sombre)|M-00 — Cadrage, conception & documentation|enhancement,done|Réaliser les maquettes des 7 écrans en version claire et sombre.||- Maquetter accueil, ajout, identification, collection, fiche, paramètres, recherche||- Fournir les prototypes visuels provisoires"
+  "ORG-01|Organiser la présentation client/UX|M-00 — Cadrage, conception & documentation|documentation,done|Rédiger la présentation générale orientée client.||- Présenter le projet, les fonctionnalités et le parcours UX||- Intégrer les retours client (scan en continu, filtres, code-barres)"   "ORG-02|Configurer le dépôt GitHub (branches, kanban, labels, milestones)|M-00 — Cadrage, conception & documentation|infra,done|Préparer le dépôt pour le suivi agile : branches, projet kanban, labels, milestones.|- Créer le GitHub Project v2 « Picsou Collection »||- Activer la protection des branches main et develop||- Configurer templates issues/PR et workflow CI"
+
+  # ---- M-01 — Initialisation technique (à faire) ----
+  "SETUP-01|Créer le projet Expo|M-01 — Initialisation technique|infra,to-do|Créer le projet React Native avec Expo.||- Générer l'application Expo (Router)||- Vérifier le lancement sur téléphone"
+  "SETUP-02|Configurer TypeScript strict|M-01 — Initialisation technique|infra,to-do|Activer le mode strict de TypeScript.||- Configurer tsconfig strict||- Ajouter le script typecheck"
+  "SETUP-03|Configurer Expo Router|M-01 — Initialisation technique|infra,to-do|Configurer la navigation par fichiers (Expo Router).||- Mettre en place la structure des routes||- Vérifier la navigation entre écrans"
+  "SETUP-04|Installer expo-sqlite|M-01 — Initialisation technique|infra,to-do|Installer et configurer expo-sqlite.||- Ajouter la dépendance||- Préparer l'initialisation au démarrage"
+  "SETUP-05|Installer Zustand (gestion d'état)|M-01 — Initialisation technique|infra,to-do|Installer Zustand pour la gestion d'état global.||- Ajouter la dépendance||- Définir les stores de base"
+  "SETUP-06|Configurer ESLint + Prettier|M-01 — Initialisation technique|infra,to-do|Configurer les outils de qualité de code.||- Configurer ESLint||- Configurer Prettier||- Ajouter le script lint"
+  "SETUP-07|Configurer Jest et la couverture|M-01 — Initialisation technique|test,to-do|Configurer Jest + React Native Testing Library.||- Initialiser la config Jest||- Ajouter une config de couverture (>80 %)"
+  "SETUP-08|Configurer EAS Build (eas.json)|M-01 — Initialisation technique|infra,to-do|Configurer le build de production EAS.||- Créer eas.json (profils dev/preview/production)||- Vérifier la génération d'un AAB"
+  "SETUP-09|Configurer le setup GitHub (script kanban)|M-01 — Initialisation technique|infra,done|Automatiser la création des labels, milestones, issues et l'association au kanban.|- Créer le script d'initialisation idempotent||- Créer labels, milestones, 27 user stories + issues complémentaires||- Associer toutes les issues au GitHub Project v2"
+  "SETUP-10|Tester l'installation sur téléphone|M-01 — Initialisation technique|infra,to-do|Vérifier l'installation et le débogage sur un téléphone Android physique.|- Lancer le développement build sur téléphone||- Valider le fonctionnement de base"
+)
+
 create_issue() {
   local entry="$1"
   IFS='|' read -r id title milestone labels enonce criteres <<<"$entry"
 
-  # Construire le corps (toujours recalculé)
-  local body="## Contexte\n\n**User story source** : \`$id\`\n\n## Story\n\n> $enonce\n\n## Critères d'acceptation\n\n"
+  # Construire le corps (toujours recalculé) selon le type d'issue
+  local body
+  if [[ "$id" == US-* ]]; then
+    body="## Contexte\n\n**User story source** : \`$id\`\n\n## Story\n\n> $enonce\n\n## Critères d'acceptation\n\n"
+  else
+    body="## Contexte\n\n**Épique / milestone** : $milestone\n\n## Objectif\n\n> $enonce\n\n## Tâches\n\n"
+  fi
   # Découpage sur le séparateur § (les "||" de la donnée y sont convertis)
   local crits_data="${criteres//||/§}"
   IFS='§' read -r -a crits <<<"$crits_data"
@@ -195,9 +241,10 @@ create_issue() {
     label_args+=(--label "$l")
   done
 
-  # Idempotence : recherche d'une issue existante avec le code US dans le titre
+  # Idempotence : recherche d'une issue existante dont le TITRE commence exactement par "[$id]"
   local num
-  num=$(gh issue list -R "$REPO" --state all --search "in:title \"[$id]\"" --json number --jq '.[0].number // empty' 2>/dev/null || true)
+  num=$(gh api "/repos/$REPO/issues?state=all&per_page=200" \
+    --jq ".[] | select(.title | startswith(\"[$id]\")) | .number" 2>/dev/null | head -n1)
 
   if [[ -n "$num" ]]; then
     # Sur `edit`, le flag s'appelle `--add-label`
@@ -221,7 +268,7 @@ create_issue() {
   echo "  - issue '$id' créée."
 }
 
-for entry in "${ISSUES[@]}"; do
+for entry in "${ISSUES[@]}" "${ISSUES_EXTRA[@]}"; do
   create_issue "$entry"
 done
 
@@ -240,28 +287,33 @@ if [[ -z "$PROJECT_NODE_ID" || "$PROJECT_NODE_ID" == "null" ]]; then
   exit 1
 fi
 
+# Ensemble des contenus (issues) déjà présents dans le projet (vérification exacte)
+IN_PROJECT_IDS=$(gh api graphql \
+  -f query="query { node(id: \"$PROJECT_NODE_ID\") { ... on ProjectV2 { items(first: 200) { nodes { content { ... on Issue { id } } } } } } }" \
+  --jq '.data.node.items.nodes[].content.id' 2>/dev/null || true)
+
 add_to_project() {
-  local repo_name="$REPO"
   local issue_number="$1"
 
   # Node ID de l'issue via l'API REST
   local issue_node_id
   issue_node_id=$(gh api "/repos/$REPO/issues/$issue_number" --jq '.node_id')
 
+  # Déjà présent ?
+  if grep -qF "$issue_node_id" <<<"$IN_PROJECT_IDS"; then
+    echo "  - issue #$issue_number déjà dans le projet."
+    return
+  fi
+
   local q="mutation { addProjectV2ItemById(input: {projectId: \"$PROJECT_NODE_ID\", contentId: \"$issue_node_id\"}) { item { id } } }"
   if gh api graphql -f query="$q" >/dev/null 2>&1; then
     echo "  - issue #$issue_number ajoutée au projet."
   else
-    # Idempotent : une issue déjà présente génère une erreur d'unicité
-    if gh api "/repos/$REPO/issues/$issue_number" --jq '.node_id' >/dev/null 2>&1; then
-      echo "  - issue #$issue_number déjà dans le projet (ou erreur ignorée)."
-    else
-      echo "  - Erreur sur l'issue #$issue_number." >&2
-    fi
+    echo "  - Erreur sur l'ajout de l'issue #$issue_number (déjà présente ou API)." >&2
   fi
 }
 
-for number in $(gh issue list -R "$REPO" --state all --json number --jq '.[].number'); do
+for number in $(gh api "/repos/$REPO/issues?state=all&per_page=200" --jq '.[].number'); do
   add_to_project "$number"
 done
 
@@ -274,6 +326,6 @@ echo "  Terminé. Récapitulatif :"
 echo "============================================="
 echo "  - Labels    : $(gh label list -R "$REPO" --limit 100 --json name --jq 'length')"
 echo "  - Milestones: $(gh api "/repos/$REPO/milestones?state=all" --jq 'length')"
-echo "  - Issues    : $(gh issue list -R "$REPO" --state all --json number --jq 'length')"
+echo "  - Issues    : $(gh api "/repos/$REPO/issues?state=all&per_page=200" --jq 'length')"
 echo "  - Kanban    : https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER"
 echo "============================================="
