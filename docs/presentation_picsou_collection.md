@@ -107,10 +107,11 @@ Trois méthodes complémentaires pour identifier un magazine (détaillées à la
 
 ### 📚 Ma Collection — l'inventaire
 Une vue complète de la collection avec :
-- **Recherche** globale (par titre ou numéro) ;
-- **Filtres avancés** (type de publication, époque, statut de possession) ;
+- **Recherche** globale (par titre, publication ou numéro) ;
+- **Filtres pertinents** (type de publication, époque/années, numéro) ;
 - **Tri** ;
-- Consultation, modification et suppression d'une édition.
+- Consultation, modification et suppression d'une édition ;
+- **Scan en continu** : ajouter plusieurs magazines à la suite depuis la collection.
 
 ### 📇 Fiche Magazine — le détail qui compte
 Pour chaque numéro, une fiche complète : publication, numéro, édition, pays, date, code-barres, et surtout la **liste des exemplaires possédés** avec pour chacun :
@@ -290,7 +291,7 @@ Deux voies d'entrée : le **Scanner** (grand bouton) et un **formulaire** (publi
 Le choix des trois méthodes, avec un **aperçu caméra** évocateur (réticule de scan animé). La barre de navigation est volontairement masquée pour concentrer l'attention sur la tâche : **identifier**.
 
 ### 8.4 Ma Collection
-Vue liste à haute densité avec **recherche**, **filtres** et bouton flottant de scanner. Chaque entrée affiche la miniature, le numéro en grand et un **badge de statut** (Possédé / Manquant).
+Vue liste à haute densité avec **recherche**, **filtres** (type de publication, époque) et bouton flottant de scanner qui permet le **scan en continu**. Chaque entrée affiche la miniature, le numéro en grand et un **badge de statut** (Possédé / Manquant).
 
 ### 8.5 Fiche Magazine
 La fiche détaillée : bannière de statut, numéro en grand, chips de métadonnées, informations d'édition et **liste des exemplaires** avec leur état et leurs notes.
@@ -299,7 +300,7 @@ La fiche détaillée : bannière de statut, numéro en grand, chips de métadonn
 Statistiques, **export/import** de la collection, thème, langue, version de l'application.
 
 ### 8.7 Recherche avancée
-Filtres croisés : **type de publication**, **statut de possession**, **époque** (plage d'années). Résultats affichés avec badges et possibilité de tri.
+Filtres pertinents : **type de publication**, **époque** (plage d'années), **numéro**. Résultats affichés avec badges et possibilité de tri.
 
 ---
 
@@ -489,13 +490,13 @@ Chaque ligne du tableau correspond à un écran, avec sa version **Clair** et sa
 
 | Écran | Version Clair (PNG) | Version Sombre (PNG) |
 |---|---|---|
-| **Accueil** | ![Accueil - Mode clair](../Maquette%20Screen/accueil/screen.png) | ![Accueil - Mode sombre](../Maquette%20Screen/accueil_sombre_fr/screen.png) |
-| **Ajouter à la collection** | ![Ajouter - Mode clair](../Maquette%20Screen/ajouter_la_collection/screen.png) | ![Ajouter - Mode sombre](../Maquette%20Screen/ajouter_la_collection_sombre_harmonis/screen.png) |
-| **Identifier** | ![Identifier - Mode clair](../Maquette%20Screen/identifier/screen.png) | ![Identifier - Mode sombre](../Maquette%20Screen/identifier_sombre/screen.png) |
-| **Ma Collection** | ![Ma Collection - Mode clair](../Maquette%20Screen/ma_collection/screen.png) | ![Ma Collection - Mode sombre](../Maquette%20Screen/ma_collection_sombre_fr/screen.png) |
-| **Fiche Magazine** | ![Fiche Magazine - Mode clair](../Maquette%20Screen/fiche_magazine/screen.png) | ![Fiche Magazine - Mode sombre](../Maquette%20Screen/fiche_magazine_sombre_fr/screen.png) |
-| **Paramètres** | ![Paramètres - Mode clair](../Maquette%20Screen/param_tres/screen.png) | ![Paramètres - Mode sombre](../Maquette%20Screen/param_tres_sombre_fr/screen.png) |
-| **Recherche avancée** | ![Recherche - Mode clair](../Maquette%20Screen/rechercher_dans_la_base_harmonis/screen.png) | ![Recherche - Mode sombre](../Maquette%20Screen/rechercher_dans_la_base_sombre/screen.png) |
+| **Accueil** | ![Accueil - Mode clair](design/Maquette%20Screen/accueil/screen.png) | ![Accueil - Mode sombre](design/Maquette%20Screen/accueil_sombre_fr/screen.png) |
+| **Ajouter à la collection** | ![Ajouter - Mode clair](design/Maquette%20Screen/ajouter_la_collection/screen.png) | ![Ajouter - Mode sombre](design/Maquette%20Screen/ajouter_la_collection_sombre_harmonis/screen.png) |
+| **Identifier** | ![Identifier - Mode clair](design/Maquette%20Screen/identifier/screen.png) | ![Identifier - Mode sombre](design/Maquette%20Screen/identifier_sombre/screen.png) |
+| **Ma Collection** | ![Ma Collection - Mode clair](design/Maquette%20Screen/ma_collection/screen.png) | ![Ma Collection - Mode sombre](design/Maquette%20Screen/ma_collection_sombre_fr/screen.png) |
+| **Fiche Magazine** | ![Fiche Magazine - Mode clair](design/Maquette%20Screen/fiche_magazine/screen.png) | ![Fiche Magazine - Mode sombre](design/Maquette%20Screen/fiche_magazine_sombre_fr/screen.png) |
+| **Paramètres** | ![Paramètres - Mode clair](design/Maquette%20Screen/param_tres/screen.png) | ![Paramètres - Mode sombre](design/Maquette%20Screen/param_tres_sombre_fr/screen.png) |
+| **Recherche avancée** | ![Recherche - Mode clair](design/Maquette%20Screen/rechercher_dans_la_base_harmonis/screen.png) | ![Recherche - Mode sombre](design/Maquette%20Screen/rechercher_dans_la_base_sombre/screen.png) |
 
 ### 17.1 Lecture du tableau
 
