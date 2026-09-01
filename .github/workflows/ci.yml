@@ -52,6 +52,10 @@ jobs:
         if: steps.check.outputs.initialized == 'true'
         run: npm run lint
 
+      - name: Format
+        if: steps.check.outputs.initialized == 'true'
+        run: npm run format:check
+
       - name: Tests
         if: steps.check.outputs.initialized == 'true'
         run: npm test -- --ci
