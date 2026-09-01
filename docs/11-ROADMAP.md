@@ -38,7 +38,7 @@
 
 ```
 Phase 0  ██████████████████████████████  Terminé ✓
-Phase 1  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  À venir
+Phase 1  ██████████████████████████████  Terminé ✓ (v0.1.0)
 Phase 2  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 3  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 4  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -56,7 +56,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Phase | Milestone | Issues | Nb |
 |---|---|---|---|
 | 0 — Cadrage | `M-00 — Cadrage, conception & documentation` | `DOC-01..15`, `DESIGN-01..02`, `ORG-01..02` | 19 |
-| 1 — Initialisation | `M-01 — Initialisation technique` | `SETUP-01..10` | 10 |
+| 1 — Initialisation | `M-01 — Initialisation technique` | `SETUP-01..11` | 11 |
 | 2 — Base de données | `M-02 — Base de données` | `US-DB-01..05` | 5 |
 | 3 — Interface | `M-03 — Interface principale` | `US-ACC-01..04`, `US-COL-01..05`, `US-QA-01` | 10 |
 | 4 — Scan code-barres | `M-04 — Scan code-barres` | `US-ID-01..02` | 2 |
@@ -65,7 +65,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
 | 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02` | 1 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **56** |
+| **Total** | | | **57** |
 
 ---
 
@@ -89,6 +89,8 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ## 4. Phase 1 — Initialisation technique
 
+**Statut : Terminé ✓** — livré en **release `v0.1.0`**.
+
 **Objectif** : Obtenir une application Expo vide, opérationnelle sur un téléphone Android physique.
 
 | Tâche | Issue |
@@ -103,10 +105,11 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Configurer EAS Build (eas.json) | `SETUP-08` |
 | Configurer le setup GitHub (script kanban) | `SETUP-09` |
 | Test d'installation sur téléphone | `SETUP-10` |
+| Ajouter `expo-doctor` aux checks CI | `SETUP-11` |
 | Configurer `.gitignore` | — |
 | Initialiser `CHANGELOG.md` | — |
 
-**Livrables** : projet vide, installable et débogable sur téléphone.
+**Livrables** : projet vide, installable et débogable sur téléphone ; CI complète (typecheck, lint, format, doctor, tests, couverture) ; **build `preview` installé et démarré sur Android** pour la validation `SETUP-10`.
 
 ---
 
@@ -274,7 +277,7 @@ Pour chaque phase, les critères de sortie sont :
 | Phase | Objectif | Issues | Nb |
 |---|---|---|---|
 | 0 — Cadrage | Décisions techniques, docs, design, org | `DOC-*`, `DESIGN-*`, `ORG-*` | 19 |
-| 1 — Initialisation | Projet Expo opérationnel | `SETUP-01..10` | 10 |
+| 1 — Initialisation | Projet Expo opérationnel | `SETUP-01..11` | 11 |
 | 2 — Base de données | Persistance SQLite | US-DB-01..05 | 5 |
 | 3 — Interface | Écrans principaux | US-ACC-01..04, US-COL-01..05, US-QA-01 | 10 |
 | 4 — Scan code-barres | Identification EAN-13 | US-ID-01, US-ID-02 | 2 |
@@ -283,4 +286,4 @@ Pour chaque phase, les critères de sortie sont :
 | 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
 | 8 — Optimisation | Performance | US-QA-02 | 1 |
 | 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **56** |
+| **Total** | | | **57** |
