@@ -63,6 +63,9 @@
     "collectCoverageFrom": [
       "src/**/*.{ts,tsx}",
       "!src/app/**",
+      "!src/types/**",
+      "!src/database/types.ts",
+      "!src/test-utils/**",
       "!src/**/*.d.ts"
     ],
     "coverageThreshold": {
