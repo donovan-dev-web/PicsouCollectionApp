@@ -12,32 +12,56 @@ jobs:
     name: Quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      initialized: ${{ steps.check.outputs.initialized }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Tant que le projet Expo (package.json + lockfile) n'existe pas encore
+      # (Phase 1 / M-01), on ne peut pas exécuter les checks de qualité.
+      # Le pipeline sort alors en succès pour ne pas bloquer les commits de
+      # documentation / configuration.
+      - name: Vérifier l'initialisation du projet
+        id: check
+        run: |
+          if [ -f "package.json" ]; then
+            echo "initialized=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "initialized=false" >> "$GITHUB_OUTPUT"
+            echo "Projet Expo non initialisé (pas de package.json) - pipeline ignoré."
+          fi
+        shell: bash
+
       - name: Setup Node
+        if: steps.check.outputs.initialized == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
+        if: steps.check.outputs.initialized == 'true'
         run: npm ci
 
       - name: Typecheck
+        if: steps.check.outputs.initialized == 'true'
         run: npm run typecheck
 
       - name: Lint
+        if: steps.check.outputs.initialized == 'true'
         run: npm run lint
 
       - name: Tests
+        if: steps.check.outputs.initialized == 'true'
         run: npm test -- --ci
 
       - name: Coverage report
+        if: steps.check.outputs.initialized == 'true'
         run: npm run test:coverage
 
       - name: Upload coverage artifact
+        if: steps.check.outputs.initialized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: coverage

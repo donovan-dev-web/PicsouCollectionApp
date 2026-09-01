@@ -49,6 +49,24 @@ Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░�
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 ```
 
+### 2.1 Correspondance phase ↔ milestone ↔ issues
+
+Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à un ensemble d'**issues** assurant le suivi dans le Kanban.
+
+| Phase | Milestone | Issues | Nb |
+|---|---|---|---|
+| 0 — Cadrage | `M-00 — Cadrage, conception & documentation` | `DOC-01..15`, `DESIGN-01..02`, `ORG-01..02` | 19 |
+| 1 — Initialisation | `M-01 — Initialisation technique` | `SETUP-01..10` | 10 |
+| 2 — Base de données | `M-02 — Base de données` | `US-DB-01..05` | 5 |
+| 3 — Interface | `M-03 — Interface principale` | `US-ACC-01..04`, `US-COL-01..05`, `US-QA-01` | 10 |
+| 4 — Scan code-barres | `M-04 — Scan code-barres` | `US-ID-01..02` | 2 |
+| 5 — Caméra / OCR | `M-05 — Caméra / OCR` | `US-ID-03`, `US-ID-05` | 2 |
+| 6 — Parcours complet | `M-06 — Parcours complet` | `US-ID-04`, `US-ID-06`, `US-COL-06` | 3 |
+| 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
+| 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02` | 1 |
+| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
+| **Total** | | | **56** |
+
 ---
 
 ## 3. Phase 0 — Cadrage
@@ -63,7 +81,9 @@ Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░�
 | Définir le format d'export/import | ✓ |
 | Documenter les spécifications | ✓ |
 
-**Livrables** : documents `docs/01` à `docs/13`, LICENSE.
+**Livrables** : documents `docs/01` à `docs/13`, LICENSE, maquettes, design system, présentation client.
+
+**Issues de suivi (M-00)** : `DOC-01..15` (rédaction des documents), `DESIGN-01..02` (design system & maquettes), `ORG-01..02` (présentation client & configuration du dépôt). **Toutes clôturées.**
 
 ---
 
@@ -71,17 +91,18 @@ Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░�
 
 **Objectif** : Obtenir une application Expo vide, opérationnelle sur un téléphone Android physique.
 
-| Tâche | Story |
+| Tâche | Issue |
 |---|---|
-| Créer le projet Expo | — |
-| Configurer TypeScript strict | — |
-| Configurer Expo Router | — |
-| Installer `expo-sqlite` | US-DB-01 |
-| Installer `zustand` | — |
-| Configurer ESLint + Prettier | — |
-| Configurer Jest | US-QA-02 |
-| Configurer EAS Build (eas.json) | US-QA-03 |
-| Test d'installation sur téléphone | — |
+| Créer le projet Expo | `SETUP-01` |
+| Configurer TypeScript strict | `SETUP-02` |
+| Configurer Expo Router | `SETUP-03` |
+| Installer `expo-sqlite` | `SETUP-04` |
+| Installer `zustand` | `SETUP-05` |
+| Configurer ESLint + Prettier | `SETUP-06` |
+| Configurer Jest | `SETUP-07` |
+| Configurer EAS Build (eas.json) | `SETUP-08` |
+| Configurer le setup GitHub (script kanban) | `SETUP-09` |
+| Test d'installation sur téléphone | `SETUP-10` |
 | Configurer `.gitignore` | — |
 | Initialiser `CHANGELOG.md` | — |
 
@@ -99,7 +120,7 @@ Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░�
 | Gestion des migrations (`PRAGMA user_version`) | US-DB-01 |
 | Repository `magazineRepository` (CRUD) | US-DB-02, US-DB-03, US-DB-04 |
 | Repository `collectionRepository` (exemplaires) | US-DB-05 |
-| Service `collectionService` | US-COL-06 |
+| Service `collectionService` | — |
 | Tests unitaires repositories | US-QA-02 |
 
 **Livrables** : couche persistance testée et fonctionnelle.
@@ -118,7 +139,7 @@ Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░�
 | Navigation inférieure (tabs) | — |
 | Thème clair + design system | US-QA-01 |
 | États de chargement / erreur / vide | — |
-| Messages de confirmation | US-COL-06 |
+| Messages de confirmation | — |
 
 **Livrables** : application avec navigation, écrans fonctionnels, thème appliqué.
 
@@ -250,15 +271,16 @@ Pour chaque phase, les critères de sortie sont :
 
 ## Récapitulatif
 
-| Phase | Objectif | Stories |
-|---|---|---|
-| 0 — Cadrage | Décisions techniques | — |
-| 1 — Initialisation | Projet Expo opérationnel | — |
-| 2 — Base de données | Persistance SQLite | US-DB-01..05 |
-| 3 — Interface | Écrans principaux | US-ACC-*, US-COL-02..05 |
-| 4 — Scan code-barres | Identification EAN-13 | US-ID-01, US-ID-02 |
-| 5 — OCR | Identification par caméra | US-ID-03, US-ID-05 |
-| 6 — Parcours complet | Boucle complète | US-ID-*, US-COL-01, US-COL-06 |
-| 7 — Export / Import | Sauvegarde | US-BK-01..03 |
-| 8 — Optimisation | Performance | US-QA-02 |
-| 9 — Publication | Play Store | US-QA-03 |
+| Phase | Objectif | Issues | Nb |
+|---|---|---|---|
+| 0 — Cadrage | Décisions techniques, docs, design, org | `DOC-*`, `DESIGN-*`, `ORG-*` | 19 |
+| 1 — Initialisation | Projet Expo opérationnel | `SETUP-01..10` | 10 |
+| 2 — Base de données | Persistance SQLite | US-DB-01..05 | 5 |
+| 3 — Interface | Écrans principaux | US-ACC-01..04, US-COL-01..05, US-QA-01 | 10 |
+| 4 — Scan code-barres | Identification EAN-13 | US-ID-01, US-ID-02 | 2 |
+| 5 — OCR | Identification par caméra | US-ID-03, US-ID-05 | 2 |
+| 6 — Parcours complet | Boucle complète | US-ID-04, US-ID-06, US-COL-06 | 3 |
+| 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
+| 8 — Optimisation | Performance | US-QA-02 | 1 |
+| 9 — Publication | Play Store | US-QA-03 | 1 |
+| **Total** | | | **56** |
