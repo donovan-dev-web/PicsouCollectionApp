@@ -16,7 +16,12 @@ type MagazineRow = {
   updated_at: string;
 };
 
-function toMagazine(row: MagazineRow): Magazine {
+function toMagazine(
+  row: Omit<MagazineRow, 'notes' | 'ocr_text'> & {
+    notes?: string | null;
+    ocr_text?: string | null;
+  },
+): Magazine {
   return {
     id: row.id,
     publication: row.publication,
@@ -25,8 +30,8 @@ function toMagazine(row: MagazineRow): Magazine {
     country: row.country,
     publicationDate: row.publication_date,
     barcode: row.barcode,
-    notes: row.notes,
-    ocrText: row.ocr_text,
+    notes: row.notes ?? null,
+    ocrText: row.ocr_text ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -34,6 +39,18 @@ function toMagazine(row: MagazineRow): Magazine {
 
 export class MagazineRepository {
   constructor(private readonly db: Database) {}
+
+  async findByBarcode(barcode: string): Promise<Magazine | null> {
+    const row = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, country, publication_date,
+              barcode, created_at, updated_at
+       FROM magazines
+       WHERE barcode = ?`,
+      barcode,
+    );
+
+    return row ? toMagazine(row) : null;
+  }
 
   async create(input: CreateMagazineInput): Promise<Magazine> {
     const publication = input.publication.trim();
