@@ -4,17 +4,27 @@ import type { MagazineListItem } from '@/types';
 const mockList = jest.fn();
 const mockCreate = jest.fn();
 const mockDelete = jest.fn();
+const mockFindByBarcode = jest.fn();
 const mockMagazineRepo = {
   list: mockList,
   create: mockCreate,
   delete: mockDelete,
-  findByBarcode: jest.fn(),
+  findByBarcode: mockFindByBarcode,
+};
+
+const mockListRecentCopies = jest.fn();
+const mockCollectionRepo = {
+  listRecentCopies: mockListRecentCopies,
+  addCopy: jest.fn(),
+  countByMagazine: jest.fn(),
+  listByMagazine: jest.fn(),
+  deleteCopy: jest.fn(),
 };
 
 jest.mock('@/dependencies', () => ({
   getDeps: jest.fn(() => ({
     magazineRepository: mockMagazineRepo,
-    collectionRepository: {},
+    collectionRepository: mockCollectionRepo,
   })),
 }));
 
@@ -90,5 +100,25 @@ describe('useCollectionStore', () => {
     const state = useCollectionStore.getState();
     expect(state.magazines).toHaveLength(0);
     expect(state.totalCopies).toBe(0);
+  });
+
+  it('charge les derniers exemplaires ajoutes', async () => {
+    mockListRecentCopies.mockResolvedValue([
+      {
+        copy: {
+          id: 'c1',
+          magazineId: 'mag-1',
+          condition: null,
+          notes: null,
+          dateAdded: '2026-09-01T10:00:00Z',
+        },
+        magazine: { id: 'mag-1', publication: 'Picsou Magazine', issueNumber: 547 },
+      },
+    ]);
+
+    await useCollectionStore.getState().loadRecent();
+
+    expect(useCollectionStore.getState().recentCopies).toHaveLength(1);
+    expect(mockListRecentCopies).toHaveBeenCalledWith(5);
   });
 });

@@ -1,5 +1,5 @@
 import type { Database } from '@/database/types';
-import type { CollectionItem, CreateCollectionItemInput } from '@/types';
+import type { CollectionItem, CreateCollectionItemInput, RecentCopy } from '@/types';
 import { generateId } from '@/utils/id';
 
 type CollectionItemRow = {
@@ -71,5 +71,45 @@ export class CollectionRepository {
 
   async deleteCopy(id: string): Promise<void> {
     await this.db.runAsync('DELETE FROM collection_items WHERE id = ?', id);
+  }
+
+  async listRecentCopies(limit = 5): Promise<RecentCopy[]> {
+    const rows = await this.db.getAllAsync<{
+      copy_id: string;
+      copy_magazine_id: string;
+      copy_condition: string | null;
+      copy_notes: string | null;
+      copy_date_added: string;
+      magazine_publication: string;
+      magazine_issue_number: number | null;
+    }>(
+      `SELECT c.id AS copy_id,
+              c.magazine_id AS copy_magazine_id,
+              c.condition AS copy_condition,
+              c.notes AS copy_notes,
+              c.date_added AS copy_date_added,
+              m.publication AS magazine_publication,
+              m.issue_number AS magazine_issue_number
+       FROM collection_items c
+       JOIN magazines m ON m.id = c.magazine_id
+       ORDER BY c.date_added DESC
+       LIMIT ?`,
+      limit,
+    );
+
+    return rows.map((row) => ({
+      copy: {
+        id: row.copy_id,
+        magazineId: row.copy_magazine_id,
+        condition: row.copy_condition,
+        notes: row.copy_notes,
+        dateAdded: row.copy_date_added,
+      },
+      magazine: {
+        id: row.copy_magazine_id,
+        publication: row.magazine_publication,
+        issueNumber: row.magazine_issue_number,
+      },
+    }));
   }
 }

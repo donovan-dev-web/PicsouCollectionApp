@@ -4,14 +4,17 @@ import HomeScreen from '@/app/index';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 const mockPush = jest.fn();
+const mockUseFocusEffect = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
+  useFocusEffect: (callback: () => void) => mockUseFocusEffect(callback),
 }));
 
 describe('HomeScreen (compteur)', () => {
   beforeEach(() => {
     mockPush.mockClear();
+    mockUseFocusEffect.mockClear();
   });
 
   it('affiche le nombre d exemplaires possedes', () => {
@@ -73,5 +76,56 @@ describe('HomeScreen (bouton Ajouter)', () => {
     fireEvent.press(screen.getByTestId('add-button'));
 
     expect(mockPush).toHaveBeenCalledWith('/scan/manual');
+  });
+});
+
+describe('HomeScreen (ajouts recents)', () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+    mockUseFocusEffect.mockImplementation((callback: () => void) => callback());
+  });
+
+  it('affiche la liste des derniers exemplaires ajoutes', () => {
+    useCollectionStore.setState({
+      loading: false,
+      loaded: true,
+      recentCopies: [
+        {
+          copy: {
+            id: 'c1',
+            magazineId: 'm1',
+            condition: 'neuf',
+            notes: null,
+            dateAdded: '2026-09-01T10:00:00Z',
+          },
+          magazine: { id: 'm1', publication: 'Picsou Magazine', issueNumber: 547 },
+        },
+        {
+          copy: {
+            id: 'c2',
+            magazineId: 'm2',
+            condition: null,
+            notes: 'coffret',
+            dateAdded: '2026-08-20T10:00:00Z',
+          },
+          magazine: { id: 'm2', publication: 'Super Picsou Géant', issueNumber: null },
+        },
+      ],
+    });
+
+    render(<HomeScreen />);
+
+    expect(screen.getAllByTestId('recent-item')).toHaveLength(2);
+    expect(screen.getByText('Picsou Magazine n°547')).toBeTruthy();
+    expect(screen.getByText('Super Picsou Géant')).toBeTruthy();
+    expect(screen.getByText('2026-09-01')).toBeTruthy();
+  });
+
+  it('affiche un etat vide sans ajouts', () => {
+    useCollectionStore.setState({ loading: false, loaded: true, recentCopies: [] });
+
+    render(<HomeScreen />);
+
+    expect(screen.getByTestId('recent-empty')).toBeTruthy();
   });
 });
