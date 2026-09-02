@@ -6,12 +6,14 @@ const mockCreate = jest.fn();
 const mockDelete = jest.fn();
 const mockFindByBarcode = jest.fn();
 const mockFindById = jest.fn();
+const mockUpdate = jest.fn();
 const mockMagazineRepo = {
   list: mockList,
   create: mockCreate,
   delete: mockDelete,
   findByBarcode: mockFindByBarcode,
   findById: mockFindById,
+  update: mockUpdate,
 };
 
 const mockListRecentCopies = jest.fn();
@@ -160,5 +162,31 @@ describe('useCollectionStore', () => {
     useCollectionStore.getState().clearDetail();
 
     expect(useCollectionStore.getState().detail).toBeNull();
+  });
+
+  it('modifie une edition et rafraichit la liste et le detail', async () => {
+    mockUpdate.mockResolvedValue({ ...magazine, publication: 'Mickey Parade' });
+    useCollectionStore.setState({
+      magazines: [magazine],
+      detail: { ...magazine, copies: [] },
+    });
+
+    await useCollectionStore.getState().updateMagazine('mag-1', {
+      publication: 'Mickey Parade',
+    });
+
+    const state = useCollectionStore.getState();
+    expect(mockUpdate).toHaveBeenCalledWith('mag-1', { publication: 'Mickey Parade' });
+    expect(state.magazines[0].publication).toBe('Mickey Parade');
+    expect(state.magazines[0].quantity).toBe(4);
+    expect(state.detail?.publication).toBe('Mickey Parade');
+  });
+
+  it('signale une edition introuvable lors de la modification', async () => {
+    mockUpdate.mockResolvedValue(null);
+
+    await expect(
+      useCollectionStore.getState().updateMagazine('inconnue', { publication: 'X' }),
+    ).rejects.toThrow('Édition introuvable.');
   });
 });

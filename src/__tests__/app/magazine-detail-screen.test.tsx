@@ -9,6 +9,7 @@ const mockLoadDetail = jest.fn();
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
   useLocalSearchParams: () => ({ id: 'mag-1' }),
+  useRouter: () => ({ push: jest.fn() }),
 }));
 
 const detail = {

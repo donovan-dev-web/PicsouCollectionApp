@@ -185,4 +185,50 @@ export class MagazineRepository {
 
     return magazine;
   }
+
+  async update(id: string, input: CreateMagazineInput): Promise<Magazine | null> {
+    const current = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, country, publication_date,
+              barcode, notes, ocr_text, created_at, updated_at
+       FROM magazines
+       WHERE id = ?`,
+      id,
+    );
+
+    if (!current) {
+      return null;
+    }
+
+    const publication = input.publication.trim();
+    if (!publication) {
+      throw new Error('La publication est obligatoire.');
+    }
+
+    const updatedAt = new Date().toISOString();
+    await this.db.runAsync(
+      `UPDATE magazines
+       SET publication = ?, issue_number = ?, edition = ?, country = ?,
+           publication_date = ?, barcode = ?, updated_at = ?
+       WHERE id = ?`,
+      publication,
+      input.issueNumber ?? null,
+      input.edition ?? null,
+      input.country ?? null,
+      input.publicationDate ?? null,
+      input.barcode ?? null,
+      updatedAt,
+      id,
+    );
+
+    return {
+      ...toMagazine(current),
+      publication,
+      issueNumber: input.issueNumber ?? null,
+      edition: input.edition ?? null,
+      country: input.country ?? null,
+      publicationDate: input.publicationDate ?? null,
+      barcode: input.barcode ?? null,
+      updatedAt,
+    };
+  }
 }
