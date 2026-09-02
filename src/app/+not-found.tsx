@@ -1,9 +1,12 @@
 import { Link, Stack } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/hooks/use-theme';
 
 export default function NotFoundScreen() {
+  const colors = useThemeColors();
+  const styles = makeStyles(colors);
   return (
     <>
       <Stack.Screen options={{ title: 'Introuvable' }} />
@@ -18,32 +21,34 @@ export default function NotFoundScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.background,
-    padding: Spacing.four,
-    gap: Spacing.three,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-  },
-  link: {
-    marginTop: Spacing.two,
-  },
-  linkText: {
-    color: Colors.light.accent,
-    fontSize: 16,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+      padding: Spacing.four,
+      gap: Spacing.three,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    link: {
+      marginTop: Spacing.two,
+    },
+    linkText: {
+      color: colors.accent,
+      fontSize: 16,
+      fontWeight: '600',
+      textDecorationLine: 'underline',
+    },
+  });
+}

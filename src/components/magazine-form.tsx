@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/hooks/use-theme';
 import type { CreateMagazineInput, Magazine } from '@/types';
 
 type FormValues = {
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
+  const colors = useThemeColors();
   const [values, setValues] = useState<FormValues>({
     publication: initial?.publication ?? '',
     issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
@@ -29,6 +31,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
     barcode: initial?.barcode ?? '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const styles = makeStyles(colors);
 
   const set = (key: keyof FormValues) => (value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -63,7 +66,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         value={values.publication}
         onChangeText={set('publication')}
         placeholder="Ex : Picsou Magazine"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-publication"
         accessibilityLabel="Publication"
       />
@@ -75,7 +78,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         onChangeText={set('issueNumber')}
         placeholder="Ex : 547"
         keyboardType="number-pad"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-issue-number"
         accessibilityLabel="Numéro"
       />
@@ -86,7 +89,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         value={values.edition}
         onChangeText={set('edition')}
         placeholder="Ex : édition française"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-edition"
         accessibilityLabel="Édition"
       />
@@ -97,7 +100,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         value={values.country}
         onChangeText={set('country')}
         placeholder="Ex : FR"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-country"
         accessibilityLabel="Pays"
       />
@@ -108,7 +111,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         value={values.publicationDate}
         onChangeText={set('publicationDate')}
         placeholder="Ex : 2023-03"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-publication-date"
         accessibilityLabel="Date de publication"
       />
@@ -120,7 +123,7 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
         onChangeText={set('barcode')}
         placeholder="Ex : 3271234000011"
         keyboardType="number-pad"
-        placeholderTextColor={Colors.light.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         testID="field-barcode"
         accessibilityLabel="Code-barres"
       />
@@ -137,38 +140,40 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  form: {
-    gap: Spacing.two,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginTop: Spacing.two,
-  },
-  input: {
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    fontSize: 16,
-    color: Colors.light.text,
-  },
-  submit: {
-    marginTop: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.accent,
-    paddingVertical: Spacing.three,
-    borderRadius: 12,
-  },
-  submitDisabled: {
-    opacity: 0.5,
-  },
-  submitText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    form: {
+      gap: Spacing.two,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+      marginTop: Spacing.two,
+    },
+    input: {
+      backgroundColor: colors.backgroundElement,
+      borderRadius: 8,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+      fontSize: 16,
+      color: colors.text,
+    },
+    submit: {
+      marginTop: Spacing.three,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.three,
+      borderRadius: 12,
+    },
+    submitDisabled: {
+      opacity: 0.5,
+    },
+    submitText: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.accentText,
+    },
+  });
+}

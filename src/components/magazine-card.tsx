@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/hooks/use-theme';
 import type { MagazineListItem } from '@/types';
 
 import { StatusBadge } from './status-badge';
@@ -11,7 +12,9 @@ type Props = {
 };
 
 export function MagazineCard({ magazine, onPress }: Props) {
+  const colors = useThemeColors();
   const owned = magazine.quantity > 0;
+  const styles = makeStyles(colors);
 
   return (
     <Pressable
@@ -29,30 +32,32 @@ export function MagazineCard({ magazine, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 12,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-  },
-  publication: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.light.text,
-    flexShrink: 1,
-  },
-  issue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.light.accent,
-  },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.backgroundElement,
+      borderRadius: 12,
+      padding: Spacing.three,
+      gap: Spacing.two,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+    },
+    publication: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+      flexShrink: 1,
+    },
+    issue: {
+      fontSize: 24,
+      fontWeight: '800',
+      color: colors.accent,
+    },
+  });
+}

@@ -3,8 +3,11 @@ import { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
+
+type StyleSheetType = ReturnType<typeof makeStyles>;
 
 function formatDate(iso: string | null): string {
   if (!iso) {
@@ -15,6 +18,8 @@ function formatDate(iso: string | null): string {
 
 export default function MagazineDetailScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = makeStyles(colors);
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = useCollectionStore((s) => s.detail);
   const detailLoading = useCollectionStore((s) => s.detailLoading);
@@ -80,11 +85,11 @@ export default function MagazineDetailScreen() {
       </View>
 
       <View style={styles.card} testID="detail-info">
-        <InfoRow label="Édition" value={detail.edition?.trim() || '—'} />
-        <InfoRow label="Pays" value={detail.country?.trim() || '—'} />
-        <InfoRow label="Date" value={formatDate(detail.publicationDate)} />
-        <InfoRow label="Code-barres" value={detail.barcode?.trim() || '—'} />
-        <InfoRow label="Ajouté le" value={formatDate(detail.createdAt)} />
+        <InfoRow styles={styles} label="Édition" value={detail.edition?.trim() || '—'} />
+        <InfoRow styles={styles} label="Pays" value={detail.country?.trim() || '—'} />
+        <InfoRow styles={styles} label="Date" value={formatDate(detail.publicationDate)} />
+        <InfoRow styles={styles} label="Code-barres" value={detail.barcode?.trim() || '—'} />
+        <InfoRow styles={styles} label="Ajouté le" value={formatDate(detail.createdAt)} />
       </View>
 
       {detail.notes ? (
@@ -128,7 +133,15 @@ export default function MagazineDetailScreen() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({
+  styles,
+  label,
+  value,
+}: {
+  styles: StyleSheetType;
+  label: string;
+  value: string;
+}) {
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -139,126 +152,128 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
-  content: {
-    padding: Spacing.four,
-    gap: Spacing.three,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.background,
-    padding: Spacing.four,
-  },
-  publication: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  issue: {
-    fontSize: 16,
-    color: Colors.light.textSecondary,
-    marginTop: -Spacing.two,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  count: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-  },
-  card: {
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 12,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: Colors.light.text,
-    fontWeight: '500',
-    flexShrink: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginTop: Spacing.two,
-  },
-  notes: {
-    fontSize: 14,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  copyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 8,
-    padding: Spacing.three,
-  },
-  copyIndex: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.light.accent,
-  },
-  copyMeta: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.light.text,
-  },
-  copyDate: {
-    fontSize: 12,
-    color: Colors.light.textSecondary,
-  },
-  muted: {
-    fontSize: 15,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-  },
-  editButton: {
-    marginTop: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.accent,
-    paddingVertical: Spacing.three,
-    borderRadius: 12,
-  },
-  editButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  deleteButton: {
-    marginTop: Spacing.two,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#B3261E',
-    paddingVertical: Spacing.three,
-    borderRadius: 12,
-  },
-  deleteButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: Spacing.four,
+      gap: Spacing.three,
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+      padding: Spacing.four,
+    },
+    publication: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    issue: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      marginTop: -Spacing.two,
+    },
+    statusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    count: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    card: {
+      backgroundColor: colors.backgroundElement,
+      borderRadius: 12,
+      padding: Spacing.three,
+      gap: Spacing.two,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    infoLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    infoValue: {
+      fontSize: 14,
+      color: colors.text,
+      fontWeight: '500',
+      flexShrink: 1,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      marginTop: Spacing.two,
+    },
+    notes: {
+      fontSize: 14,
+      color: colors.text,
+      lineHeight: 20,
+    },
+    copyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.three,
+      backgroundColor: colors.backgroundElement,
+      borderRadius: 8,
+      padding: Spacing.three,
+    },
+    copyIndex: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.accent,
+    },
+    copyMeta: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text,
+    },
+    copyDate: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    muted: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    editButton: {
+      marginTop: Spacing.three,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.three,
+      borderRadius: 12,
+    },
+    editButtonText: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.accentText,
+    },
+    deleteButton: {
+      marginTop: Spacing.two,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.danger,
+      paddingVertical: Spacing.three,
+      borderRadius: 12,
+    },
+    deleteButtonText: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.onDanger,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  });
+}
