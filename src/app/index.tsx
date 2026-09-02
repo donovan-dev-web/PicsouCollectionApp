@@ -36,6 +36,15 @@ export default function HomeScreen() {
         accessibilityLabel="Scanner un magazine">
         <Text style={styles.scanButtonText}>📷 Scanner</Text>
       </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.addButton, pressed && styles.scanButtonPressed]}
+        onPress={() => router.push('/scan/manual')}
+        testID="add-button"
+        accessibilityRole="button"
+        accessibilityLabel="Ajouter une édition">
+        <Text style={styles.addButtonText}>+ Ajouter</Text>
+      </Pressable>
     </View>
   );
 }
@@ -92,6 +101,19 @@ const styles = StyleSheet.create({
   scanButtonText: {
     fontSize: 20,
     fontWeight: '700',
+    color: Colors.light.text,
+  },
+  addButton: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.backgroundElement,
+    paddingVertical: Spacing.three,
+    borderRadius: 12,
+  },
+  addButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
     color: Colors.light.text,
   },
 });

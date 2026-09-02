@@ -54,3 +54,24 @@ describe('HomeScreen (bouton Scanner)', () => {
     expect(mockPush).toHaveBeenCalledWith('/scan');
   });
 });
+
+describe('HomeScreen (bouton Ajouter)', () => {
+  it('affiche un bouton Ajouter', () => {
+    useCollectionStore.setState({ loading: false, loaded: true });
+
+    render(<HomeScreen />);
+
+    expect(screen.getByTestId('add-button')).toBeTruthy();
+    expect(screen.getByText('+ Ajouter')).toBeTruthy();
+  });
+
+  it('navigue vers la saisie manuelle au toucher', () => {
+    useCollectionStore.setState({ loading: false, loaded: true });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByTestId('add-button'));
+
+    expect(mockPush).toHaveBeenCalledWith('/scan/manual');
+  });
+});
