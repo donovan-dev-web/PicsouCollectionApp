@@ -2,7 +2,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { MagazineForm } from '@/components/magazine-form';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
 import type { CreateMagazineInput } from '@/types';
 
@@ -11,6 +12,8 @@ export default function EditMagazineScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = useCollectionStore((s) => s.detail);
   const updateMagazine = useCollectionStore((s) => s.updateMagazine);
+  const colors = useThemeColors();
+  const styles = makeStyles(colors);
 
   const handleSubmit = async (input: CreateMagazineInput) => {
     await updateMagazine(id, input);
@@ -35,21 +38,23 @@ export default function EditMagazineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    padding: Spacing.four,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.light.text,
-    marginBottom: Spacing.two,
-  },
-  muted: {
-    fontSize: 15,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-  },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: Spacing.four,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: Spacing.two,
+    },
+    muted: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+  });
+}
