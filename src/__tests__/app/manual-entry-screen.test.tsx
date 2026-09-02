@@ -6,6 +6,8 @@ import { useCollectionStore } from '@/store/use-collection-store';
 const mockBack = jest.fn();
 
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
+  useFocusEffect: (callback: () => void) => callback(),
   useRouter: () => ({ back: mockBack }),
 }));
 
