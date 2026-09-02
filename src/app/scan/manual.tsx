@@ -1,33 +1,40 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 
+import { MagazineForm } from '@/components/magazine-form';
 import { Colors, Spacing } from '@/constants/theme';
+import { useCollectionStore } from '@/store/use-collection-store';
+import type { CreateMagazineInput } from '@/types';
 
 export default function ManualEntryScreen() {
+  const router = useRouter();
+  const addMagazine = useCollectionStore((s) => s.addMagazine);
+
+  const handleSubmit = async (input: CreateMagazineInput) => {
+    await addMagazine(input);
+    router.back();
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.title}>Ajouter une édition</Text>
-      <Text style={styles.subtitle}>Saisie manuelle (formulaire complet prévu en US-COL-01).</Text>
-    </View>
+      <MagazineForm submitLabel="Enregistrer" onSubmit={handleSubmit} />
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: Colors.light.background,
     padding: Spacing.four,
-    gap: Spacing.three,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: Colors.light.text,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
+    marginBottom: Spacing.three,
   },
 });

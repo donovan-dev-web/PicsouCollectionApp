@@ -13,9 +13,10 @@ const mockMagazineRepo = {
 };
 
 const mockListRecentCopies = jest.fn();
+const mockAddCopy = jest.fn();
 const mockCollectionRepo = {
   listRecentCopies: mockListRecentCopies,
-  addCopy: jest.fn(),
+  addCopy: mockAddCopy,
   countByMagazine: jest.fn(),
   listByMagazine: jest.fn(),
   deleteCopy: jest.fn(),
@@ -78,9 +79,16 @@ describe('useCollectionStore', () => {
     expect(state.loaded).toBe(false);
   });
 
-  it('ajoute une edition et incremente le compteur', async () => {
+  it('ajoute une edition et un exemplaire, puis incremente le compteur', async () => {
     const created = { ...magazine, quantity: 1 };
     mockCreate.mockResolvedValue(created);
+    mockAddCopy.mockResolvedValue({
+      id: 'c1',
+      magazineId: 'mag-1',
+      condition: null,
+      notes: null,
+      dateAdded: 'x',
+    });
 
     await useCollectionStore
       .getState()
@@ -89,6 +97,7 @@ describe('useCollectionStore', () => {
     const state = useCollectionStore.getState();
     expect(state.magazines).toHaveLength(1);
     expect(state.totalCopies).toBe(1);
+    expect(mockAddCopy).toHaveBeenCalledWith('mag-1');
   });
 
   it('supprime une edition et decremente le compteur', async () => {
