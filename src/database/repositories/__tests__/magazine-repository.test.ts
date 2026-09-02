@@ -2,9 +2,15 @@ import { createTestDatabase } from '@/test-utils/test-db';
 import { migrate } from '@/database/migrations';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 
-jest.mock('expo-crypto', () => ({
-  randomUUID: jest.fn(() => 'b1a2c3d4-0000-4000-8000-000000000001'),
-}));
+jest.mock('expo-crypto', () => {
+  let n = 0;
+  return {
+    randomUUID: jest.fn(() => {
+      n += 1;
+      return `b1a2c3d4-0000-4000-8000-${String(n).padStart(12, '0')}`;
+    }),
+  };
+});
 
 let testDb: ReturnType<typeof createTestDatabase>;
 let repo: MagazineRepository;
@@ -120,5 +126,79 @@ describe('magazineRepository.findByBarcode', () => {
 
     expect(found?.notes).toBeNull();
     expect(found?.ocrText).toBeNull();
+  });
+});
+
+describe('magazineRepository.list', () => {
+  it('trie par publication puis numero', async () => {
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 100 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 20 });
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 10 });
+
+    const list = await repo.list();
+
+    expect(list.map((m) => `${m.publication}/${m.issueNumber}`)).toEqual([
+      'Mickey Parade/2',
+      'Mickey Parade/10',
+      'Picsou Magazine/20',
+      'Picsou Magazine/100',
+    ]);
+  });
+
+  it('compte le nombre dexemplaires possedes', async () => {
+    const single = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    const double = await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
+
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c1',
+      single.id,
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c2',
+      double.id,
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c3',
+      double.id,
+      '2026-09-01T10:00:00Z',
+    );
+
+    const list = await repo.list();
+
+    const byPublication = new Map(list.map((m) => [m.publication, m]));
+    expect(byPublication.get('Picsou Magazine')?.quantity).toBe(1);
+    expect(byPublication.get('Super Picsou Géant')?.quantity).toBe(2);
+  });
+
+  it('renvoie 0 exemplaire pour une edition non possedee', async () => {
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 1 });
+
+    const list = await repo.list();
+
+    expect(list).toHaveLength(1);
+    expect(list[0].quantity).toBe(0);
+  });
+
+  it('reste leger : ne charge ni notes ni ocr_text', async () => {
+    await repo.create({
+      publication: 'Mickey Parade',
+      issueNumber: 7,
+      notes: 'secret',
+      ocrText: 'raw',
+    });
+
+    const list = await repo.list();
+
+    expect(list[0].notes).toBeNull();
+    expect(list[0].ocrText).toBeNull();
   });
 });
