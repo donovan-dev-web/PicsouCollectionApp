@@ -1,6 +1,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { MagazineForm } from '@/components/magazine-form';
+import { setPendingBarcode } from '@/lib/pending-barcode';
+
+const mockPush = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useFocusEffect: (callback: () => void) => callback(),
+  useRouter: () => ({ push: mockPush, back: jest.fn() }),
+}));
 
 describe('MagazineForm', () => {
   it('desactive le bouton tant que la publication est vide', () => {
@@ -55,5 +63,32 @@ describe('MagazineForm', () => {
       publicationDate: null,
       barcode: null,
     });
+  });
+
+  it('ouvre le scanner de code-barres depuis le champ barcode', () => {
+    const onSubmit = jest.fn();
+    render(<MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} />);
+
+    fireEvent.press(screen.getByTestId('barcode-scan'));
+    expect(mockPush).toHaveBeenCalledWith('/scan/form-barcode');
+  });
+
+  it('remplit le champ barcode avec le code scanné au retour du scanner', () => {
+    const onSubmit = jest.fn();
+    setPendingBarcode('3271234000011');
+
+    render(<MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} />);
+
+    expect(screen.getByTestId('field-barcode').props.value).toBe('3271234000011');
+  });
+
+  it('préremplit le code-barres via la prop initialBarcode', () => {
+    const onSubmit = jest.fn();
+
+    render(
+      <MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} initialBarcode="5901234123457" />,
+    );
+
+    expect(screen.getByTestId('field-barcode').props.value).toBe('5901234123457');
   });
 });

@@ -4,24 +4,21 @@ import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
-import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
+import { setPendingBarcode } from '@/lib/pending-barcode';
+import { scanBarcode } from '@/identification/scanBarcode';
 
-type ScanState =
-  { status: 'idle' } | { status: 'searching' } | { status: 'invalid'; reason: string };
-
-export default function BarcodeScreen() {
+export default function FormBarcodeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
 
   const [permission, requestPermission] = useCameraPermissions();
-  const [state, setState] = useState<ScanState>({ status: 'idle' });
   const [scanning, setScanning] = useState(true);
   const lastCode = useRef<string | null>(null);
 
-  const handleScan = async ({ data }: { data: string; type: string }) => {
-    if (!scanning || state.status === 'searching') {
+  const handleScan = ({ data }: { data: string; type: string }) => {
+    if (!scanning) {
       return;
     }
     const normalized = data.trim();
@@ -29,35 +26,16 @@ export default function BarcodeScreen() {
       return;
     }
     lastCode.current = normalized;
-    setScanning(false);
-    setState({ status: 'searching' });
 
-    const { identificationService } = getDeps();
-    const result = await identificationService.identifyByBarcode(normalized);
-
-    if (result.status === 'found') {
-      router.replace({
-        pathname: '/scan/result',
-        params: {
-          id: result.magazine.id,
-          publication: result.magazine.publication,
-          issueNumber:
-            result.magazine.issueNumber != null ? String(result.magazine.issueNumber) : '',
-          barcode: normalized,
-        },
-      });
-    } else if (result.status === 'unknown') {
-      router.replace({ pathname: '/scan/result', params: { barcode: normalized } });
-    } else {
-      setState({ status: 'invalid', reason: result.reason });
+    const validation = scanBarcode(normalized);
+    if (validation.status !== 'found') {
       setScanning(true);
+      return;
     }
-  };
 
-  const reset = () => {
-    lastCode.current = null;
-    setScanning(true);
-    setState({ status: 'idle' });
+    setScanning(false);
+    setPendingBarcode(validation.normalized);
+    router.back();
   };
 
   if (!permission) {
@@ -74,7 +52,7 @@ export default function BarcodeScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Accès à la caméra requis</Text>
         <Text style={styles.message}>
-          Le scan de code-barres a besoin de la caméra pour identifier vos magazines.
+          Le scan de code-barres a besoin de la caméra pour remplir le champ.
         </Text>
         {permission.canAskAgain ? (
           <Pressable
@@ -112,38 +90,17 @@ export default function BarcodeScreen() {
 
       <View style={styles.overlay} pointerEvents="none">
         <View style={styles.reticle} />
-        <Text style={styles.scanHint}>
-          {state.status === 'searching' ? 'Recherche…' : 'Alignez le code-barres dans le cadre'}
-        </Text>
-        {state.status === 'invalid' && (
-          <Text style={styles.invalidText} testID="invalid-reason">
-            {state.reason}
-          </Text>
-        )}
+        <Text style={styles.scanHint}>Scannez le code-barres du magazine</Text>
       </View>
 
-      {state.status === 'idle' && (
-        <Pressable
-          style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}
-          onPress={() => router.back()}
-          testID="scan-back"
-          accessibilityRole="button"
-          accessibilityLabel="Annuler">
-          <Text style={styles.backButtonText}>✕</Text>
-        </Pressable>
-      )}
-
-      {state.status === 'invalid' && (
-        <View style={styles.invalidActions}>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={reset}
-            testID="invalid-retry"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
-          </Pressable>
-        </View>
-      )}
+      <Pressable
+        style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}
+        onPress={() => router.back()}
+        testID="scan-back"
+        accessibilityRole="button"
+        accessibilityLabel="Annuler">
+        <Text style={styles.backButtonText}>✕</Text>
+      </Pressable>
     </View>
   );
 }
@@ -185,24 +142,25 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 8,
       overflow: 'hidden',
     },
-    invalidText: {
-      marginTop: Spacing.two,
-      fontSize: 14,
-      color: '#FFD5D2',
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
       textAlign: 'center',
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-      overflow: 'hidden',
     },
-    invalidActions: {
-      position: 'absolute',
-      left: Spacing.four,
-      right: Spacing.four,
-      bottom: 60,
+    message: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+    errorText: {
+      fontSize: 14,
+      color: colors.danger,
+      textAlign: 'center',
     },
     primaryButton: {
+      marginTop: Spacing.three,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
@@ -213,23 +171,6 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 16,
       fontWeight: '700',
       color: colors.accentText,
-      textAlign: 'center',
-    },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      textAlign: 'center',
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    errorText: {
-      fontSize: 14,
-      color: colors.danger,
       textAlign: 'center',
     },
     cancelButton: {
