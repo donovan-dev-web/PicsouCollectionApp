@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import HomeScreen from '@/app/index';
+import HomeScreen from '@/app/(tabs)/index';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 const mockPush = jest.fn();
