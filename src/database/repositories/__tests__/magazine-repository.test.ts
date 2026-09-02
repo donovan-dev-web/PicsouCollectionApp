@@ -1,0 +1,204 @@
+import { createTestDatabase } from '@/test-utils/test-db';
+import { migrate } from '@/database/migrations';
+import { MagazineRepository } from '@/database/repositories/magazine-repository';
+
+jest.mock('expo-crypto', () => {
+  let n = 0;
+  return {
+    randomUUID: jest.fn(() => {
+      n += 1;
+      return `b1a2c3d4-0000-4000-8000-${String(n).padStart(12, '0')}`;
+    }),
+  };
+});
+
+let testDb: ReturnType<typeof createTestDatabase>;
+let repo: MagazineRepository;
+
+beforeEach(async () => {
+  testDb = createTestDatabase();
+  await migrate(testDb);
+  repo = new MagazineRepository(testDb);
+});
+
+afterEach(async () => {
+  await testDb.close();
+});
+
+describe('magazineRepository.create', () => {
+  it('cree une edition complete avec UUID et dates', async () => {
+    const magazine = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      edition: 'standard',
+      country: 'FR',
+      publicationDate: '2023-03',
+      barcode: '3271234567890',
+      notes: 'Mention bimestriel',
+    });
+
+    expect(magazine).toMatchObject({
+      id: 'b1a2c3d4-0000-4000-8000-000000000001',
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      edition: 'standard',
+      country: 'FR',
+      publicationDate: '2023-03',
+      barcode: '3271234567890',
+      notes: 'Mention bimestriel',
+      ocrText: null,
+    });
+    expect(magazine.createdAt).toBeTruthy();
+    expect(magazine.updatedAt).toBeTruthy();
+
+    const row = await testDb.getFirstAsync<{ publication: string; issue_number: number }>(
+      'SELECT publication, issue_number FROM magazines WHERE id = ?',
+      magazine.id,
+    );
+    expect(row?.publication).toBe('Picsou Magazine');
+    expect(row?.issue_number).toBe(547);
+  });
+
+  it('autorise un magazine sans numero (hors-serie)', async () => {
+    const magazine = await repo.create({ publication: 'Super Picsou Géant Hors-Série' });
+
+    expect(magazine.issueNumber).toBeNull();
+    const row = await testDb.getFirstAsync<{ issue_number: number | null }>(
+      'SELECT issue_number FROM magazines WHERE id = ?',
+      magazine.id,
+    );
+    expect(row?.issue_number).toBeNull();
+  });
+
+  it('refuse une publication vide', async () => {
+    await expect(repo.create({ publication: '   ' })).rejects.toThrow(
+      'La publication est obligatoire.',
+    );
+  });
+
+  it('accepte un code-barres null (ancien magazine)', async () => {
+    const magazine = await repo.create({ publication: 'Mickey Parade', country: 'FR' });
+
+    expect(magazine.barcode).toBeNull();
+  });
+});
+
+describe('magazineRepository.findByBarcode', () => {
+  it('retrouve ledition depuis un code-barres connu', async () => {
+    const created = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      country: 'FR',
+      barcode: '3271234567890',
+    });
+
+    const found = await repo.findByBarcode('3271234567890');
+
+    expect(found).toEqual(
+      expect.objectContaining({
+        id: created.id,
+        publication: 'Picsou Magazine',
+        issueNumber: 547,
+        country: 'FR',
+        barcode: '3271234567890',
+        notes: null,
+        ocrText: null,
+      }),
+    );
+  });
+
+  it('renvoie null pour un code-barres inconnu', async () => {
+    const found = await repo.findByBarcode('9999999999999');
+
+    expect(found).toBeNull();
+  });
+
+  it('ne charge pas les champs lourds notes/ocr_text', async () => {
+    await repo.create({
+      publication: 'Super Picsou Géant',
+      issueNumber: 30,
+      notes: 'coffret specifique',
+      ocrText: 'Super Picsou Géant n°30',
+      barcode: '3271234000011',
+    });
+
+    const found = await repo.findByBarcode('3271234000011');
+
+    expect(found?.notes).toBeNull();
+    expect(found?.ocrText).toBeNull();
+  });
+});
+
+describe('magazineRepository.list', () => {
+  it('trie par publication puis numero', async () => {
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 100 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 20 });
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 10 });
+
+    const list = await repo.list();
+
+    expect(list.map((m) => `${m.publication}/${m.issueNumber}`)).toEqual([
+      'Mickey Parade/2',
+      'Mickey Parade/10',
+      'Picsou Magazine/20',
+      'Picsou Magazine/100',
+    ]);
+  });
+
+  it('compte le nombre dexemplaires possedes', async () => {
+    const single = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    const double = await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
+
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c1',
+      single.id,
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c2',
+      double.id,
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c3',
+      double.id,
+      '2026-09-01T10:00:00Z',
+    );
+
+    const list = await repo.list();
+
+    const byPublication = new Map(list.map((m) => [m.publication, m]));
+    expect(byPublication.get('Picsou Magazine')?.quantity).toBe(1);
+    expect(byPublication.get('Super Picsou Géant')?.quantity).toBe(2);
+  });
+
+  it('renvoie 0 exemplaire pour une edition non possedee', async () => {
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 1 });
+
+    const list = await repo.list();
+
+    expect(list).toHaveLength(1);
+    expect(list[0].quantity).toBe(0);
+  });
+
+  it('reste leger : ne charge ni notes ni ocr_text', async () => {
+    await repo.create({
+      publication: 'Mickey Parade',
+      issueNumber: 7,
+      notes: 'secret',
+      ocrText: 'raw',
+    });
+
+    const list = await repo.list();
+
+    expect(list[0].notes).toBeNull();
+    expect(list[0].ocrText).toBeNull();
+  });
+});

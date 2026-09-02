@@ -7,6 +7,24 @@
 
 ---
 
+## [0.2.0] — 2026-09-02
+
+> Deuxième release technique : **couche de persistance complète** pour gérer la collection sans caméra (M-02).
+
+### Added
+- Schéma SQLite v1 (`magazines` + `collection_items`) via `expo-sqlite` — `US-DB-01`
+- Moteur de migrations (`PRAGMA user_version`) — `US-DB-01`
+- `magazineRepository` : `create`, `findByBarcode`, `list` (tri + quantité), `delete` — `US-DB-02`, `US-DB-03`, `US-DB-04`
+- `collectionRepository` : `addCopy`, `countByMagazine`, `listByMagazine`, `deleteCopy` — `US-DB-05`
+- Suppression en cascade d'une édition → supprime ses exemplaires (FK `ON DELETE CASCADE`) — `US-DB-05`
+- Tests d'intégration sur **vrai SQLite en mémoire** (`better-sqlite3`) : 29 tests / 7 suites, **100 % de couverture** — `US-QA-02`
+
+### Changed
+- Versions Expo alignées sur le SDK : `expo ~57.0.19`, `expo-router ~57.0.18`, `expo-linking ~57.0.9`, `expo-updates ~57.0.21` (expo-doctor 21/21)
+- Lockfile régénéré avec `npm@10.9.4` (compatibilité EAS/CI vérifiée via `npm ci`)
+
+---
+
 ## [0.1.0] — 2026-09-01
 
 > Première release technique : socle du projet opérationnel, **build Android installable et testé sur téléphone** (M-01).
