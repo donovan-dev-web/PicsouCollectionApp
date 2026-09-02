@@ -20,7 +20,8 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="scan/index" />
         <Stack.Screen name="scan/manual" />
-        <Stack.Screen name="collection/[id]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="collection/[id]/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="collection/[id]/edit" options={{ presentation: 'modal' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

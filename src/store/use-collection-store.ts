@@ -16,6 +16,7 @@ interface CollectionState {
   loadRecent: () => Promise<void>;
   loadDetail: (id: string) => Promise<MagazineDetail | null>;
   addMagazine: (input: CreateMagazineInput) => Promise<MagazineListItem | null>;
+  updateMagazine: (id: string, input: CreateMagazineInput) => Promise<void>;
   removeMagazine: (id: string) => Promise<void>;
   clearDetail: () => void;
 }
@@ -77,6 +78,21 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       totalCopies: state.totalCopies + 1,
     }));
     return item;
+  },
+
+  updateMagazine: async (id, input) => {
+    const { magazineRepository } = getDeps();
+    const updated = await magazineRepository.update(id, input);
+    if (!updated) {
+      throw new Error('Édition introuvable.');
+    }
+    set((state) => ({
+      magazines: state.magazines.map((m) =>
+        m.id === id ? { ...m, ...updated, quantity: m.quantity } : m,
+      ),
+      detail:
+        state.detail && state.detail.id === id ? { ...state.detail, ...updated } : state.detail,
+    }));
   },
 
   removeMagazine: async (id) => {

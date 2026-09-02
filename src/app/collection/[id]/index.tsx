@@ -1,6 +1,6 @@
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
 import { Colors, Spacing } from '@/constants/theme';
@@ -14,6 +14,7 @@ function formatDate(iso: string | null): string {
 }
 
 export default function MagazineDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = useCollectionStore((s) => s.detail);
   const detailLoading = useCollectionStore((s) => s.detailLoading);
@@ -92,6 +93,14 @@ export default function MagazineDetailScreen() {
           </View>
         ))
       )}
+
+      <Pressable
+        style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+        onPress={() => router.push(`/collection/${detail.id}/edit`)}
+        testID="detail-edit"
+        accessibilityRole="button">
+        <Text style={styles.editButtonText}>Modifier</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -199,5 +208,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.light.textSecondary,
     textAlign: 'center',
+  },
+  editButton: {
+    marginTop: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.accent,
+    paddingVertical: Spacing.three,
+    borderRadius: 12,
+  },
+  editButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  pressed: {
+    opacity: 0.85,
   },
 });

@@ -324,3 +324,83 @@ describe('magazineRepository.findById', () => {
     expect(detail).toBeNull();
   });
 });
+
+describe('magazineRepository.update', () => {
+  it('met a jour les champs modifiables et rafraichit updated_at', async () => {
+    const created = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      country: 'FR',
+      barcode: '3271234567890',
+    });
+    const originalUpdatedAt = created.updatedAt;
+
+    const updated = await repo.update(created.id, {
+      publication: 'Picsou Magazine (Édition Deluxe)',
+      issueNumber: 548,
+      edition: 'deluxe',
+      country: 'FR',
+      publicationDate: '2024-01',
+      barcode: '3271234567891',
+    });
+
+    expect(updated).toMatchObject({
+      id: created.id,
+      publication: 'Picsou Magazine (Édition Deluxe)',
+      issueNumber: 548,
+      edition: 'deluxe',
+      country: 'FR',
+      publicationDate: '2024-01',
+      barcode: '3271234567891',
+    });
+    expect(updated?.updatedAt).not.toBe(originalUpdatedAt);
+    expect(updated?.createdAt).toBe(created.createdAt);
+  });
+
+  it('preserve notes et ocr_text lors de la modification', async () => {
+    const created = await repo.create({
+      publication: 'Mickey Parade',
+      issueNumber: 2,
+      notes: 'annotation',
+      ocrText: 'raw',
+    });
+
+    const updated = await repo.update(created.id, { publication: 'Mickey Parade' });
+
+    expect(updated?.notes).toBe('annotation');
+    expect(updated?.ocrText).toBe('raw');
+    const row = await testDb.getFirstAsync<{ notes: string; ocr_text: string }>(
+      'SELECT notes, ocr_text FROM magazines WHERE id = ?',
+      created.id,
+    );
+    expect(row?.notes).toBe('annotation');
+    expect(row?.ocr_text).toBe('raw');
+  });
+
+  it('peut remettre un champ a null', async () => {
+    const created = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      edition: 'standard',
+    });
+
+    const updated = await repo.update(created.id, { publication: 'Picsou Magazine' });
+
+    expect(updated?.issueNumber).toBeNull();
+    expect(updated?.edition).toBeNull();
+  });
+
+  it('refuse une publication vide', async () => {
+    const created = await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+
+    await expect(repo.update(created.id, { publication: '   ' })).rejects.toThrow(
+      'La publication est obligatoire.',
+    );
+  });
+
+  it('renvoie null pour un id inconnu', async () => {
+    const updated = await repo.update('nimporte', { publication: 'Picsou' });
+
+    expect(updated).toBeNull();
+  });
+});
