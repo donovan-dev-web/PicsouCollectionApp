@@ -68,6 +68,10 @@ export class MagazineRepository {
     return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
   }
 
+  async delete(id: string): Promise<void> {
+    await this.db.runAsync('DELETE FROM magazines WHERE id = ?', id);
+  }
+
   async create(input: CreateMagazineInput): Promise<Magazine> {
     const publication = input.publication.trim();
     if (!publication) {
