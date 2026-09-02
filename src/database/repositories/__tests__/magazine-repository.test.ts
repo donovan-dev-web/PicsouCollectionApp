@@ -202,3 +202,58 @@ describe('magazineRepository.list', () => {
     expect(list[0].ocrText).toBeNull();
   });
 });
+
+describe('magazineRepository.search', () => {
+  it('filtre par publication (insensible a la casse)', async () => {
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 20 });
+    await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
+
+    const results = await repo.search('picsou');
+
+    expect(results.map((m) => m.publication)).toEqual(['Picsou Magazine', 'Super Picsou Géant']);
+  });
+
+  it('filtre par numero exact', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 547 });
+    await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
+
+    const results = await repo.search('547');
+
+    expect(results).toHaveLength(2);
+    expect(results.map((m) => m.issueNumber)).toEqual([547, 547]);
+  });
+
+  it('retourne la liste complete pour une recherche vide', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+
+    const results = await repo.search('  ');
+
+    expect(results).toHaveLength(2);
+  });
+
+  it('retourne une liste vide sans correspondance', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+
+    const results = await repo.search('Rienici');
+
+    expect(results).toEqual([]);
+  });
+
+  it('calcule la quantite pour chaque resultat', async () => {
+    const mag = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c1',
+      mag.id,
+      '2026-09-01T10:00:00Z',
+    );
+
+    const results = await repo.search('Picsou');
+
+    expect(results[0].quantity).toBe(1);
+  });
+});

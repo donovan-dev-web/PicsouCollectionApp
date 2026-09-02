@@ -16,6 +16,13 @@ type MagazineRow = {
   updated_at: string;
 };
 
+const LIST_SELECT = `
+  SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
+         m.publication_date, m.barcode, m.created_at, m.updated_at,
+         COUNT(c.id) AS quantity
+  FROM magazines m
+  LEFT JOIN collection_items c ON c.magazine_id = m.id`;
+
 function toMagazine(
   row: Omit<MagazineRow, 'notes' | 'ocr_text'> & {
     notes?: string | null;
@@ -56,13 +63,34 @@ export class MagazineRepository {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
     >(
-      `SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
-              m.publication_date, m.barcode, m.created_at, m.updated_at,
-              COUNT(c.id) AS quantity
-       FROM magazines m
-       LEFT JOIN collection_items c ON c.magazine_id = m.id
+      `${LIST_SELECT}
        GROUP BY m.id
        ORDER BY m.publication, m.issue_number`,
+    );
+
+    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+  }
+
+  async search(query: string): Promise<MagazineListItem[]> {
+    const term = query.trim();
+    if (!term) {
+      return this.list();
+    }
+
+    const numeric = Number(term);
+    const isNumeric = Number.isFinite(numeric);
+
+    const rows = await this.db.getAllAsync<
+      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
+    >(
+      `${LIST_SELECT}
+       WHERE m.publication LIKE '%' || ? || '%'
+          OR (? = 1 AND m.issue_number = ?)
+       GROUP BY m.id
+       ORDER BY m.publication, m.issue_number`,
+      term,
+      isNumeric ? 1 : 0,
+      isNumeric ? numeric : 0,
     );
 
     return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
