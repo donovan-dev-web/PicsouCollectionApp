@@ -335,6 +335,8 @@ describe('magazineRepository.update', () => {
     });
     const originalUpdatedAt = created.updatedAt;
 
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     const updated = await repo.update(created.id, {
       publication: 'Picsou Magazine (Édition Deluxe)',
       issueNumber: 548,
