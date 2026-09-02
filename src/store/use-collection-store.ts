@@ -1,21 +1,24 @@
 import { create } from 'zustand';
 
 import { getDeps } from '@/dependencies';
-import type { CreateMagazineInput, MagazineListItem } from '@/types';
+import type { CreateMagazineInput, MagazineListItem, RecentCopy } from '@/types';
 
 interface CollectionState {
   magazines: MagazineListItem[];
+  recentCopies: RecentCopy[];
   loading: boolean;
   error: string | null;
   loaded: boolean;
   totalCopies: number;
   load: () => Promise<void>;
+  loadRecent: () => Promise<void>;
   addMagazine: (input: CreateMagazineInput) => Promise<MagazineListItem | null>;
   removeMagazine: (id: string) => Promise<void>;
 }
 
 export const useCollectionStore = create<CollectionState>((set, get) => ({
   magazines: [],
+  recentCopies: [],
   loading: false,
   error: null,
   loaded: false,
@@ -30,6 +33,16 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       set({ magazines, totalCopies, loading: false, loaded: true });
     } catch (err) {
       set({ loading: false, error: err instanceof Error ? err.message : 'Erreur inconnue' });
+    }
+  },
+
+  loadRecent: async () => {
+    try {
+      const { collectionRepository } = getDeps();
+      const recentCopies = await collectionRepository.listRecentCopies(5);
+      set({ recentCopies });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Erreur inconnue' });
     }
   },
 
