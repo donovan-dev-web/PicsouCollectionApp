@@ -6,14 +6,9 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
-import type { Magazine } from '@/types';
 
 type ScanState =
-  | { status: 'idle' }
-  | { status: 'searching' }
-  | { status: 'found'; magazine: Magazine }
-  | { status: 'unknown' }
-  | { status: 'invalid'; reason: string };
+  { status: 'idle' } | { status: 'searching' } | { status: 'invalid'; reason: string };
 
 export default function BarcodeScreen() {
   const router = useRouter();
@@ -25,7 +20,7 @@ export default function BarcodeScreen() {
   const [scanning, setScanning] = useState(true);
   const lastCode = useRef<string | null>(null);
 
-  const handleScan = async ({ data, type }: { data: string; type: string }) => {
+  const handleScan = async ({ data }: { data: string; type: string }) => {
     if (!scanning || state.status === 'searching') {
       return;
     }
@@ -41,11 +36,21 @@ export default function BarcodeScreen() {
     const result = await identificationService.identifyByBarcode(normalized);
 
     if (result.status === 'found') {
-      setState({ status: 'found', magazine: result.magazine });
+      router.replace({
+        pathname: '/scan/result',
+        params: {
+          id: result.magazine.id,
+          publication: result.magazine.publication,
+          issueNumber:
+            result.magazine.issueNumber != null ? String(result.magazine.issueNumber) : '',
+          barcode: normalized,
+        },
+      });
     } else if (result.status === 'unknown') {
-      setState({ status: 'unknown' });
+      router.replace({ pathname: '/scan/result', params: { barcode: normalized } });
     } else {
       setState({ status: 'invalid', reason: result.reason });
+      setScanning(true);
     }
   };
 
@@ -110,75 +115,12 @@ export default function BarcodeScreen() {
         <Text style={styles.scanHint}>
           {state.status === 'searching' ? 'Recherche…' : 'Alignez le code-barres dans le cadre'}
         </Text>
-      </View>
-
-      {state.status === 'found' && (
-        <View style={styles.resultCard}>
-          <Text style={styles.resultTitle}>Magazine trouvé</Text>
-          <Text style={styles.resultMagazine}>{state.magazine.publication}</Text>
-          {state.magazine.issueNumber != null && (
-            <Text style={styles.resultIssue}>N° {state.magazine.issueNumber}</Text>
-          )}
-          <View style={styles.resultActions}>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={reset}
-              testID="result-reset"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={() => router.push('/scan/manual')}
-              testID="result-manual"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Saisie manuelle</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      {state.status === 'unknown' && (
-        <View style={styles.resultCard}>
-          <Text style={styles.resultTitle}>Code-barres inconnu</Text>
-          <Text style={styles.message}>
-            Aucune correspondance dans votre collection. Le scan seul ne crée pas une édition :
-            saisissez-la manuellement au moins une fois.
-          </Text>
-          <View style={styles.resultActions}>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={reset}
-              testID="unknown-retry"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={() => router.push('/scan/manual')}
-              testID="unknown-manual"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Saisir manuellement</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      {state.status === 'invalid' && (
-        <View style={styles.resultCard}>
-          <Text style={styles.resultTitle}>Code non reconnu</Text>
-          <Text style={styles.errorText} testID="invalid-reason">
+        {state.status === 'invalid' && (
+          <Text style={styles.invalidText} testID="invalid-reason">
             {state.reason}
           </Text>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={reset}
-            testID="invalid-retry"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
-          </Pressable>
-        </View>
-      )}
+        )}
+      </View>
 
       {state.status === 'idle' && (
         <Pressable
@@ -189,6 +131,18 @@ export default function BarcodeScreen() {
           accessibilityLabel="Annuler">
           <Text style={styles.backButtonText}>✕</Text>
         </Pressable>
+      )}
+
+      {state.status === 'invalid' && (
+        <View style={styles.invalidActions}>
+          <Pressable
+            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+            onPress={reset}
+            testID="invalid-retry"
+            accessibilityRole="button">
+            <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -231,57 +185,24 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 8,
       overflow: 'hidden',
     },
-    resultCard: {
+    invalidText: {
+      marginTop: Spacing.two,
+      fontSize: 14,
+      color: '#FFD5D2',
+      textAlign: 'center',
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    invalidActions: {
       position: 'absolute',
       left: Spacing.four,
       right: Spacing.four,
       bottom: 60,
-      backgroundColor: colors.background,
-      borderRadius: 16,
-      padding: Spacing.four,
-      gap: Spacing.two,
-      shadowColor: '#000',
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 4,
-    },
-    resultTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    resultMagazine: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    resultIssue: {
-      fontSize: 16,
-      color: colors.textSecondary,
-    },
-    resultActions: {
-      flexDirection: 'row',
-      gap: Spacing.three,
-      marginTop: Spacing.two,
-    },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      lineHeight: 22,
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    errorText: {
-      fontSize: 14,
-      color: colors.danger,
     },
     primaryButton: {
-      flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
@@ -294,18 +215,32 @@ function makeStyles(colors: ThemeColors) {
       color: colors.accentText,
       textAlign: 'center',
     },
-    secondaryButton: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.backgroundElement,
-      paddingVertical: Spacing.three,
-      borderRadius: 12,
-    },
-    secondaryButtonText: {
+    message: {
       fontSize: 15,
-      fontWeight: '600',
+      color: colors.textSecondary,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
       color: colors.text,
+      textAlign: 'center',
+    },
+    errorText: {
+      fontSize: 14,
+      color: colors.danger,
+      textAlign: 'center',
+    },
+    cancelButton: {
+      marginTop: Spacing.three,
+      alignSelf: 'center',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+    },
+    cancelButtonText: {
+      fontSize: 16,
+      color: colors.textSecondary,
       textAlign: 'center',
     },
     buttonPressed: {
@@ -325,16 +260,6 @@ function makeStyles(colors: ThemeColors) {
     backButtonText: {
       fontSize: 20,
       color: '#FFFFFF',
-    },
-    cancelButton: {
-      marginTop: Spacing.three,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-    },
-    cancelButtonText: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
     },
   });
 }

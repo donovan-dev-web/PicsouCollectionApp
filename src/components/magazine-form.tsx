@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { consumePendingBarcode } from '@/lib/pending-barcode';
 import type { CreateMagazineInput, Magazine } from '@/types';
 
 type FormValues = {
@@ -16,25 +18,40 @@ type FormValues = {
 
 type Props = {
   initial?: Magazine;
+  initialBarcode?: string;
   submitLabel: string;
   onSubmit: (input: CreateMagazineInput) => Promise<void> | void;
 };
 
-export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
+export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }: Props) {
   const colors = useThemeColors();
+  const router = useRouter();
   const [values, setValues] = useState<FormValues>({
     publication: initial?.publication ?? '',
     issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
     edition: initial?.edition ?? '',
     country: initial?.country ?? '',
     publicationDate: initial?.publicationDate ?? '',
-    barcode: initial?.barcode ?? '',
+    barcode: initial?.barcode ?? initialBarcode ?? '',
   });
   const [submitting, setSubmitting] = useState(false);
   const styles = makeStyles(colors);
 
   const set = (key: keyof FormValues) => (value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }));
+
+  const openBarcodeScanner = () => {
+    router.push('/scan/form-barcode');
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const pending = consumePendingBarcode();
+      if (pending) {
+        setValues((prev) => ({ ...prev, barcode: pending }));
+      }
+    }, []),
+  );
 
   const canSubmit = values.publication.trim().length > 0 && !submitting;
 
@@ -117,16 +134,26 @@ export function MagazineForm({ initial, submitLabel, onSubmit }: Props) {
       />
 
       <Text style={styles.label}>Code-barres</Text>
-      <TextInput
-        style={styles.input}
-        value={values.barcode}
-        onChangeText={set('barcode')}
-        placeholder="Ex : 3271234000011"
-        keyboardType="number-pad"
-        placeholderTextColor={colors.textSecondary}
-        testID="field-barcode"
-        accessibilityLabel="Code-barres"
-      />
+      <View style={styles.barcodeRow}>
+        <TextInput
+          style={[styles.input, styles.barcodeInput]}
+          value={values.barcode}
+          onChangeText={set('barcode')}
+          placeholder="Ex : 3271234000011"
+          keyboardType="number-pad"
+          placeholderTextColor={colors.textSecondary}
+          testID="field-barcode"
+          accessibilityLabel="Code-barres"
+        />
+        <Pressable
+          style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+          onPress={openBarcodeScanner}
+          testID="barcode-scan"
+          accessibilityRole="button"
+          accessibilityLabel="Scanner le code-barres">
+          <Text style={styles.scanButtonText}>▣ Scanner</Text>
+        </Pressable>
+      </View>
 
       <Pressable
         style={[styles.submit, !canSubmit && styles.submitDisabled]}
@@ -158,6 +185,32 @@ function makeStyles(colors: ThemeColors) {
       paddingVertical: Spacing.two,
       fontSize: 16,
       color: colors.text,
+    },
+    barcodeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    barcodeInput: {
+      flex: 1,
+    },
+    scanButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.backgroundElement,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      borderRadius: 8,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+    },
+    scanButtonText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    buttonPressed: {
+      opacity: 0.8,
     },
     submit: {
       marginTop: Spacing.three,

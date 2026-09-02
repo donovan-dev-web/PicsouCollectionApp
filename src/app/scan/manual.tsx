@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 
 import { MagazineForm } from '@/components/magazine-form';
@@ -9,6 +9,7 @@ import type { CreateMagazineInput } from '@/types';
 
 export default function ManualEntryScreen() {
   const router = useRouter();
+  const { barcode } = useLocalSearchParams<{ barcode?: string }>();
   const addMagazine = useCollectionStore((s) => s.addMagazine);
   const colors = useThemeColors();
   const styles = makeStyles(colors);
@@ -23,7 +24,7 @@ export default function ManualEntryScreen() {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.title}>Ajouter une édition</Text>
-      <MagazineForm submitLabel="Enregistrer" onSubmit={handleSubmit} />
+      <MagazineForm submitLabel="Enregistrer" initialBarcode={barcode} onSubmit={handleSubmit} />
     </KeyboardAvoidingView>
   );
 }
