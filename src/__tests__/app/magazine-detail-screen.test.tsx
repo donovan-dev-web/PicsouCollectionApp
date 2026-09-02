@@ -1,15 +1,18 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 
 import MagazineDetailScreen from '@/app/collection/[id]';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 const mockUseFocusEffect = jest.fn();
 const mockLoadDetail = jest.fn();
+const mockRemoveMagazine = jest.fn();
+const mockBack = jest.fn();
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
   useLocalSearchParams: () => ({ id: 'mag-1' }),
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), back: mockBack }),
 }));
 
 const detail = {
@@ -39,12 +42,16 @@ describe('MagazineDetailScreen', () => {
   beforeEach(() => {
     mockUseFocusEffect.mockClear();
     mockLoadDetail.mockClear();
+    mockRemoveMagazine.mockClear();
+    mockBack.mockClear();
+    mockRemoveMagazine.mockResolvedValue(undefined);
     mockUseFocusEffect.mockImplementation((cb: () => void) => cb());
     useCollectionStore.setState({
       detail: null,
       detailLoading: false,
       error: null,
       loadDetail: mockLoadDetail,
+      removeMagazine: mockRemoveMagazine,
     });
     mockLoadDetail.mockResolvedValue(detail);
   });
@@ -109,5 +116,23 @@ describe('MagazineDetailScreen', () => {
     render(<MagazineDetailScreen />);
 
     expect(screen.getByTestId('detail-not-found')).toBeTruthy();
+  });
+
+  it('demande confirmation puis supprime et revient en arriere', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    useCollectionStore.setState({ detail, detailLoading: false });
+    render(<MagazineDetailScreen />);
+
+    fireEvent.press(screen.getByTestId('detail-delete'));
+
+    expect(alertSpy).toHaveBeenCalled();
+    const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[];
+    const confirm = buttons?.find((b) => b.text === 'Supprimer');
+    expect(confirm).toBeDefined();
+    await confirm?.onPress?.();
+
+    expect(mockRemoveMagazine).toHaveBeenCalledWith('mag-1');
+    expect(mockBack).toHaveBeenCalled();
+    alertSpy.mockRestore();
   });
 });

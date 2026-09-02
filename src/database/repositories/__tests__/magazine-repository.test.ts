@@ -406,3 +406,31 @@ describe('magazineRepository.update', () => {
     expect(updated).toBeNull();
   });
 });
+
+describe('magazineRepository.delete', () => {
+  it('supprime l edition et ses exemplaires en cascade', async () => {
+    const mag = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c1',
+      mag.id,
+      '2026-09-01T10:00:00Z',
+    );
+    const countBefore = await testDb.getFirstAsync<{ n: number }>(
+      'SELECT COUNT(*) AS n FROM collection_items WHERE magazine_id = ?',
+      mag.id,
+    );
+    expect(countBefore?.n).toBe(1);
+
+    await repo.delete(mag.id);
+
+    const magazine = await repo.findById(mag.id);
+    expect(magazine).toBeNull();
+    const countAfter = await testDb.getFirstAsync<{ n: number }>(
+      'SELECT COUNT(*) AS n FROM collection_items WHERE magazine_id = ?',
+      mag.id,
+    );
+    expect(countAfter?.n).toBe(0);
+  });
+});
