@@ -39,7 +39,7 @@
 ```
 Phase 0  ██████████████████████████████  Terminé ✓
 Phase 1  ██████████████████████████████  Terminé ✓ (v0.1.0)
-Phase 2  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
 Phase 3  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 4  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -117,6 +117,8 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Pouvoir gérer toute la collection sans caméra.
 
+**Statut : Terminé ✓** — livré en **release `v0.2.0`**.
+
 | Tâche | Story |
 |---|---|
 | Schéma SQL `magazines` + `collection_items` | US-DB-01 |
@@ -126,7 +128,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Service `collectionService` | — |
 | Tests unitaires repositories | US-QA-02 |
 
-**Livrables** : couche persistance testée et fonctionnelle.
+**Livrables** : couche persistance testée et fonctionnelle (29 tests / 7 suites, 100 % couverture).
 
 ---
 
