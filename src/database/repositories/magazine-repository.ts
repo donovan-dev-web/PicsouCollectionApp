@@ -1,5 +1,5 @@
 import type { Database } from '@/database/types';
-import type { Magazine, CreateMagazineInput } from '@/types';
+import type { Magazine, CreateMagazineInput, MagazineListItem } from '@/types';
 import { generateId } from '@/utils/id';
 
 type MagazineRow = {
@@ -50,6 +50,22 @@ export class MagazineRepository {
     );
 
     return row ? toMagazine(row) : null;
+  }
+
+  async list(): Promise<MagazineListItem[]> {
+    const rows = await this.db.getAllAsync<
+      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
+    >(
+      `SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
+              m.publication_date, m.barcode, m.created_at, m.updated_at,
+              COUNT(c.id) AS quantity
+       FROM magazines m
+       LEFT JOIN collection_items c ON c.magazine_id = m.id
+       GROUP BY m.id
+       ORDER BY m.publication, m.issue_number`,
+    );
+
+    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
   }
 
   async create(input: CreateMagazineInput): Promise<Magazine> {
