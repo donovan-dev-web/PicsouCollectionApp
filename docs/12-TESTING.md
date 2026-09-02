@@ -175,11 +175,11 @@ Alternativement, les tests peuvent être co-localisés `collectionService.test.t
 
 | Zone | Couverture actuelle | Couverture cible |
 |---|---|---|
-| Global | **70 %** (seuil CI) | ≥ 80 % |
-| Services / repositories | à consolider (M-02) | ≥ 85 % |
+| Global | **100 %** (seuil CI ≥ 70 %) | ≥ 80 % |
+| Services / repositories | consolidée (M-02) | ≥ 85 % |
 | Composants critiques | à consolider (M-03) | ≥ 70 % |
 
-> État M-01 : 7 tests / 3 suites, **100 % de couverture** sur `src/`.
+> État M-02 : 29 tests / 7 suites, **100 % de couverture** sur `src/`, branches 93,93 %, seuils globaux 70 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
