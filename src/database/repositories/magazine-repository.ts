@@ -1,5 +1,11 @@
 import type { Database } from '@/database/types';
-import type { Magazine, CreateMagazineInput, MagazineListItem } from '@/types';
+import type {
+  Magazine,
+  CollectionItem,
+  CreateMagazineInput,
+  MagazineDetail,
+  MagazineListItem,
+} from '@/types';
 import { generateId } from '@/utils/id';
 
 type MagazineRow = {
@@ -94,6 +100,44 @@ export class MagazineRepository {
     );
 
     return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+  }
+
+  async findById(id: string): Promise<MagazineDetail | null> {
+    const row = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, country, publication_date,
+              barcode, notes, ocr_text, created_at, updated_at
+       FROM magazines
+       WHERE id = ?`,
+      id,
+    );
+
+    if (!row) {
+      return null;
+    }
+
+    const copyRows = await this.db.getAllAsync<{
+      id: string;
+      magazine_id: string;
+      condition: string | null;
+      notes: string | null;
+      date_added: string;
+    }>(
+      `SELECT id, magazine_id, condition, notes, date_added
+       FROM collection_items
+       WHERE magazine_id = ?
+       ORDER BY date_added DESC`,
+      id,
+    );
+
+    const copies: CollectionItem[] = copyRows.map((r) => ({
+      id: r.id,
+      magazineId: r.magazine_id,
+      condition: r.condition,
+      notes: r.notes,
+      dateAdded: r.date_added,
+    }));
+
+    return { ...toMagazine(row), copies };
   }
 
   async delete(id: string): Promise<void> {

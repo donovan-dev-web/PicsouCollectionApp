@@ -1,25 +1,31 @@
 import { create } from 'zustand';
 
 import { getDeps } from '@/dependencies';
-import type { CreateMagazineInput, MagazineListItem, RecentCopy } from '@/types';
+import type { CreateMagazineInput, MagazineDetail, MagazineListItem, RecentCopy } from '@/types';
 
 interface CollectionState {
   magazines: MagazineListItem[];
   recentCopies: RecentCopy[];
+  detail: MagazineDetail | null;
   loading: boolean;
+  detailLoading: boolean;
   error: string | null;
   loaded: boolean;
   totalCopies: number;
   load: () => Promise<void>;
   loadRecent: () => Promise<void>;
+  loadDetail: (id: string) => Promise<MagazineDetail | null>;
   addMagazine: (input: CreateMagazineInput) => Promise<MagazineListItem | null>;
   removeMagazine: (id: string) => Promise<void>;
+  clearDetail: () => void;
 }
 
 export const useCollectionStore = create<CollectionState>((set, get) => ({
   magazines: [],
   recentCopies: [],
+  detail: null,
   loading: false,
+  detailLoading: false,
   error: null,
   loaded: false,
   totalCopies: 0,
@@ -45,6 +51,21 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       set({ error: err instanceof Error ? err.message : 'Erreur inconnue' });
     }
   },
+
+  loadDetail: async (id) => {
+    set({ detailLoading: true, error: null });
+    try {
+      const { magazineRepository } = getDeps();
+      const detail = await magazineRepository.findById(id);
+      set({ detail, detailLoading: false });
+      return detail;
+    } catch (err) {
+      set({ detailLoading: false, error: err instanceof Error ? err.message : 'Erreur inconnue' });
+      return null;
+    }
+  },
+
+  clearDetail: () => set({ detail: null }),
 
   addMagazine: async (input) => {
     const { magazineRepository, collectionRepository } = getDeps();

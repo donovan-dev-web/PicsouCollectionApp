@@ -257,3 +257,70 @@ describe('magazineRepository.search', () => {
     expect(results[0].quantity).toBe(1);
   });
 });
+
+describe('magazineRepository.findById', () => {
+  it('charge une edition complete avec ses copies', async () => {
+    const mag = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      edition: 'standard',
+      country: 'FR',
+      publicationDate: '2023-03',
+      barcode: '3271234567890',
+      notes: 'Mention bimestriel',
+    });
+
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, ?, NULL, ?)`,
+      'c1',
+      mag.id,
+      'neuf',
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, NULL, ?)`,
+      'c2',
+      mag.id,
+      '2026-09-02T10:00:00Z',
+    );
+
+    const detail = await repo.findById(mag.id);
+
+    expect(detail).toMatchObject({
+      id: mag.id,
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      edition: 'standard',
+      country: 'FR',
+      barcode: '3271234567890',
+      notes: 'Mention bimestriel',
+      ocrText: null,
+    });
+    expect(detail?.copies).toHaveLength(2);
+    expect(detail?.copies[0]).toEqual({
+      id: 'c2',
+      magazineId: mag.id,
+      condition: null,
+      notes: null,
+      dateAdded: '2026-09-02T10:00:00Z',
+    });
+    expect(detail?.copies[1]).toMatchObject({ id: 'c1', condition: 'neuf' });
+  });
+
+  it('renvoie une liste de copies vide pour une edition non possedee', async () => {
+    const mag = await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });
+
+    const detail = await repo.findById(mag.id);
+
+    expect(detail).not.toBeNull();
+    expect(detail?.copies).toEqual([]);
+  });
+
+  it('renvoie null pour un id inconnu', async () => {
+    const detail = await repo.findById('nimporte');
+
+    expect(detail).toBeNull();
+  });
+});

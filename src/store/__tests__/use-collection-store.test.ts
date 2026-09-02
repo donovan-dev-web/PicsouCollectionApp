@@ -5,11 +5,13 @@ const mockList = jest.fn();
 const mockCreate = jest.fn();
 const mockDelete = jest.fn();
 const mockFindByBarcode = jest.fn();
+const mockFindById = jest.fn();
 const mockMagazineRepo = {
   list: mockList,
   create: mockCreate,
   delete: mockDelete,
   findByBarcode: mockFindByBarcode,
+  findById: mockFindById,
 };
 
 const mockListRecentCopies = jest.fn();
@@ -129,5 +131,34 @@ describe('useCollectionStore', () => {
 
     expect(useCollectionStore.getState().recentCopies).toHaveLength(1);
     expect(mockListRecentCopies).toHaveBeenCalledWith(5);
+  });
+
+  it('charge le detail d une edition avec ses copies', async () => {
+    mockFindById.mockResolvedValue({ ...magazine, copies: [] });
+
+    const detail = await useCollectionStore.getState().loadDetail('mag-1');
+
+    expect(detail).toMatchObject({ publication: 'Picsou Magazine' });
+    expect(useCollectionStore.getState().detail).toMatchObject({ publication: 'Picsou Magazine' });
+    expect(useCollectionStore.getState().detailLoading).toBe(false);
+    expect(mockFindById).toHaveBeenCalledWith('mag-1');
+  });
+
+  it('met le detail a null en cas de defaut', async () => {
+    mockFindById.mockRejectedValue(new Error('detail indisponible'));
+
+    const detail = await useCollectionStore.getState().loadDetail('mag-1');
+
+    expect(detail).toBeNull();
+    expect(useCollectionStore.getState().error).toBe('detail indisponible');
+    expect(useCollectionStore.getState().detailLoading).toBe(false);
+  });
+
+  it('efface le detail a la sortie de la fiche', () => {
+    useCollectionStore.setState({ detail: { ...magazine, copies: [] } });
+
+    useCollectionStore.getState().clearDetail();
+
+    expect(useCollectionStore.getState().detail).toBeNull();
   });
 });
