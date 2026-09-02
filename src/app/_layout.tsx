@@ -1,14 +1,27 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+
+import { initialize } from '@/dependencies';
+import { useCollectionStore } from '@/store/use-collection-store';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const loadCollection = useCollectionStore((s) => s.load);
+
+  useEffect(() => {
+    initialize().then(loadCollection);
+  }, [loadCollection]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="scan/index" />
+        <Stack.Screen name="scan/manual" />
+        <Stack.Screen name="collection/[id]/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="collection/[id]/edit" options={{ presentation: 'modal' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

@@ -7,6 +7,27 @@
 
 ---
 
+## [0.3.0] — 2026-09-02
+
+> Troisième release technique : **interface principale de gestion de la collection** (M-03).
+
+### Added
+- **Accueil** : compteur d'exemplaires possédés et section « Ajouts récents » (rechargés au focus) — `US-ACC-01`, `US-ACC-04`
+- **Scanner** : bouton proéminent vers le choix de méthode, et **saisie manuelle** (formulaire réutilisable) — `US-ACC-02`, `US-ACC-03`
+- **Formulaire de saisie manuelle** (publication obligatoire, champs facultatifs → `NULL`) ; ajout crée l'édition **et** son premier exemplaire — `US-COL-01`
+- **Ma Collection** : navigation **onglets** (Accueil / Collection / Paramètres), recherche par **titre ou numéro**, badge de statut (Possédé 🔴 / Absent 🟢) — `US-COL-02`
+- **Fiche d'une édition** : infos complètes, statut, nombre et liste des exemplaires — `US-COL-03`
+- **Modifier** une édition (formulaire pré-rempli, `updated_at` rafraîchi) — `US-COL-04`
+- **Supprimer** une édition avec **confirmation**, exemplaires supprimés en cascade — `US-COL-05`
+- **Design system clair/sombre** (`useThemeColors` + tokens light/dark) appliqué à toute l'interface — `US-QA-01`
+- Injection de dépendances (DI) pour repo `magazine` / `collection`, store Zustand et singletons testables — `US-ACC-01`
+
+### Changed
+- `MagazineRepository.update(id, input)` et `findById(id)` (+ copies) ajoutés pour la gestion de la collection
+- Migration des écrans et composants vers l'API de thème dynamique (suppression des `Colors.light` en dur)
+
+---
+
 ## [0.2.0] — 2026-09-02
 
 > Deuxième release technique : **couche de persistance complète** pour gérer la collection sans caméra (M-02).

@@ -43,3 +43,8 @@ export type CreateCollectionItemInput = {
   condition?: string | null;
   notes?: string | null;
 };
+
+export type RecentCopy = {
+  copy: CollectionItem;
+  magazine: Pick<Magazine, 'id' | 'publication' | 'issueNumber'>;
+};

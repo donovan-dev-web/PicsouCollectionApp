@@ -1,9 +1,9 @@
 /**
- * Design tokens minimal — Phase 1 (M-01).
+ * Design tokens — design system (Phase 3, US-QA-01).
  *
- * Les couleurs reprennent la palette de marque définie dans le design system
- * (docs/design). Le design system complet (Vault & Venture / Obsidian Vault)
- * sera intégré lors de la Phase 3 (US-QA-01).
+ * Palette claire et sombre (Vault & Venture / Obsidian Vault). Les composants
+ * consomment ces couleurs via le hook `useThemeColors`, pour basculer de
+ * manière réactive entre les modes clair et sombre du système.
  */
 
 export const Colors = {
@@ -13,18 +13,28 @@ export const Colors = {
     background: '#FFFFFF',
     backgroundElement: '#F0F3F7',
     accent: '#FDD835',
+    accentText: '#1F1B00',
+    danger: '#B3261E',
+    onDanger: '#FFFFFF',
   },
   dark: {
     text: '#FFFFFF',
     textSecondary: '#B0B6C2',
-    background: '#001B3D',
-    backgroundElement: '#0F2747',
+    background: '#0B1B33',
+    backgroundElement: '#16304F',
     accent: '#FDD835',
+    accentText: '#1F1B00',
+    danger: '#F2B8B5',
+    onDanger: '#410002',
   },
 } as const;
+
+export type ThemeColors = { [K in keyof (typeof Colors)['light']]: string };
 
 export const Spacing = {
   two: 8,
   three: 16,
   four: 24,
 } as const;
+
+export type SpacingScale = typeof Spacing;

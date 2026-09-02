@@ -40,7 +40,7 @@
 Phase 0  ██████████████████████████████  Terminé ✓
 Phase 1  ██████████████████████████████  Terminé ✓ (v0.1.0)
 Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
-Phase 3  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
 Phase 4  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -136,6 +136,8 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Disposer d'une application utilisable manuellement.
 
+**Statut : Terminé ✓** — livré en **release `v0.3.0`**.
+
 | Tâche | Story |
 |---|---|
 | Écran Accueil (compteur + boutons + récents) | US-ACC-01, US-ACC-02, US-ACC-03, US-ACC-04 |
@@ -146,7 +148,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | États de chargement / erreur / vide | — |
 | Messages de confirmation | — |
 
-**Livrables** : application avec navigation, écrans fonctionnels, thème appliqué.
+**Livrables** : application avec navigation, écrans fonctionnels, thème appliqué (**94 tests / 18 suites, ~99 % de couverture**).
 
 ---
 

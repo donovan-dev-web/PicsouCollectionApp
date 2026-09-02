@@ -115,3 +115,48 @@ describe('suppression en cascade', () => {
     expect(await repo.countByMagazine(magazineId)).toBe(0);
   });
 });
+
+describe('collectionRepository.listRecentCopies', () => {
+  it('liste les derniers exemplaires avec les infos du magazine, du plus recent au plus ancien', async () => {
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, 'neuf', NULL, ?)`,
+      'copy-old',
+      magazineId,
+      '2026-01-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, 'tres bon', NULL, ?)`,
+      'copy-new',
+      magazineId,
+      '2026-09-01T10:00:00Z',
+    );
+    const otherMagazine = await magazineRepo.create({
+      publication: 'Super Picsou Géant',
+      issueNumber: 30,
+    });
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+       VALUES (?, ?, NULL, 'coffret', ?)`,
+      'copy-mid',
+      otherMagazine.id,
+      '2026-05-01T10:00:00Z',
+    );
+
+    const recent = await repo.listRecentCopies(2);
+
+    expect(recent).toHaveLength(2);
+    expect(recent[0].copy.id).toBe('copy-new');
+    expect(recent[0].copy.condition).toBe('tres bon');
+    expect(recent[0].magazine.publication).toBe('Picsou Magazine');
+    expect(recent[0].magazine.issueNumber).toBe(547);
+    expect(recent[1].copy.id).toBe('copy-mid');
+    expect(recent[1].copy.notes).toBe('coffret');
+    expect(recent[1].magazine.publication).toBe('Super Picsou Géant');
+  });
+
+  it('respecte la limite et retourne une liste vide si aucun exemplaire', async () => {
+    expect(await repo.listRecentCopies(5)).toEqual([]);
+  });
+});

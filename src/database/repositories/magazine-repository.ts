@@ -1,5 +1,11 @@
 import type { Database } from '@/database/types';
-import type { Magazine, CreateMagazineInput, MagazineListItem } from '@/types';
+import type {
+  Magazine,
+  CollectionItem,
+  CreateMagazineInput,
+  MagazineDetail,
+  MagazineListItem,
+} from '@/types';
 import { generateId } from '@/utils/id';
 
 type MagazineRow = {
@@ -15,6 +21,13 @@ type MagazineRow = {
   created_at: string;
   updated_at: string;
 };
+
+const LIST_SELECT = `
+  SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
+         m.publication_date, m.barcode, m.created_at, m.updated_at,
+         COUNT(c.id) AS quantity
+  FROM magazines m
+  LEFT JOIN collection_items c ON c.magazine_id = m.id`;
 
 function toMagazine(
   row: Omit<MagazineRow, 'notes' | 'ocr_text'> & {
@@ -56,16 +69,75 @@ export class MagazineRepository {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
     >(
-      `SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
-              m.publication_date, m.barcode, m.created_at, m.updated_at,
-              COUNT(c.id) AS quantity
-       FROM magazines m
-       LEFT JOIN collection_items c ON c.magazine_id = m.id
+      `${LIST_SELECT}
        GROUP BY m.id
        ORDER BY m.publication, m.issue_number`,
     );
 
     return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+  }
+
+  async search(query: string): Promise<MagazineListItem[]> {
+    const term = query.trim();
+    if (!term) {
+      return this.list();
+    }
+
+    const numeric = Number(term);
+    const isNumeric = Number.isFinite(numeric);
+
+    const rows = await this.db.getAllAsync<
+      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
+    >(
+      `${LIST_SELECT}
+       WHERE m.publication LIKE '%' || ? || '%'
+          OR (? = 1 AND m.issue_number = ?)
+       GROUP BY m.id
+       ORDER BY m.publication, m.issue_number`,
+      term,
+      isNumeric ? 1 : 0,
+      isNumeric ? numeric : 0,
+    );
+
+    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+  }
+
+  async findById(id: string): Promise<MagazineDetail | null> {
+    const row = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, country, publication_date,
+              barcode, notes, ocr_text, created_at, updated_at
+       FROM magazines
+       WHERE id = ?`,
+      id,
+    );
+
+    if (!row) {
+      return null;
+    }
+
+    const copyRows = await this.db.getAllAsync<{
+      id: string;
+      magazine_id: string;
+      condition: string | null;
+      notes: string | null;
+      date_added: string;
+    }>(
+      `SELECT id, magazine_id, condition, notes, date_added
+       FROM collection_items
+       WHERE magazine_id = ?
+       ORDER BY date_added DESC`,
+      id,
+    );
+
+    const copies: CollectionItem[] = copyRows.map((r) => ({
+      id: r.id,
+      magazineId: r.magazine_id,
+      condition: r.condition,
+      notes: r.notes,
+      dateAdded: r.date_added,
+    }));
+
+    return { ...toMagazine(row), copies };
   }
 
   async delete(id: string): Promise<void> {
@@ -112,5 +184,51 @@ export class MagazineRepository {
     );
 
     return magazine;
+  }
+
+  async update(id: string, input: CreateMagazineInput): Promise<Magazine | null> {
+    const current = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, country, publication_date,
+              barcode, notes, ocr_text, created_at, updated_at
+       FROM magazines
+       WHERE id = ?`,
+      id,
+    );
+
+    if (!current) {
+      return null;
+    }
+
+    const publication = input.publication.trim();
+    if (!publication) {
+      throw new Error('La publication est obligatoire.');
+    }
+
+    const updatedAt = new Date().toISOString();
+    await this.db.runAsync(
+      `UPDATE magazines
+       SET publication = ?, issue_number = ?, edition = ?, country = ?,
+           publication_date = ?, barcode = ?, updated_at = ?
+       WHERE id = ?`,
+      publication,
+      input.issueNumber ?? null,
+      input.edition ?? null,
+      input.country ?? null,
+      input.publicationDate ?? null,
+      input.barcode ?? null,
+      updatedAt,
+      id,
+    );
+
+    return {
+      ...toMagazine(current),
+      publication,
+      issueNumber: input.issueNumber ?? null,
+      edition: input.edition ?? null,
+      country: input.country ?? null,
+      publicationDate: input.publicationDate ?? null,
+      barcode: input.barcode ?? null,
+      updatedAt,
+    };
   }
 }
