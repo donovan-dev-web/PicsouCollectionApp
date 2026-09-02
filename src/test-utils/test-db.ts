@@ -3,7 +3,6 @@ import type { Database, RunResult } from '@/database/types';
 
 export function createTestDatabase(): Database & { close(): void } {
   const db = new BetterSqlite3(':memory:');
-  db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
 
   return {

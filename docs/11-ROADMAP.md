@@ -41,7 +41,7 @@ Phase 0  ███████████████████████�
 Phase 1  ██████████████████████████████  Terminé ✓ (v0.1.0)
 Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
 Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
-Phase 4  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
 Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -156,6 +156,8 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Pouvoir identifier rapidement un magazine en brocante.
 
+**Statut : Terminé ✓** — livré en **release `v0.4.0`**.
+
 | Tâche | Story |
 |---|---|
 | Intégrer `expo-camera` | US-ID-01 |
@@ -166,7 +168,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Afficher code inconnu + méthodes secours | US-ID-02 |
 | Tests unitaires `scanBarcode` | US-QA-02 |
 
-**Livrables** : fonctionnalité scan code-barres opérationnelle.
+**Livrables** : fonctionnalité scan code-barres opérationnelle (**121 tests / 22 suites, ~98,5 % de couverture**).
 
 ---
 

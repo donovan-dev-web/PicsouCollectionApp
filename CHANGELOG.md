@@ -7,6 +7,25 @@
 
 ---
 
+## [0.4.0] — 2026-09-02
+
+> Quatrième release technique : **scan code-barres** pour identifier une édition en brocante (M-04).
+
+### Added
+- **Choix de la méthode d'identification** : écran `/scan` proposant code-barres, caméra/OCR et saisie manuelle, avec annulation — `US-ID-01`
+- **Scan code-barres** (`/scan/barcode`) : permission caméra, preview avec réticule, détection EAN-13 / Code128 / ITF-14 / UPC-A — `US-ID-02`
+- **Lecture et validation EAN-13 / ISBN** (checksum ISBN-13, ISBN-10 avec `X`) — `US-ID-02`
+- **Recherche de l'édition par code-barres** via `IdentificationService` (résultats `found` / `unknown` / `invalid`) — `US-ID-02`
+- **Code inconnu + méthodes secours** (« Scanner à nouveau » / « Saisir manuellement ») — `US-ID-02`
+- **Caméra / OCR placeholder** (`/scan/camera`) avec repli vers les autres méthodes (à compléter en M-05) — `US-ID-01`
+- Tests unitaires `scanBarcode` et `IdentificationService`, tests des écrans (mocks caméra) — `US-QA-02`
+
+### Changed
+- Injection de `IdentificationService` dans les dépendances (`Dependencies.identificationService`)
+- `test-db` : `foreign_keys` sans `journal_mode=WAL` (WAL inutile sur `:memory:`) pour des tests DB stables en CI
+
+---
+
 ## [0.3.0] — 2026-09-02
 
 > Troisième release technique : **interface principale de gestion de la collection** (M-03).
