@@ -1,9 +1,11 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/theme';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const totalCopies = useCollectionStore((s) => s.totalCopies);
   const loading = useCollectionStore((s) => s.loading);
   const loaded = useCollectionStore((s) => s.loaded);
@@ -25,6 +27,15 @@ export default function HomeScreen() {
           </>
         )}
       </View>
+
+      <Pressable
+        style={({ pressed }) => [styles.scanButton, pressed && styles.scanButtonPressed]}
+        onPress={() => router.push('/scan')}
+        testID="scan-button"
+        accessibilityRole="button"
+        accessibilityLabel="Scanner un magazine">
+        <Text style={styles.scanButtonText}>📷 Scanner</Text>
+      </Pressable>
     </View>
   );
 }
@@ -65,5 +76,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.textSecondary,
     marginTop: Spacing.two,
+  },
+  scanButton: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.accent,
+    paddingVertical: Spacing.three,
+    borderRadius: 12,
+    marginTop: 'auto',
+  },
+  scanButtonPressed: {
+    opacity: 0.8,
+  },
+  scanButtonText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.light.text,
   },
 });
