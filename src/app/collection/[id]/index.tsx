@@ -1,6 +1,6 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
 import { Colors, Spacing } from '@/constants/theme';
@@ -19,6 +19,21 @@ export default function MagazineDetailScreen() {
   const detail = useCollectionStore((s) => s.detail);
   const detailLoading = useCollectionStore((s) => s.detailLoading);
   const loadDetail = useCollectionStore((s) => s.loadDetail);
+  const removeMagazine = useCollectionStore((s) => s.removeMagazine);
+
+  const confirmDelete = () => {
+    Alert.alert(`Supprimer l'édition`, `Retirer « ${detail?.publication} » et ses exemplaires ?`, [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: async () => {
+          await removeMagazine(id);
+          router.back();
+        },
+      },
+    ]);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -100,6 +115,14 @@ export default function MagazineDetailScreen() {
         testID="detail-edit"
         accessibilityRole="button">
         <Text style={styles.editButtonText}>Modifier</Text>
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+        onPress={confirmDelete}
+        testID="detail-delete"
+        accessibilityRole="button">
+        <Text style={styles.deleteButtonText}>Supprimer</Text>
       </Pressable>
     </ScrollView>
   );
@@ -218,6 +241,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   editButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  deleteButton: {
+    marginTop: Spacing.two,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#B3261E',
+    paddingVertical: Spacing.three,
+    borderRadius: 12,
+  },
+  deleteButtonText: {
     fontSize: 18,
     fontWeight: '700',
     color: Colors.light.text,
