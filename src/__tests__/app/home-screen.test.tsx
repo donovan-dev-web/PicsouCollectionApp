@@ -94,7 +94,6 @@ describe('HomeScreen (ajouts recents)', () => {
           copy: {
             id: 'c1',
             magazineId: 'm1',
-            condition: 'neuf',
             notes: null,
             dateAdded: '2026-09-01T10:00:00Z',
           },
@@ -104,7 +103,6 @@ describe('HomeScreen (ajouts recents)', () => {
           copy: {
             id: 'c2',
             magazineId: 'm2',
-            condition: null,
             notes: 'coffret',
             dateAdded: '2026-08-20T10:00:00Z',
           },
@@ -130,7 +128,6 @@ describe('HomeScreen (ajouts recents)', () => {
           copy: {
             id: 'c1',
             magazineId: 'm1',
-            condition: null,
             notes: null,
             dateAdded: '2026-09-01T10:00:00Z',
           },

@@ -30,7 +30,7 @@ Le glossaire est organisé en trois parties :
 ### Édition
 **Général :** version particulière d'une publication.
 
-**Contexte :** **l'entité centrale** du projet. Une édition est la combinaison unique de *publication + numéro + édition + pays + date*. Elle possède un identifiant interne (`id`, un UUID) indépendant du numéro ou du code-barres. Exemple : *Picsou Magazine n°547, édition standard, FR*. Une édition peut avoir zéro, un ou plusieurs exemplaires.
+**Contexte :** **l'entité centrale** du projet. Une édition est la combinaison unique de *publication + numéro + édition + langue + date*. Elle possède un identifiant interne (`id`, un UUID) indépendant du numéro ou du code-barres. Exemple : *Picsou Magazine n°547, édition standard, FR*. Une édition peut avoir zéro, un ou plusieurs exemplaires, et porte son **état** (`condition`).
 
 ### Numéro
 **Général :** valeur numérique attribuée à un magazine dans une série.
@@ -40,15 +40,15 @@ Le glossaire est organisé en trois parties :
 ### Exemplaire
 **Général :** copie physique d'une publication.
 
-**Contexte :** **l'exemplaire physique réellement possédé**, rattaché à une édition via `collection_items`. Chaque exemplaire a son propre état (`condition`), ses notes et sa date d'ajout. La possession de plusieurs exemplaires d'une même édition est permise.
+**Contexte :** **l'exemplaire physique réellement possédé**, rattaché à une édition via `collection_items`. Chaque exemplaire a ses notes et sa date d'ajout ; l'état est porté par l'édition (`magazines.condition`). La possession de plusieurs exemplaires d'une même édition est permise.
 
 ### Code-barres
 **Général :** représentation optique lisible par machine d'un identifiant (EAN, ISBN, etc.).
 
-**Contexte :** **identifiant externe** d'une édition, permettant de la retrouver par scan. Les formats pris en charge sont **EAN-13** et **ISBN**. Un code-barres ne désigne **pas** un exemplaire physique, et un code-barres correspond à **au plus une** édition dans la base locale. Représenté par le champ `barcode`.
+**Contexte :** **identifiant externe** d'une édition, permettant de la retrouver par scan. Les formats pris en charge sont **EAN-13** et **ISBN**. Un code-barres ne désigne **pas** un exemplaire physique. Un même code peut également correspondre à **plusieurs éditions/numéros** (certains codes ne reflètent pas un numéro exact), la base autorise donc des doublons. Représenté par le champ `barcode`.
 
 ### Identification combinée
-**Contexte :** la combinaison `Publication + Numéro + Édition + Pays + Date` permettant une identification fiable. C'est la **règle d'or** qui garantit la fiabilité, au lieu de se fier au numéro seul.
+**Contexte :** la combinaison `Publication + Numéro + Édition + Langue + Date` permettant une identification fiable. C'est la **règle d'or** qui garantit la fiabilité, au lieu de se fier au numéro seul.
 
 ### Possédé / Absent
 **Contexte :** les deux états du résultat d'identification.

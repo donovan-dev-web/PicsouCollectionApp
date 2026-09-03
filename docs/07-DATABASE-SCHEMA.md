@@ -22,8 +22,8 @@
 
 | Élément | Valeur |
 |---|---|
-| Version du schéma | `1` |
-| Tables | `magazines`, `collection_items` |
+| Version du schéma | `4` |
+| Tables | `magazines`, `collection_items`, `settings` |
 
 ---
 
@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS magazines (
     publication      TEXT NOT NULL,
     issue_number     INTEGER,
     edition          TEXT,
-    country          TEXT,
+    language         TEXT,
+    condition        TEXT,
     publication_date TEXT,
     barcode          TEXT,
     notes            TEXT,
@@ -51,7 +52,8 @@ CREATE TABLE IF NOT EXISTS magazines (
 - **`publication`** : obligatoire ;
 - **`issue_number`** : facultatif (certaines publications sont des hors-séries) ;
 - **`edition`** : facultative ;
-- **`country`** : code pays ou valeur normalisée (ex. `FR`) ;
+- **`language`** : langue de l'édition ou valeur normalisée (ex. `FR`) ;
+- **`condition`** : état de l'édition (ex. `neuf`, `usé`) ;
 - **`publication_date`** : texte ISO selon la précision disponible (`2023-03-01` ou `2023-03`) ;
 - **`barcode`** : EAN-13 ou ISBN. Index unique (voir section Index). `NULL` autorisé (magazine sans code-barres) ;
 - **`notes`** : notes libres sur l'édition ;
@@ -68,7 +70,6 @@ Le numéro n'est **jamais** utilisé comme clé primaire.
 CREATE TABLE IF NOT EXISTS collection_items (
     id          TEXT PRIMARY KEY NOT NULL,
     magazine_id TEXT NOT NULL,
-    condition   TEXT,
     notes       TEXT,
     date_added  TEXT NOT NULL,
 
@@ -82,19 +83,19 @@ CREATE TABLE IF NOT EXISTS collection_items (
 
 - **`id`** : UUID généré par l'application ;
 - **`magazine_id`** : référence vers `magazines.id` ;
-- **`condition`** : état de l'exemplaire (ex. `good`, `average`) ;
 - **`notes`** : notes personnelles de l'exemplaire ;
 - **`date_added`** : timestamp ISO 8601 d'ajout ;
 - `ON DELETE CASCADE` : supprimer une édition supprime ses exemplaires ;
 - Une ligne = un exemplaire physique. Le nombre d'exemplaires = nombre de lignes.
+- L'état (`condition`) caractérise désormais l'**édition** (`magazines`), plus l'exemplaire. Il a été migré en v3. La valeur retenue est celle de l'exemplaire le plus récent selon `date_added`.
 
 ---
 
 ## 4. Index
 
 ```sql
--- Recherche code-barres immédiate (scan)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_magazines_barcode
+-- Recherche code-barres immédiate (scan) — index simple, non unique
+CREATE INDEX IF NOT EXISTS idx_magazines_barcode
 ON magazines(barcode);
 
 -- Tri / filtrage collection
@@ -110,7 +111,7 @@ ON collection_items(magazine_id);
 
 | Index | Type | Justification |
 |---|---|---|
-| `idx_magazines_barcode` | UNIQUE | Recherche par scan instantanée ; garantit un code-barres → max une édition. SQLite n'impose qu'une seule valeur `NULL` par colonne indexée, ce qui est accepté ici (magazines sans barcode) |
+| `idx_magazines_barcode` | normal | Recherche par scan instantanée. **Non unique** : certains codes-barres ne reflètent pas un numéro exact et peuvent correspondre à plusieurs éditions/numéros (depuis v4) |
 | `idx_magazines_publication_issue` | normal | Tri et regroupement de la collection par publication puis numéro |
 | `idx_collection_items_magazine_id` | normal | Jointure `LEFT JOIN` et comptage des exemplaires |
 
@@ -124,14 +125,52 @@ Le schéma est géré via un mécanisme de **version incrémentale**. Chaque mig
 
 ```sql
 -- Création initiale (schéma v1)
-CREATE TABLE IF NOT EXISTS magazines ( /* ... */ );
-CREATE TABLE IF NOT EXISTS collection_items ( /* ... */ );
+CREATE TABLE IF NOT EXISTS magazines ( /* ... y compris country ... */ );
+CREATE TABLE IF NOT EXISTS collection_items ( /* ... y compris condition ... */ );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_magazines_barcode ON magazines(barcode);
 CREATE INDEX IF NOT EXISTS idx_magazines_publication_issue ON magazines(publication, issue_number);
 CREATE INDEX IF NOT EXISTS idx_collection_items_magazine_id ON collection_items(magazine_id);
 
 PRAGMA user_version = 1;
+```
+
+### Migration `002_settings.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+);
+```
+
+### Migration `003_modele.sql` (renommage + optimisation du modèle)
+
+```sql
+-- v2 → v3 : `country` devient `language`
+ALTER TABLE magazines ADD COLUMN language TEXT;
+UPDATE magazines SET language = country;
+ALTER TABLE magazines DROP COLUMN country;
+
+-- v2 → v3 : `condition` migre de l'exemplaire vers l'édition
+ALTER TABLE magazines ADD COLUMN condition TEXT;
+UPDATE magazines SET condition = (
+    SELECT ci.condition FROM collection_items ci
+    WHERE ci.magazine_id = magazines.id
+    ORDER BY ci.date_added DESC
+    LIMIT 1
+);
+ALTER TABLE collection_items DROP COLUMN condition;
+```
+
+### Migration `004_barcode_non_unique.sql` (barcodes multiples)
+
+```sql
+-- v3 → v4 : le code-barres n'est plus unique
+-- (un même code peut correspondre à des numéros/éditions différents)
+DROP INDEX IF EXISTS idx_magazines_barcode;
+CREATE INDEX IF NOT EXISTS idx_magazines_barcode
+ON magazines(barcode);
 ```
 
 > La table de métadonnées `migrations` (facultative) peut stocker l'historique des migrations appliquées :
@@ -185,27 +224,27 @@ const MIGRATIONS: Array<{ version: number; up: (db: SQLiteDatabase) => void }> =
 ### Insertion d'une édition avec un exemplaire
 
 ```sql
-INSERT INTO magazines (id, publication, issue_number, edition, country,
+INSERT INTO magazines (id, publication, issue_number, edition, language, condition,
                        publication_date, barcode, notes, ocr_text, created_at, updated_at)
 VALUES ('3f2b4e5a-1111-2222-3333-444455556666',
-        'Picsou Magazine', 547, 'standard', 'FR',
+        'Picsou Magazine', 547, 'standard', 'FR', 'good',
         '2023-03', '3271234567890', NULL, NULL,
         '2026-08-30T14:30:00Z', '2026-08-30T14:30:00Z');
 
-INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
+INSERT INTO collection_items (id, magazine_id, notes, date_added)
 VALUES ('9c1d2e3f-aaaa-bbbb-cccc-ddddeeeeffff',
         '3f2b4e5a-1111-2222-3333-444455556666',
-        'good', 'Acheté 0,50 € en brocante à Lille',
+        'Acheté 0,50 € en brocante à Lille',
         '2026-08-30T14:30:00Z');
 ```
 
 ### Édition sans code-barres (ancien magazine)
 
 ```sql
-INSERT INTO magazines (id, publication, issue_number, edition, country,
+INSERT INTO magazines (id, publication, issue_number, edition, language, condition,
                        publication_date, barcode, notes, ocr_text, created_at, updated_at)
 VALUES ('7a1b2c3d-0000-1111-2222-333344445555',
-        'Super Picsou Géant', 30, 'standard', 'FR',
+        'Super Picsou Géant', 30, 'standard', 'FR', NULL,
         '1987-05', NULL, 'Sans code-barres', NULL,
         '2026-09-01T09:00:00Z', '2026-09-01T09:00:00Z');
 ```
@@ -216,8 +255,8 @@ VALUES ('7a1b2c3d-0000-1111-2222-333344445555',
 
 | Élément | Valeur |
 |---|---|
-| Version du schéma | `1` |
-| Tables | `magazines`, `collection_items` |
-| Index | `idx_magazines_barcode` (UNIQUE), `idx_magazines_publication_issue`, `idx_collection_items_magazine_id` |
+| Version du schéma | `4` |
+| Tables | `magazines`, `collection_items`, `settings` |
+| Index | `idx_magazines_barcode`, `idx_magazines_publication_issue`, `idx_collection_items_magazine_id` |
 | Version stockée dans | `PRAGMA user_version` |
-| Migration initiale | `001_initial.sql` |
+| Migrations | `001_initial.sql`, `002_settings.sql`, `003_modele.sql`, `004_barcode_non_unique.sql` |

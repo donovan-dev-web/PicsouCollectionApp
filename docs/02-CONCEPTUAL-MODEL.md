@@ -47,10 +47,10 @@ Cette distinction est le cœur du modèle. Le **numéro seul ne suffit jamais** 
 La série de magazines. Exemples : *Picsou Magazine*, *Super Picsou Géant*, *Mickey Parade*, *Les Trésors de Picsou*.
 
 ### 2.2 Édition
-Un magazine précis et unique : une combinaison de **publication + numéro + édition + pays + date**. C'est l'entité centrale qui porte l'identifiant interne (`issue_id`).
+Un magazine précis et unique : une combinaison de **publication + numéro + édition + langue + date**. C'est l'entité centrale qui porte l'identifiant interne (`issue_id`).
 
 ### 2.3 Exemplaire
-L'exemplaire physique réellement possédé, rattaché à une édition. Chaque exemplaire a son propre état, ses notes et sa date d'ajout.
+L'exemplaire physique réellement possédé, rattaché à une édition. Chaque exemplaire a ses notes et sa date d'ajout ; l'**état** (`condition`) est porté par l'édition à laquelle il appartient.
 
 ### 2.4 Code-barres
 Identifiant externe (EAN-13 ou ISBN) permettant de retrouver une édition. Un code-barres **n'identifie pas** un exemplaire physique.
@@ -91,7 +91,8 @@ La publication est représentée textuellement par le champ `publication` de l'�
 | `publication` | string | ✅ | Nom de la série |
 | `issueNumber` | number | ❌ | Numéro (facultatif, certains hors-séries) |
 | `edition` | string | ❌ | Édition (ex. "standard", "spéciale") |
-| `country` | string | ❌ | Code pays (ex. "FR") |
+| `language` | string | ❌ | Langue de l'édition (ex. "FR") |
+| `condition` | string | ❌ | État de l'édition (ex. "neuf", "usé") |
 | `publicationDate` | string | ❌ | Date ISO (ex. "2023-03") |
 | `barcode` | string | ❌ | Code-barres principal |
 | `createdAt` | ISO 8601 | ✅ | Date de création |
@@ -103,7 +104,6 @@ La publication est représentée textuellement par le champ `publication` de l'�
 |---|---|---|---|
 | `id` | UUID | ✅ | Identifiant unique de l'exemplaire |
 | `magazineId` | UUID | ✅ | Référence vers l'édition |
-| `condition` | string | ❌ | État (ex. "bon", "moyen") |
 | `notes` | string | ❌ | Notes personnelles |
 | `dateAdded` | ISO 8601 | ✅ | Date d'ajout de l'exemplaire |
 
@@ -134,7 +134,7 @@ Une édition peut avoir **zéro ou plusieurs** exemplaires. Le nombre d'exemplai
 ### 6.2 Règles
 - Un code-barres est un **identifiant externe** : il permet de retrouver une édition ;
 - Un code-barres ne désigne **pas** un exemplaire physique ;
-- Un code-barres donné correspond à **au plus une** édition dans la base locale.
+- Un même code-barres peut correspondre à **plusieurs éditions/numéros** (ex. certains codes ne reflètent pas un numéro exact) : l'application autorise les doublons de code-barres, et l'identification se confirme par la règle Publication + Numéro + Édition + Langue + Date.
 
 ### 6.3 Origine des codes-barres
 La seule source d'enrichissement des codes-barres est **l'ajout manuel** : l'utilisateur associe manuellement un code-barres à une édition. Il n'existe pas de base pré-remplie ni d'API externe.
@@ -151,7 +151,7 @@ Chaque édition possède un identifiant interne (`UUID`), indépendant du numér
 ### R2 — Le numéro seul n'est jamais suffisant
 L'identification combine toujours le maximum d'informations disponibles :
 ```
-Publication + Numéro + Édition + Pays + Date
+Publication + Numéro + Édition + Langue + Date
 ```
 
 ### R3 — Un code-barres unique vers une édition

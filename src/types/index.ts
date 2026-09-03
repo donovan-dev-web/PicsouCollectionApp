@@ -3,7 +3,8 @@ export type Magazine = {
   publication: string;
   issueNumber: number | null;
   edition: string | null;
-  country: string | null;
+  language: string | null;
+  condition: string | null;
   publicationDate: string | null;
   barcode: string | null;
   notes: string | null;
@@ -23,7 +24,6 @@ export type MagazineDetail = Magazine & {
 export type CollectionItem = {
   id: string;
   magazineId: string;
-  condition: string | null;
   notes: string | null;
   dateAdded: string;
 };
@@ -32,7 +32,8 @@ export type CreateMagazineInput = {
   publication: string;
   issueNumber?: number | null;
   edition?: string | null;
-  country?: string | null;
+  language?: string | null;
+  condition?: string | null;
   publicationDate?: string | null;
   barcode?: string | null;
   notes?: string | null;
@@ -40,7 +41,6 @@ export type CreateMagazineInput = {
 };
 
 export type CreateCollectionItemInput = {
-  condition?: string | null;
   notes?: string | null;
 };
 

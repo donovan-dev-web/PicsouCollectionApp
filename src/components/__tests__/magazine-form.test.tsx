@@ -27,6 +27,19 @@ describe('MagazineForm', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it('affiche un message d erreur si la soumission echoue', async () => {
+    const onSubmit = jest.fn().mockRejectedValue(new Error('Code-barres déjà enregistré.'));
+    render(<MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} />);
+
+    fireEvent.changeText(screen.getByTestId('field-publication'), 'Picsou Magazine');
+    fireEvent.press(screen.getByTestId('form-submit'));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('form-error')).toHaveTextContent('Code-barres déjà enregistré.'),
+    );
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   it('masque la section détails par défaut et l affiche via le bouton', async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn();
@@ -52,7 +65,7 @@ describe('MagazineForm', () => {
 
     // ouvre la section détails et remplit les champs optionnels
     fireEvent.press(screen.getByTestId('details-toggle'));
-    fireEvent.changeText(screen.getByTestId('field-country'), 'FR');
+    fireEvent.changeText(screen.getByTestId('field-language'), 'FR');
     fireEvent.changeText(screen.getByTestId('field-notes'), 'Couverture abîmée');
     await openSelectOption('select-month', 'select-month-option-03');
     await openSelectOption('select-year', 'select-year-option-2023');
@@ -64,7 +77,8 @@ describe('MagazineForm', () => {
       publication: 'Picsou Magazine',
       issueNumber: 547,
       edition: 'édition française',
-      country: 'FR',
+      language: 'FR',
+      condition: null,
       publicationDate: '2023-03',
       barcode: null,
       notes: 'Couverture abîmée',
@@ -84,7 +98,8 @@ describe('MagazineForm', () => {
       publication: 'Mickey Parade',
       issueNumber: null,
       edition: null,
-      country: null,
+      language: null,
+      condition: null,
       publicationDate: null,
       barcode: null,
       notes: null,
@@ -102,7 +117,8 @@ describe('MagazineForm', () => {
             publication: 'Picsou Magazine',
             issueNumber: 547,
             edition: 'standard',
-            country: 'FR',
+            language: 'FR',
+            condition: null,
             publicationDate: '2023-03',
             barcode: null,
             notes: 'nc',

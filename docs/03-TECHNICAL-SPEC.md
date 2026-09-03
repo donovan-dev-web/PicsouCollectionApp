@@ -152,7 +152,7 @@ Caméra → détection du code-barres → lecture du code
 ```
 
 ### 6.3 Point critique
-La recherche par code-barres utilise l'index unique `idx_magazines_barcode`. La requête reste très légère et ne charge jamais `notes` / `ocr_text`.
+La recherche par code-barres utilise l'index `idx_magazines_barcode` (non unique : un même code peut correspondre à plusieurs numéros/éditions). La requête reste très légère et ne charge jamais `notes` / `ocr_text`.
 
 ---
 
@@ -210,7 +210,7 @@ Priorités :
 7. fonctionnement hors ligne.
 
 ### Optimisation requêtes
-- les données essentielles (`publication`, `issue_number`, `edition`, `country`, `publication_date`, `barcode`) restent indexées ;
+- les données essentielles (`publication`, `issue_number`, `edition`, `language`, `publication_date`, `barcode`) restent indexées ;
 - les requêtes de liste/scan ne chargent jamais `notes` et `ocr_text` inutilement ;
 - l'OCR n'analyse qu'une fraction des frames.
 
