@@ -9,13 +9,16 @@ type Props<T extends string> = {
   placeholder: string;
   value: string | null;
   options: readonly T[];
-  onSelect: (value: string) => void;
+  onSelect: (value: string | null) => void;
   testID: string;
+  /** Option ajoutée en tête permettant de réinitialiser (émet `null`). */
+  noneLabel?: string;
 };
 
 /**
  * Liste déroulante légère (sans dépendance native). Affiche une liste de choix
- * sur appui, permettant de sélectionner une valeur (ex. mois, année).
+ * sur appui, permettant de sélectionner une valeur (ex. mois, année) ou de la
+ * réinitialiser via `noneLabel`.
  */
 export function SelectField<T extends string>({
   label,
@@ -24,12 +27,13 @@ export function SelectField<T extends string>({
   options,
   onSelect,
   testID,
+  noneLabel,
 }: Props<T>) {
   const colors = useThemeColors();
   const styles = makeStyles(colors);
   const [open, setOpen] = useState(false);
 
-  const handleSelect = (option: string) => {
+  const handleSelect = (option: string | null) => {
     onSelect(option);
     setOpen(false);
   };
@@ -50,25 +54,29 @@ export function SelectField<T extends string>({
       {open && (
         <View style={styles.listContainer}>
           <FlatList
-            data={options}
+            data={(noneLabel ? [noneLabel, ...options] : options) as readonly string[]}
             keyExtractor={(item) => item}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.option,
-                  item === value && styles.optionSelected,
-                  pressed && styles.pressed,
-                ]}
-                onPress={() => handleSelect(item)}
-                testID={`${testID}-option-${item}`}
-                accessibilityRole="button">
-                <Text style={item === value ? styles.optionTextSelected : styles.optionText}>
-                  {item}
-                </Text>
-              </Pressable>
-            )}
+            renderItem={({ item }) => {
+              const isNone = noneLabel != null && item === noneLabel;
+              const selected = value === null ? isNone : item === value;
+              return (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.option,
+                    selected && styles.optionSelected,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() => handleSelect(isNone ? null : item)}
+                  testID={`${testID}-option-${item}`}
+                  accessibilityRole="button">
+                  <Text style={selected ? styles.optionTextSelected : styles.optionText}>
+                    {item}
+                  </Text>
+                </Pressable>
+              );
+            }}
           />
         </View>
       )}
