@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
+import { BarcodeStabilizer } from '@/identification/barcodeStabilizer';
 
 type ScanState =
   { status: 'idle' } | { status: 'searching' } | { status: 'invalid'; reason: string };
@@ -18,22 +19,21 @@ export default function BarcodeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [state, setState] = useState<ScanState>({ status: 'idle' });
   const [scanning, setScanning] = useState(true);
-  const lastCode = useRef<string | null>(null);
+  const stabilizer = useRef(new BarcodeStabilizer(3));
 
   const handleScan = async ({ data }: { data: string; type: string }) => {
     if (!scanning || state.status === 'searching') {
       return;
     }
-    const normalized = data.trim();
-    if (normalized === lastCode.current) {
+    const stabilized = stabilizer.current.push(data);
+    if (stabilized === null) {
       return;
     }
-    lastCode.current = normalized;
     setScanning(false);
     setState({ status: 'searching' });
 
     const { identificationService } = getDeps();
-    const result = await identificationService.identifyByBarcode(normalized);
+    const result = await identificationService.identifyByBarcode(stabilized);
 
     if (result.status === 'found') {
       router.replace({
@@ -43,11 +43,11 @@ export default function BarcodeScreen() {
           publication: result.magazine.publication,
           issueNumber:
             result.magazine.issueNumber != null ? String(result.magazine.issueNumber) : '',
-          barcode: normalized,
+          barcode: stabilized,
         },
       });
     } else if (result.status === 'unknown') {
-      router.replace({ pathname: '/scan/result', params: { barcode: normalized } });
+      router.replace({ pathname: '/scan/result', params: { barcode: stabilized } });
     } else {
       setState({ status: 'invalid', reason: result.reason });
       setScanning(true);
@@ -55,7 +55,7 @@ export default function BarcodeScreen() {
   };
 
   const reset = () => {
-    lastCode.current = null;
+    stabilizer.current.reset();
     setScanning(true);
     setState({ status: 'idle' });
   };
@@ -105,7 +105,9 @@ export default function BarcodeScreen() {
       <CameraView
         style={styles.camera}
         facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ['ean13', 'code128', 'itf14', 'upc_a'] }}
+        barcodeScannerSettings={{
+          barcodeTypes: ['ean13', 'ean8', 'code128', 'code39', 'code93', 'itf14', 'upc_a', 'upc_e'],
+        }}
         onBarcodeScanned={handleScan}
         testID="camera-view"
       />

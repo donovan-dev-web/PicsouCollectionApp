@@ -5,8 +5,9 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
-import { setPendingBarcode } from '@/lib/pending-barcode';
+import { BarcodeStabilizer } from '@/identification/barcodeStabilizer';
 import { scanBarcode } from '@/identification/scanBarcode';
+import { setPendingBarcode } from '@/lib/pending-barcode';
 
 export default function FormBarcodeScreen() {
   const router = useRouter();
@@ -15,20 +16,20 @@ export default function FormBarcodeScreen() {
 
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
-  const lastCode = useRef<string | null>(null);
+  const stabilizer = useRef(new BarcodeStabilizer(3));
 
   const handleScan = ({ data }: { data: string; type: string }) => {
     if (!scanning) {
       return;
     }
-    const normalized = data.trim();
-    if (normalized === lastCode.current) {
+    const stabilized = stabilizer.current.push(data);
+    if (stabilized === null) {
       return;
     }
-    lastCode.current = normalized;
 
-    const validation = scanBarcode(normalized);
+    const validation = scanBarcode(stabilized);
     if (validation.status !== 'found') {
+      stabilizer.current.reset();
       setScanning(true);
       return;
     }
@@ -83,7 +84,9 @@ export default function FormBarcodeScreen() {
       <CameraView
         style={styles.camera}
         facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ['ean13', 'code128', 'itf14', 'upc_a'] }}
+        barcodeScannerSettings={{
+          barcodeTypes: ['ean13', 'ean8', 'code128', 'code39', 'code93', 'itf14', 'upc_a', 'upc_e'],
+        }}
         onBarcodeScanned={handleScan}
         testID="camera-view"
       />

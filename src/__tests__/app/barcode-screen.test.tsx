@@ -59,6 +59,17 @@ function scan() {
   return camera.props.onBarcodeScanned;
 }
 
+/** Émet `times` lectures identiques pour atteindre le seuil du stabilisateur (3 par défaut). */
+function scanTimes(code: string, type = 'ean13', times = 3) {
+  return (async () => {
+    for (let i = 0; i < times; i++) {
+      await act(async () => {
+        scan()({ data: code, type });
+      });
+    }
+  })();
+}
+
 describe('BarcodeScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
@@ -70,6 +81,42 @@ describe('BarcodeScreen', () => {
     render(<BarcodeScreen />);
     expect(screen.getByTestId('camera-view')).toBeTruthy();
     expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
+  });
+
+  it('ne lance la recherche qu’après stabilisation de la lecture (3 lectures identiques)', async () => {
+    const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByBarcode,
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<BarcodeScreen />);
+
+    // Une seule lecture (voire deux) ne doit pas déclencher de recherche
+    await act(async () => {
+      scan()({ data: '5901234123457', type: 'ean13' });
+    });
+    expect(identifyByBarcode).not.toHaveBeenCalled();
+
+    await act(async () => {
+      scan()({ data: '5901234123457', type: 'ean13' });
+    });
+    expect(identifyByBarcode).not.toHaveBeenCalled();
+
+    // La 3e lecture stabilise le code → la recherche est lancée
+    await act(async () => {
+      scan()({ data: '5901234123457', type: 'ean13' });
+    });
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/scan/result',
+        params: { barcode: '5901234123457' },
+      }),
+    );
+    expect(identifyByBarcode).toHaveBeenCalledTimes(1);
   });
 
   it('navigue vers le résultat quand le magazine existe en base', async () => {
@@ -85,9 +132,7 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '5901234123457', type: 'ean13' });
-    });
+    await scanTimes('5901234123457');
 
     await waitFor(() =>
       expect(mockReplace).toHaveBeenCalledWith({
@@ -115,9 +160,7 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '5901234123457', type: 'ean13' });
-    });
+    await scanTimes('5901234123457');
 
     await waitFor(() =>
       expect(mockReplace).toHaveBeenCalledWith({
@@ -127,7 +170,7 @@ describe('BarcodeScreen', () => {
     );
   });
 
-  it("n'ignore pas une deuxième lecture du même code (le résultat est géré par navigation)", async () => {
+  it('n’émet qu’une seule recherche par code stabilisé', async () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(
       stubDeps({
@@ -139,10 +182,8 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '5901234123457', type: 'ean13' });
-    });
-    expect(mockReplace).toHaveBeenCalledTimes(1);
+    await scanTimes('5901234123457', 'ean13', 6);
+    expect(identifyByBarcode).toHaveBeenCalledTimes(1);
   });
 
   it('affiche une erreur et permet de réessayer pour un code invalide', async () => {
@@ -159,9 +200,7 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '5901234123458', type: 'ean13' });
-    });
+    await scanTimes('5901234123458');
 
     await waitFor(() => expect(screen.getByTestId('invalid-reason')).toBeTruthy());
     expect(mockReplace).not.toHaveBeenCalled();

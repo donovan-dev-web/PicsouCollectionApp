@@ -27,6 +27,15 @@ function scan() {
   return screen.getByTestId('camera-view').props.onBarcodeScanned;
 }
 
+/** Émet `times` lectures identiques pour atteindre le seuil du stabilisateur (3 par défaut). */
+async function scanTimes(code: string, type = 'ean13', times = 3) {
+  for (let i = 0; i < times; i++) {
+    await act(async () => {
+      scan()({ data: code, type });
+    });
+  }
+}
+
 describe('FormBarcodeScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
@@ -42,34 +51,38 @@ describe('FormBarcodeScreen', () => {
   it('stocke le code scanné et revient au formulaire pour un code valide', async () => {
     render(<FormBarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '5901234123457', type: 'ean13' });
-    });
+    await scanTimes('5901234123457');
 
     await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(1));
     expect(consumePendingBarcode()).toBe('5901234123457');
   });
 
-  it('ignore les codes invalides et ne revient pas', async () => {
+  it('ne revient pas tant que la lecture n est pas stabilisée', async () => {
     render(<FormBarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '0000', type: 'ean13' });
-    });
+    await scanTimes('5901234123457', 'ean13', 2);
 
     expect(mockBack).not.toHaveBeenCalled();
     expect(consumePendingBarcode()).toBeNull();
   });
 
-  it('n ignore pas un code déjà scanné quand le premier était invalide', async () => {
+  it('ignore les codes invalides et ne revient pas', async () => {
     render(<FormBarcodeScreen />);
 
-    await act(async () => {
-      scan()({ data: '0000', type: 'ean13' });
-    });
-    await act(async () => {
-      scan()({ data: '5901234123457', type: 'ean13' });
-    });
+    await scanTimes('0000');
+
+    expect(mockBack).not.toHaveBeenCalled();
+    expect(consumePendingBarcode()).toBeNull();
+  });
+
+  it('ne stocke pas un code invalide puis accepte un code valide ensuite', async () => {
+    render(<FormBarcodeScreen />);
+
+    // code trop court → invalide, quel que soit le nombre de lectures
+    await scanTimes('0000');
+    expect(mockBack).not.toHaveBeenCalled();
+
+    await scanTimes('5901234123457');
 
     await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(1));
     expect(consumePendingBarcode()).toBe('5901234123457');

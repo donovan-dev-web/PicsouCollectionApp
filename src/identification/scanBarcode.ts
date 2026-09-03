@@ -10,13 +10,17 @@
  * par `expo-camera` ; son résultat est normalisé et validé ici.
  */
 
+export type BarcodeType = 'EAN-13' | 'ISBN-10' | 'ISBN-13' | 'GENERIC';
+
 export type BarcodeValidation =
-  | { valid: true; type: 'EAN-13' | 'ISBN-10' | 'ISBN-13'; normalized: string }
-  | { valid: false; reason: string };
+  { valid: true; type: BarcodeType; normalized: string } | { valid: false; reason: string };
 
 const EAN_13_LENGTH = 13;
 const ISBN_10_LENGTH = 10;
 const ISBN_13_LENGTH = 13;
+
+/** Longueur minimale acceptable pour un code-barres au format non standard. */
+const GENERIC_MIN_LENGTH = 6;
 
 /** Retire les caractères non numériques d'un code barres brut (espaces, tirets…). */
 export function cleanBarcode(raw: string): string {
@@ -59,18 +63,23 @@ function normalizeIsbn13(raw: string): string {
 /**
  * Valide et normalise un code-barres.
  *
+ * Le code est conservé **brut** (chaîne) sans conversion numérique, afin de ne jamais
+ * perdre de zéros de tête (ex. un code commençant par `0`). Les formats standards
+ * (EAN-13 / ISBN) restent vérifiés par checksum ; tout autre code suffisamment long
+ * (alphanumérique ou sûr format non standard) est accepté tel quel (`GENERIC`).
+ *
  * @param barcode code brut détecté par la caméra ou saisi manuellement
  * @returns le type de code reconnu et sa forme normalisée, ou la raison du rejet
  */
 export function validateBarcode(raw: string): BarcodeValidation {
-  const cleaned = cleanBarcode(raw);
+  const s = raw.trim();
 
-  if (cleaned.length === 0) {
+  if (s.length === 0) {
     return { valid: false, reason: 'Aucun chiffre détecté.' };
   }
 
-  // ISBN-10 (peut contenir un 'X' en fin de checksum)
-  const trimmedIsbn = raw.trim().toUpperCase();
+  // ISBN-10 (longueur exacte, peut contenir un 'X' en fin de checksum)
+  const trimmedIsbn = s.toUpperCase();
   if (trimmedIsbn.length === ISBN_10_LENGTH && /^[0-9X]{10}$/.test(trimmedIsbn)) {
     if (isValidIsbn10(trimmedIsbn)) {
       return { valid: true, type: 'ISBN-10', normalized: trimmedIsbn };
@@ -78,17 +87,24 @@ export function validateBarcode(raw: string): BarcodeValidation {
     return { valid: false, reason: 'ISBN-10 invalide (checksum).' };
   }
 
-  // EAN-13 / ISBN-13 (13 chiffres)
-  if (cleaned.length === EAN_13_LENGTH) {
-    if (isValidEan13(cleaned)) {
-      const isIsbn = cleaned.startsWith('978') || cleaned.startsWith('979');
+  // EAN-13 / ISBN-13 (13 chiffres, éventuellement groupés par séparateurs)
+  const digits = cleanBarcode(s);
+  if (digits.length === EAN_13_LENGTH) {
+    if (isValidEan13(digits)) {
+      const isIsbn = digits.startsWith('978') || digits.startsWith('979');
       return {
         valid: true,
         type: isIsbn ? 'ISBN-13' : 'EAN-13',
-        normalized: normalizeIsbn13(cleaned),
+        normalized: normalizeIsbn13(digits),
       };
     }
     return { valid: false, reason: 'EAN-13 invalide (checksum).' };
+  }
+
+  // Format non standard (alphanumérique, symboles, longueurs inhabituelles) :
+  // accepté tel quel dès lors qu'il est suffisamment long pour être un vrai code-barres.
+  if (s.length >= GENERIC_MIN_LENGTH) {
+    return { valid: true, type: 'GENERIC', normalized: s };
   }
 
   return { valid: false, reason: 'Format de code-barres non supporté.' };
