@@ -15,12 +15,13 @@
 5. [Phase 2 — Base de données](#5-phase-2--base-de-données)
 6. [Phase 3 — Interface principale](#6-phase-3--interface-principale)
 7. [Phase 4 — Scan code-barres](#7-phase-4--scan-code-barres)
-8. [Phase 5 — Caméra / OCR](#8-phase-5--caméra--ocr)
-9. [Phase 6 — Parcours complet](#9-phase-6--parcours-complet)
-10. [Phase 7 — Export / Import](#10-phase-7--export--import)
-11. [Phase 8 — Optimisation & qualité](#11-phase-8--optimisation--qualité)
-12. [Phase 9 — Tests terrain & publication](#12-phase-9--tests-terrain--publication)
-13. [Critères de sortie de chaque phase](#13-critères-de-sortie-de-chaque-phase)
+8. [Phase 4R — Retours test physique](#8-phase-4r--retours-test-physique)
+9. [Phase 5 — Caméra / OCR](#9-phase-5--caméra--ocr)
+10. [Phase 6 — Parcours complet](#10-phase-6--parcours-complet)
+11. [Phase 7 — Export / Import](#11-phase-7--export--import)
+12. [Phase 8 — Optimisation & qualité](#12-phase-8--optimisation--qualité)
+13. [Phase 9 — Tests terrain & publication](#13-phase-9--tests-terrain--publication)
+14. [Critères de sortie de chaque phase](#14-critères-de-sortie-de-chaque-phase)
 
 ---
 
@@ -42,6 +43,7 @@ Phase 1  ███████████████████████�
 Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
 Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
 Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
+Phase 4R ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  En cours
 Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -60,12 +62,13 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 2 — Base de données | `M-02 — Base de données` | `US-DB-01..05` | 5 |
 | 3 — Interface | `M-03 — Interface principale` | `US-ACC-01..04`, `US-COL-01..05`, `US-QA-01` | 10 |
 | 4 — Scan code-barres | `M-04 — Scan code-barres` | `US-ID-01..02` | 2 |
+| 4R — Retours test | `M-04R — Retours test physique` | `US-ACC-05`, `US-COL-07..10`, `US-ID-07`, `US-SET-01` | 7 |
 | 5 — Caméra / OCR | `M-05 — Caméra / OCR` | `US-ID-03`, `US-ID-05` | 2 |
 | 6 — Parcours complet | `M-06 — Parcours complet` | `US-ID-04`, `US-ID-06`, `US-COL-06` | 3 |
 | 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
 | 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02` | 1 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **57** |
+| **Total** | | | **64** |
 
 ---
 
@@ -172,7 +175,28 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 8. Phase 5 — Caméra / OCR
+## 8. Phase 4R — Retours test physique
+
+**Objectif** : Intégrer les retours du test sur appareil physique post-v0.4.0, stabiliser le scan et fiabiliser la saisie avant l'OCR.
+
+**Statut : En cours** — milestone `M-04R`.
+
+| Tâche | Story |
+|---|---|
+| Aligner M-04 avec la doc (écran résultat + bouton scan dans le formulaire) | US-COL-08 |
+| Lecture robuste multi-format du code-barres (alphanumérique, non tronqué, vote majoritaire anti faux-positifs) | US-ID-07 |
+| Saisie assistée avec suggestions anti-doublons | US-COL-07 |
+| Formulaire complet en deux sections + date Année/Mois | US-COL-08 |
+| Ajouts récents cliquables vers la fiche | US-ACC-05 |
+| Pagination de la collection (20/page) | US-COL-09 |
+| Filtrer la collection par numéro et édition | US-COL-10 |
+| Bascule manuelle du thème clair/sombre | US-SET-01 |
+
+**Livrables** : application corrigée sur les points relevés en condition réelle, prête à accueillir l'OCR.
+
+---
+
+## 9. Phase 5 — Caméra / OCR
 
 **Objectif** : Identifier un magazine sans code-barres à partir du flux caméra.
 
@@ -190,7 +214,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 9. Phase 6 — Parcours complet
+## 10. Phase 6 — Parcours complet
 
 **Objectif** : Pouvoir effectuer toute l'utilisation réelle en brocante.
 
@@ -210,7 +234,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 10. Phase 7 — Export / Import
+## 11. Phase 7 — Export / Import
 
 **Objectif** : Pouvoir sauvegarder et restaurer la collection sans serveur.
 
@@ -228,7 +252,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 11. Phase 8 — Optimisation & qualité
+## 12. Phase 8 — Optimisation & qualité
 
 **Objectif** : Application performante, couverture de tests satisfaisante.
 
@@ -246,7 +270,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 12. Phase 9 — Tests terrain & publication
+## 13. Phase 9 — Tests terrain & publication
 
 **Objectif** : Validation réelle et publication Play Store.
 
@@ -263,7 +287,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 13. Critères de sortie de chaque phase
+## 14. Critères de sortie de chaque phase
 
 Pour chaque phase, les critères de sortie sont :
 
@@ -287,9 +311,10 @@ Pour chaque phase, les critères de sortie sont :
 | 2 — Base de données | Persistance SQLite | US-DB-01..05 | 5 |
 | 3 — Interface | Écrans principaux | US-ACC-01..04, US-COL-01..05, US-QA-01 | 10 |
 | 4 — Scan code-barres | Identification EAN-13 | US-ID-01, US-ID-02 | 2 |
+| 4R — Retours test | Corrections & UX post-test | US-ACC-05, US-COL-07..10, US-ID-07, US-SET-01 | 7 |
 | 5 — OCR | Identification par caméra | US-ID-03, US-ID-05 | 2 |
 | 6 — Parcours complet | Boucle complète | US-ID-04, US-ID-06, US-COL-06 | 3 |
 | 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
 | 8 — Optimisation | Performance | US-QA-02 | 1 |
 | 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **57** |
+| **Total** | | | **64** |

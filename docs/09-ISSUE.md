@@ -201,6 +201,7 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-02` | Base de données | Persistance et CRUD collection |
 | `M-03` | Interface principale | Écrans accueil, collection, paramètres |
 | `M-04` | Scan code-barres | Identification par code-barres |
+| `M-04R` | Retours test physique | Corrections & améliorations UX post-test v0.4.0 |
 | `M-05` | Caméra / OCR | Identification par OCR |
 | `M-06` | Parcours complet | Identification → Possédé / Absent |
 | `M-07` | Export / Import | Sauvegarde et restauration JSON |
