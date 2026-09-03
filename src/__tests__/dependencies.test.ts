@@ -22,6 +22,7 @@ const mockGetDatabase = getDatabase as unknown as jest.Mock;
 const stubDeps: Dependencies = {
   magazineRepository: {} as Dependencies['magazineRepository'],
   collectionRepository: {} as Dependencies['collectionRepository'],
+  settingsRepository: {} as Dependencies['settingsRepository'],
   identificationService: {} as Dependencies['identificationService'],
 };
 

@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const MIGRATION_001 = `
 CREATE TABLE IF NOT EXISTS magazines (
@@ -34,4 +34,11 @@ ON magazines(publication, issue_number);
 
 CREATE INDEX IF NOT EXISTS idx_collection_items_magazine_id
 ON collection_items(magazine_id);
+`;
+
+export const MIGRATION_002 = `
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+);
 `;

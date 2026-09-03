@@ -47,8 +47,12 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
     collectionRepository: {} as Dependencies['collectionRepository'],
+    settingsRepository: {
+      getColorScheme: jest.fn().mockResolvedValue('system'),
+      setColorScheme: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Dependencies['settingsRepository'],
     identificationService: {
-      identifyByBarcode: jest.fn().mockResolvedValue({ status: 'unknown' }),
+      identify: jest.fn(),
     } as unknown as Dependencies['identificationService'],
     ...overrides,
   };
