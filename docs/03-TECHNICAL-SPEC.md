@@ -105,7 +105,7 @@ npm run typecheck        # tsc --noEmit
 ## 5. OCR
 
 ### 5.1 Technologie
-**Google ML Kit Text Recognition** (module natif Android) via un module React Native compatible avec le Development Build.
+**Google ML Kit Text Recognition** (module natif Android, on-device) via le module Expo **`expo-mlkit-ocr`** (`recognizeText(uri)`), compatible Development Build / EAS.
 
 ### 5.2 Contraintes
 - doit être **suffisamment rapide** ;
@@ -135,7 +135,7 @@ L'OCR extrait :
 
 Un **niveau de confiance** (0..1) est calculé. En cas de confiance insuffisante, l'utilisateur peut réessayer ou saisir manuellement. L'application n'invente jamais une identification avec certitude.
 
-> **Note technique :** la librairie exacte du module natif sera **validée lors du développement du prototype OCR** (Phase 4). Les pistes : `@react-native-ml-kit/text-recognition` ou implémentation native personnalisée.
+> **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est **branché par défaut** (`MlKitOcrEngine`) via `expo-mlkit-ocr` (Google ML Kit Text Recognition, on-device, hors ligne) : `dependencies.initialize()` l'utilise, l'écran `/scan/camera` capture une photo via `expo-camera` (`takePictureAsync`) puis appelle `recognizeText(uri)`. L'import du module natif est **paresseux** pour ne pas bloquer la CI. `expo-build-properties` force le iOS `deploymentTarget` à 16.4 (exigence ML Kit). **La reconnaissance se valide sur un Development Build (téléphone physique) via `eas build`** ; hors bibliothèque native, `recognize` retourne `null` (repli `NoopOcrEngine`).
 
 ---
 
@@ -267,7 +267,7 @@ Priorités :
 | DB | SQLite via `expo-sqlite` |
 | État | Zustand |
 | Tests | Jest + RTL |
-| OCR | Google ML Kit (module natif, à valider) |
+| OCR | Google ML Kit via `expo-mlkit-ocr` (on-device) |
 | Scan | EAN-13 / ISBN |
 | Build | EAS Build + Gradle local |
 | Performance | Optimisée pour téléphone modeste |

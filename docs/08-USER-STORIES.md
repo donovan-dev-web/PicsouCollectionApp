@@ -73,6 +73,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Critères d'acceptation** :
 - Le scan d'un code-barres connu retrouve l'édition ;
 - Un code-barres inconnu renvoie aucun résultat ;
+- Si plusieurs éditions partagent le même code-barres, la recherche renvoie **toutes** les éditions (avec leur nombre d'exemplaires) ;
 - La recherche n'utilise pas les champs `notes`/`ocr_text`.
 
 **Priorité** : haute.
@@ -266,7 +267,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - La permission caméra est demandée ;
 - Un EAN-13/ISBN est détecté ;
 - Le code connu affiche l'édition ;
-- Le code inconnu propose les méthodes de secours.
+- Le code inconnu propose les méthodes de secours ;
+- Un code connu correspondant à **plusieurs éditions** affiche le **nombre d'éditions** et une **liste cliquable** menant à chaque fiche.
 
 **Rappel** : le scan ne fait que **retrouver** une édition déjà en base ; il ne crée **jamais** une édition à lui seul (un code inconnu nécessite une saisie manuelle).
 
@@ -292,6 +294,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - Un niveau de confiance est affiché ;
 - En cas de confiance insuffisante, une saisie manuelle est proposée ;
 - Aucune image n'est enregistrée.
+
+**Statut (M-05)** : le pipeline logique est livré et testé (`ocrTextParser`, `identificationService.identifyByOCR`, écran `/scan/camera`). La reconnaissance brute repose sur `MlKitOcrEngine` (**expo-mlkit-ocr**, on-device), branché par défaut dans `dependencies.initialize()`. À **valider sur téléphone physique** (Development Build via `eas build`).
 
 **Priorité** : haute.
 

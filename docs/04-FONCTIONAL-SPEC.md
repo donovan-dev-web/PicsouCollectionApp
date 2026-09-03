@@ -37,6 +37,7 @@ L'application comporte les écrans suivants (navigation Expo Router) :
 | Caméra / OCR | `/scan/camera` | Reconnaissance par flux caméra |
 | Saisie manuelle | `/scan/manual` | Formulaire de saisie |
 | Résultat | `/scan/result` | Possédé / Absent |
+| Plusieurs éditions | `/scan/multiple` | Code-barres → liste d'éditions |
 | Ma Collection | `/collection` | Liste, recherche, filtres |
 | Fiche Magazine | `/collection/[id]` | Détail d'une édition |
 | Paramètres | `/settings` | Sauvegarde, données, version |
@@ -158,6 +159,8 @@ Si le code-barres n'est associé à **aucune édition**, le scan transmet le `ba
 4. Arrêter l'analyse dès que le résultat est suffisamment fiable ;
 5. **Aucune image n'est enregistrée** — analyse éphémère.
 
+> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : `MlKitOcrEngine` est **branché par défaut** dans `dependencies.initialize()` (Google ML Kit via `expo-mlkit-ocr`, image-based). L'écran `/scan/camera` capture une photo (`takePictureAsync`) et appelle `recognizeText(uri)`. **À valider sur Development Build (téléphone physique)** ; hors bibliothèque native, `recognize` retourne `null` (repli none).
+
 ### 5.2 Résultat OCR
 
 ```
@@ -178,8 +181,15 @@ Confiance : élevée
 Impossible d'identifier précisément ce magazine.
 
 [ Réessayer avec la caméra ]
+[ Scanner le code-barres ]
 [ Saisir manuellement ]
 ```
+
+> **Correctif M-05 (retour test physique) :** la saisie manuelle (états *faible* et
+> *non trouvé*) **pré-remplit** le formulaire avec les informations extraites par
+> l'OCR (**publication**, **numéro**, **année**), comme le scan code-barres
+> pré-remplit déjà `barcode` (§7.2). Un bouton **Scanner le code-barres** est
+> proposé en cas de confiance insuffisante, en plus de réessayer / saisir manuellement.
 
 L'application **ne présente jamais** une identification OCR comme certaine.
 
@@ -258,6 +268,33 @@ Absent de la collection
 
 - **Scanner à nouveau** → `/scan/barcode` ;
 - **Saisir manuellement** → `/scan/manual` en pré-remplissant le code-barres scanné, pour accélérer la création de l'édition.
+
+### 7.3 Plusieurs éditions pour un même code-barres
+
+> **Origine (retours M-04R) :** un code-barres n'est pas unique (voir §8) ; le même code peut correspondre à plusieurs éditions (numéros/éditions différents). Le flux mène alors vers `/scan/multiple`.
+
+L'écran `/scan/multiple` affiche le **nombre d'éditions** correspondant au code scanné et une **liste cliquable** : chaque ligne mène à la fiche de l'édition correspondante.
+
+```
+Plusieurs éditions pour ce code
+
+2 éditions trouvées
+Code-barres : 3271234000011
+
+┌───────────────────────────────┐
+│  Picsou Magazine      n° 547  │
+│  🔴 Possédé (1)               │
+└───────────────────────────────┘
+┌───────────────────────────────┐
+│  Picsou Magazine      n° 548  │
+│  🟢 Absent                    │
+└───────────────────────────────┘
+
+[ Scanner à nouveau ]
+```
+
+- **Chaque ligne** → `/collection/[id]` (fiche de l'édition) ;
+- **Scanner à nouveau** → `/scan/barcode`.
 
 ---
 

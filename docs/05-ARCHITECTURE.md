@@ -171,6 +171,8 @@ Opérations sur les éditions :
 
 ```ts
 findByBarcode(barcode): Promise<Magazine | null>
+findManyByBarcode(barcode): Promise<MagazineListItem[]>
+findByPublicationAndIssue(publication, issueNumber): Promise<Magazine | null>
 findById(id): Promise<MagazineDetail | null>
 list(): Promise<MagazineListItem[]>
 search(query): Promise<MagazineListItem[]>
@@ -193,10 +195,36 @@ deleteCopy(id): Promise<void>
 
 #### `identificationService.ts`
 ```ts
-identifyByBarcode(barcode): Promise<MagazineIdentification | null>
-identifyByOCR(text): Promise<MagazineIdentification | null>
+identifyByBarcode(barcode): Promise<BarcodeLookupResult>
+// found (1 édition) / ambiguous (plusieurs pour le même code) / unknown / invalid
+identifyByOCR(text): Promise<OcrLookupResult>
+// found / weak (confiance insuffisante) / unknown / no-text
 identifyManually(data): Promise<MagazineIdentification>
 ```
+
+#### `ocr/` — moteur OCR (M-05, US-ID-03)
+```ts
+// ocrTypes.ts
+interface OcrEngine { recognize(frame): Promise<OcrFrameResult> }  // OcrFrameResult = { text } | null
+
+// ocrTextParser.ts  (pur, testable)
+parseOcrText(raw): OcrParseResult      // publication, issueNumber, date, confidence (0..1)
+isConfident(parse): boolean            // seuil MIN_CONFIDENCE
+
+// ocrEngine.ts      (moteur de repli CI-safe)
+NoopOcrEngine                        // retourne toujours null
+
+// mlKitOcrEngine.ts (natif, à tester physiquement) — MOTEUR PAR DÉFAUT
+MlKitOcrEngine                       // Google ML Kit via expo-mlkit-ocr (import paresseux, image-based)
+```
+
+**Isolation** : l'écran `/scan/camera` dépend uniquement de l'interface `OcrEngine`
+injectée via `dependencies.getDeps()`. Par défaut (`dependencies.initialize()`), le
+moteur est `MlKitOcrEngine` : il capture une photo via `expo-camera`
+(`takePictureAsync`) et appelle `expo-mlkit-ocr`'s `recognizeText(uri)`. L'import du
+module natif est **paresseux** (dans `recognize`) : sur CI / hors Development Build il
+retourne `null` sans bloquer les tests. `NoopOcrEngine` reste disponible comme repli.
+<b>La reconnaissance brute se valide sur téléphone physique</b> (Development Build).
 
 #### `collectionService.ts`
 ```ts
@@ -246,11 +274,27 @@ magazineRepository / collectionRepository (SQL)
    ↓  code détecté
 identificationService.identifyByBarcode(code)
    ↓
-magazineRepository.findByBarcode(code)
+magazineRepository.findManyByBarcode(code)   // liste des éditions partageant ce code
    ↓
-collectionService.checkPossession(magazineId)
+found (1)     → Navigation vers result.tsx
+ambiguous (>1) → Navigation vers multiple.tsx (compte + liste cliquable)
+unknown       → Navigation vers result.tsx (Absent)
+```
+
+### 6.4 Identification par OCR
+```
+Écran /scan/camera → intervalle d'analyse (photo capturée via takePictureAsync)
    ↓
-Navigation vers result.tsx avec le résultat
+cameraRef.takePictureAsync() → uri       // photo éphémère, aucune image persistée
+   ↓
+ocrEngine.recognize({ native: uri })     // OcrEngine par défaut = MlKitOcrEngine (expo-mlkit-ocr)
+   ↓  { text }
+identificationService.identifyByOCR(text)
+   ↓  parseOcrText → publication / issueNumber / date + confiance
+found   → afiche la couverture reconnue + [Confirmer → /collection/[id]]
+weak    → "Confiance insuffisante" + [Réessayer] [Saisie manuelle]
+unknown → "Non trouvé" + [Saisie manuelle] [Réessayer]
+no-text → on continue d'analyser
 ```
 
 ---

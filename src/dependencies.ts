@@ -5,12 +5,15 @@ import { CollectionRepository } from '@/database/repositories/collection-reposit
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 import { SettingsRepository } from '@/database/repositories/settings-repository';
 import { IdentificationService } from '@/identification/identificationService';
+import type { OcrEngine } from '@/identification/ocr/ocrTypes';
+import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
   collectionRepository: CollectionRepository;
   settingsRepository: SettingsRepository;
   identificationService: IdentificationService;
+  ocrEngine: OcrEngine;
 }
 
 let dbPromise: Promise<Database> | null = null;
@@ -35,11 +38,15 @@ export async function initialize(): Promise<Dependencies> {
   }
   const db = await dbPromise;
   if (!deps) {
+    // Moteur OCR natif (ML Kit via expo-mlkit-ocr). Sur CI / hors Dev Build,
+    // l'import est paresseux dans `recognize` : il ne casse pas les tests.
+    const ocrEngine: OcrEngine = new MlKitOcrEngine();
     deps = {
       magazineRepository: new MagazineRepository(db),
       collectionRepository: new CollectionRepository(db),
       settingsRepository: new SettingsRepository(db),
       identificationService: new IdentificationService(new MagazineRepository(db)),
+      ocrEngine,
     };
   }
   return deps;

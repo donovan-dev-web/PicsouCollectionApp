@@ -11,6 +11,7 @@ function stubDeps(): Dependencies {
     magazineRepository: {} as Dependencies['magazineRepository'],
     collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
+    ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
     settingsRepository: {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: setColorSchemeMock,
