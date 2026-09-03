@@ -43,7 +43,7 @@ Phase 1  ███████████████████████�
 Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
 Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
 Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
-Phase 4R ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  En cours
+Phase 4R ██████████████████████████████  Terminé ✓ (v0.5.0)
 Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -179,7 +179,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Intégrer les retours du test sur appareil physique post-v0.4.0, stabiliser le scan et fiabiliser la saisie avant l'OCR.
 
-**Statut : En cours** — milestone `M-04R`.
+**Statut : Terminé ✓** — livré en **release `v0.5.0`**.
 
 | Tâche | Story |
 |---|---|
@@ -192,7 +192,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Filtrer la collection par numéro et édition | US-COL-10 |
 | Bascule manuelle du thème clair/sombre | US-SET-01 |
 
-**Livrables** : application corrigée sur les points relevés en condition réelle, prête à accueillir l'OCR.
+**Livrables** : application corrigée sur les points relevés en condition réelle, prête à accueillir l'OCR (**177 tests / 29 suites, ~96 % de couverture**).
 
 ---
 
