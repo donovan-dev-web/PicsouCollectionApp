@@ -60,7 +60,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **enregistrer une nouvelle édition** afin de **l'ajouter à ma collection**.
 
 **Critères d'acceptation** :
-- Je peux saisir publication (obligatoire), numéro, édition, pays, date, code-barres ;
+- Je peux saisir publication (obligatoire), numéro, édition, langue, état, date, code-barres ;
 - Un identifiant UUID est généré ;
 - Un magazine sans numéro est autorisé (hors-série) ;
 - La date de création est enregistrée.
@@ -91,7 +91,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **ajouter/modifier/supprimer un exemplaire** afin de **gérer les multiples copies d'une même édition**.
 
 **Critères d'acceptation** :
-- J'ajoute un exemplaire avec état, notes et date ;
+- J'ajoute un exemplaire avec notes et date ;
 - Je supprime un exemplaire ;
 - Supprimer une édition supprime ses exemplaires (cascade).
 
@@ -172,8 +172,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **ouvrir la fiche détaillée d'un magazine** afin de **voir ses exemplaires et informations**.
 
 **Critères d'acceptation** :
-- La fiche affiche publication, numéro, édition, pays, date, code-barres ;
-- Elle liste les exemplaires avec état, notes et date ;
+- La fiche affiche publication, numéro, édition, langue, état, date, code-barres ;
+- Elle liste les exemplaires avec notes et date ;
 - Elle affiche le statut Possédé/Absent.
 
 **Priorité** : haute.
@@ -182,7 +182,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **modifier les informations d'une édition** afin de **corriger une erreur de saisie**.
 
 **Critères d'acceptation** :
-- Je peux modifier publication, numéro, édition, pays, date, code-barres ;
+- Je peux modifier publication, numéro, édition, langue, état, date, code-barres ;
 - La date de modification est mise à jour.
 
 **Priorité** : moyenne.
@@ -206,10 +206,10 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Priorité** : haute.
 
 ### US-COL-07 — Saisie assistée avec suggestions
-> En tant que **Marc**, je veux **des suggestions pendant la saisie manuelle** afin de **gagner du temps et éviter les doublons ou les différences de casse** (édition, nom, pays…).
+> En tant que **Marc**, je veux **des suggestions pendant la saisie manuelle** afin de **gagner du temps et éviter les doublons ou les différences de casse** (édition, nom, langue…).
 
 **Critères d'acceptation** :
-- Des suggestions apparaissent dès le début de la frappe sur certains champs (publication, édition, pays) ;
+- Des suggestions apparaissent dès le début de la frappe sur certains champs (publication, édition, langue) ;
 - Je peux choisir une suggestion pour remplir le champ ;
 - Une même valeur écrite différemment (casse) n'est pas dupliquée.
 
@@ -219,7 +219,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **un formulaire de saisie complet, découpé en deux sections** afin de **saisir l'essentiel rapidement et avoir accès aux détails seulement si besoin**.
 
 **Critères d'acceptation** :
-- Tous les champs du modèle sont présents (publication, numéro, édition, pays, date, code-barres, état, langue, notes…) ;
+- Tous les champs du modèle sont présents (publication, numéro, édition, langue, date, code-barres, état, notes…) ;
 - La section principale contient les informations obligatoires/essentielles ;
 - Un bouton « Plus de détails » déplie la section des champs optionnels ;
 - Le champ date se saisit via des listes déroulantes Année / Mois ;

@@ -86,7 +86,8 @@ export default function MagazineDetailScreen() {
 
       <View style={styles.card} testID="detail-info">
         <InfoRow styles={styles} label="Édition" value={detail.edition?.trim() || '—'} />
-        <InfoRow styles={styles} label="Pays" value={detail.country?.trim() || '—'} />
+        <InfoRow styles={styles} label="Langue" value={detail.language?.trim() || '—'} />
+        <InfoRow styles={styles} label="État" value={detail.condition?.trim() || '—'} />
         <InfoRow styles={styles} label="Date" value={formatDate(detail.publicationDate)} />
         <InfoRow styles={styles} label="Code-barres" value={detail.barcode?.trim() || '—'} />
         <InfoRow styles={styles} label="Ajouté le" value={formatDate(detail.createdAt)} />
@@ -108,7 +109,6 @@ export default function MagazineDetailScreen() {
         detail.copies.map((copy, index) => (
           <View style={styles.copyRow} key={copy.id} testID="detail-copy">
             <Text style={styles.copyIndex}>#{index + 1}</Text>
-            <Text style={styles.copyMeta}>{copy.condition?.trim() || 'État non précisé'}</Text>
             <Text style={styles.copyDate}>{formatDate(copy.dateAdded)}</Text>
           </View>
         ))
@@ -231,11 +231,6 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 14,
       fontWeight: '700',
       color: colors.accent,
-    },
-    copyMeta: {
-      flex: 1,
-      fontSize: 14,
-      color: colors.text,
     },
     copyDate: {
       fontSize: 12,

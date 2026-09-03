@@ -13,7 +13,8 @@ type MagazineRow = {
   publication: string;
   issue_number: number | null;
   edition: string | null;
-  country: string | null;
+  language: string | null;
+  condition: string | null;
   publication_date: string | null;
   barcode: string | null;
   notes: string | null;
@@ -23,7 +24,7 @@ type MagazineRow = {
 };
 
 const LIST_SELECT = `
-  SELECT m.id, m.publication, m.issue_number, m.edition, m.country,
+  SELECT m.id, m.publication, m.issue_number, m.edition, m.language,
          m.publication_date, m.barcode, m.created_at, m.updated_at,
          COUNT(c.id) AS quantity
   FROM magazines m
@@ -40,7 +41,8 @@ function toMagazine(
     publication: row.publication,
     issueNumber: row.issue_number,
     edition: row.edition,
-    country: row.country,
+    language: row.language,
+    condition: row.condition ?? null,
     publicationDate: row.publication_date,
     barcode: row.barcode,
     notes: row.notes ?? null,
@@ -55,7 +57,7 @@ export class MagazineRepository {
 
   async findByBarcode(barcode: string): Promise<Magazine | null> {
     const row = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, country, publication_date,
+      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
               barcode, created_at, updated_at
        FROM magazines
        WHERE barcode = ?`,
@@ -104,7 +106,7 @@ export class MagazineRepository {
 
   async findById(id: string): Promise<MagazineDetail | null> {
     const row = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, country, publication_date,
+      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
               barcode, notes, ocr_text, created_at, updated_at
        FROM magazines
        WHERE id = ?`,
@@ -118,11 +120,10 @@ export class MagazineRepository {
     const copyRows = await this.db.getAllAsync<{
       id: string;
       magazine_id: string;
-      condition: string | null;
       notes: string | null;
       date_added: string;
     }>(
-      `SELECT id, magazine_id, condition, notes, date_added
+      `SELECT id, magazine_id, notes, date_added
        FROM collection_items
        WHERE magazine_id = ?
        ORDER BY date_added DESC`,
@@ -132,7 +133,6 @@ export class MagazineRepository {
     const copies: CollectionItem[] = copyRows.map((r) => ({
       id: r.id,
       magazineId: r.magazine_id,
-      condition: r.condition,
       notes: r.notes,
       dateAdded: r.date_added,
     }));
@@ -156,7 +156,8 @@ export class MagazineRepository {
       publication,
       issueNumber: input.issueNumber ?? null,
       edition: input.edition ?? null,
-      country: input.country ?? null,
+      language: input.language ?? null,
+      condition: input.condition ?? null,
       publicationDate: input.publicationDate ?? null,
       barcode: input.barcode ?? null,
       notes: input.notes ?? null,
@@ -167,14 +168,15 @@ export class MagazineRepository {
 
     await this.db.runAsync(
       `INSERT INTO magazines
-        (id, publication, issue_number, edition, country, publication_date,
+        (id, publication, issue_number, edition, language, condition, publication_date,
          barcode, notes, ocr_text, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       magazine.id,
       magazine.publication,
       magazine.issueNumber,
       magazine.edition,
-      magazine.country,
+      magazine.language,
+      magazine.condition,
       magazine.publicationDate,
       magazine.barcode,
       magazine.notes,
@@ -188,7 +190,7 @@ export class MagazineRepository {
 
   async update(id: string, input: CreateMagazineInput): Promise<Magazine | null> {
     const current = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, country, publication_date,
+      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
               barcode, notes, ocr_text, created_at, updated_at
        FROM magazines
        WHERE id = ?`,
@@ -207,13 +209,14 @@ export class MagazineRepository {
     const updatedAt = new Date().toISOString();
     await this.db.runAsync(
       `UPDATE magazines
-       SET publication = ?, issue_number = ?, edition = ?, country = ?,
-           publication_date = ?, barcode = ?, updated_at = ?
+       SET publication = ?, issue_number = ?, edition = ?, language = ?,
+           condition = ?, publication_date = ?, barcode = ?, updated_at = ?
        WHERE id = ?`,
       publication,
       input.issueNumber ?? null,
       input.edition ?? null,
-      input.country ?? null,
+      input.language ?? null,
+      input.condition ?? null,
       input.publicationDate ?? null,
       input.barcode ?? null,
       updatedAt,
@@ -225,7 +228,8 @@ export class MagazineRepository {
       publication,
       issueNumber: input.issueNumber ?? null,
       edition: input.edition ?? null,
-      country: input.country ?? null,
+      language: input.language ?? null,
+      condition: input.condition ?? null,
       publicationDate: input.publicationDate ?? null,
       barcode: input.barcode ?? null,
       updatedAt,

@@ -31,15 +31,13 @@ afterEach(async () => {
 });
 
 describe('collectionRepository.addCopy', () => {
-  it('ajoute un exemplaire avec etat, notes et date', async () => {
+  it('ajoute un exemplaire avec notes et date', async () => {
     const copy = await repo.addCopy(magazineId, {
-      condition: 'neuf',
       notes: 'emballage intact',
     });
 
     expect(copy).toMatchObject({
       magazineId,
-      condition: 'neuf',
       notes: 'emballage intact',
     });
     expect(copy.id).toMatch(/^b1a2c3d4-0000-4000-8000-/);
@@ -51,7 +49,9 @@ describe('collectionRepository.addCopy', () => {
   });
 
   it('refuse un exemplaire pour une edition inexistante', async () => {
-    await expect(repo.addCopy('edition-inconnue')).rejects.toThrow('FOREIGN KEY');
+    await expect(repo.addCopy('edition-inconnue')).rejects.toMatchObject({
+      code: 'SQLITE_CONSTRAINT_FOREIGNKEY',
+    });
   });
 });
 
@@ -75,15 +75,15 @@ describe('collectionRepository.countByMagazine', () => {
 describe('collectionRepository.listByMagazine', () => {
   it('liste du plus recent au plus ancien', async () => {
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'copy-1',
       magazineId,
       '2026-01-01T10:00:00Z',
     );
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'copy-2',
       magazineId,
       '2026-09-01T10:00:00Z',
@@ -119,15 +119,15 @@ describe('suppression en cascade', () => {
 describe('collectionRepository.listRecentCopies', () => {
   it('liste les derniers exemplaires avec les infos du magazine, du plus recent au plus ancien', async () => {
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, 'neuf', NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'copy-old',
       magazineId,
       '2026-01-01T10:00:00Z',
     );
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, 'tres bon', NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'copy-new',
       magazineId,
       '2026-09-01T10:00:00Z',
@@ -137,8 +137,8 @@ describe('collectionRepository.listRecentCopies', () => {
       issueNumber: 30,
     });
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, 'coffret', ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, 'coffret', ?)`,
       'copy-mid',
       otherMagazine.id,
       '2026-05-01T10:00:00Z',
@@ -148,7 +148,6 @@ describe('collectionRepository.listRecentCopies', () => {
 
     expect(recent).toHaveLength(2);
     expect(recent[0].copy.id).toBe('copy-new');
-    expect(recent[0].copy.condition).toBe('tres bon');
     expect(recent[0].magazine.publication).toBe('Picsou Magazine');
     expect(recent[0].magazine.issueNumber).toBe(547);
     expect(recent[1].copy.id).toBe('copy-mid');

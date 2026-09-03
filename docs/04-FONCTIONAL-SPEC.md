@@ -313,9 +313,9 @@ Inventaire complet et consultable de la collection.
 **Éléments** :
 - bannière de statut (Possédé 🔴 / Absent 🟢) ;
 - numéro en grand ;
-- chips de métadonnées (publication, édition, pays, date) ;
+- chips de métadonnées (publication, édition, langue, état, date) ;
 - code-barres ;
-- liste des **exemplaires** avec, pour chacun : état, notes, date d'ajout.
+- liste des **exemplaires** avec, pour chacun : notes, date d'ajout.
 
 > **Retour client (UX) :** l'information **essentielle** de la fiche est la réponse « possédé ou non ». Les champs de détail des exemplaires (état, notes, date) sont un **bonus**, toujours **optionnels** et jamais obligatoires. Ils ne doivent jamais ralentir le parcours principal.
 
@@ -396,7 +396,7 @@ L'application vérifie :
 ## 14. Règles transverses
 
 ### 14.1 Identité des données
-- le numéro seul ne suffit **jamais** : l'identification combine publication + numéro + édition + pays + date.
+- le numéro seul ne suffit **jamais** : l'identification combine publication + numéro + édition + langue + date.
 
 ### 14.2 Pas de persistance d'images
 - les frames caméra et les résultats OCR sont éphémères.

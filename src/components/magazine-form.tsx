@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AutocompleteInput } from '@/components/autocomplete-input';
 import { SelectField } from '@/components/select-field';
@@ -18,7 +18,8 @@ type FormValues = {
   publication: string;
   issueNumber: string;
   edition: string;
-  country: string;
+  language: string;
+  condition: string;
   month: string | null;
   year: string | null;
   barcode: string;
@@ -51,7 +52,8 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
       publication: initial?.publication ?? '',
       issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
       edition: initial?.edition ?? '',
-      country: initial?.country ?? '',
+      language: initial?.language ?? '',
+      condition: initial?.condition ?? '',
       month: month || null,
       year: year || null,
       barcode: initial?.barcode ?? initialBarcode ?? '',
@@ -59,15 +61,20 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
     };
   });
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const styles = makeStyles(colors);
 
-  const set = (key: keyof FormValues, value: string | null) =>
+  const set = (key: keyof FormValues, value: string | null) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    if (formError) {
+      setFormError(null);
+    }
+  };
 
   const publications = [...new Set(magazines.map((m) => m.publication))];
   const editions = [...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e))];
-  const countries = [...new Set(magazines.map((m) => m.country).filter((c): c is string => !!c))];
+  const languages = [...new Set(magazines.map((m) => m.language).filter((l): l is string => !!l))];
 
   const openBarcodeScanner = () => {
     router.push('/scan/form-barcode');
@@ -93,20 +100,26 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
       publication: values.publication.trim(),
       issueNumber: values.issueNumber.trim() ? Number(values.issueNumber) : null,
       edition: values.edition.trim() || null,
-      country: values.country.trim() || null,
+      language: values.language.trim() || null,
+      condition: values.condition.trim() || null,
       publicationDate: publicationDateFrom(values.month, values.year),
       barcode: values.barcode.trim() || null,
       notes: values.notes.trim() || null,
     };
     try {
       await onSubmit(input);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Erreur lors de l’enregistrement.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.form}>
+    <ScrollView
+      style={styles.formScroll}
+      contentContainerStyle={styles.form}
+      keyboardShouldPersistTaps="handled">
       {/* Section essentielle (toujours visible) */}
       <AutocompleteInput
         label="Publication *"
@@ -154,13 +167,24 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
       {detailsOpen && (
         <View style={styles.details}>
           <AutocompleteInput
-            label="Pays"
-            value={values.country}
-            options={countries}
-            onChangeText={(v) => set('country', v)}
+            label="Langue"
+            value={values.language}
+            options={languages}
+            onChangeText={(v) => set('language', v)}
             placeholder="Ex : FR"
-            testID="field-country"
-            accessibilityLabel="Pays"
+            testID="field-language"
+            accessibilityLabel="Langue"
+          />
+
+          <Text style={styles.label}>État</Text>
+          <TextInput
+            style={styles.input}
+            value={values.condition}
+            onChangeText={(v) => set('condition', v)}
+            placeholder="Ex : Neuf, usé, abîmé…"
+            placeholderTextColor={colors.textSecondary}
+            testID="field-condition"
+            accessibilityLabel="État"
           />
 
           <Text style={styles.label}>Date de publication</Text>
@@ -224,6 +248,12 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
         </View>
       )}
 
+      {formError ? (
+        <Text style={styles.formError} testID="form-error">
+          {formError}
+        </Text>
+      ) : null}
+
       <Pressable
         style={[styles.submit, !canSubmit && styles.submitDisabled]}
         onPress={handleSubmit}
@@ -232,14 +262,18 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
         accessibilityRole="button">
         <Text style={styles.submitText}>{submitting ? 'Enregistrement…' : submitLabel}</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    formScroll: {
+      flex: 1,
+    },
     form: {
       gap: Spacing.two,
+      paddingBottom: Spacing.four,
     },
     label: {
       fontSize: 14,
@@ -258,6 +292,13 @@ function makeStyles(colors: ThemeColors) {
     notesInput: {
       minHeight: 72,
       textAlignVertical: 'top',
+    },
+    formError: {
+      marginTop: Spacing.two,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.danger,
+      textAlign: 'center',
     },
     detailsToggle: {
       marginTop: Spacing.three,
