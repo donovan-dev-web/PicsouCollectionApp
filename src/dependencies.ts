@@ -6,7 +6,7 @@ import { MagazineRepository } from '@/database/repositories/magazine-repository'
 import { SettingsRepository } from '@/database/repositories/settings-repository';
 import { IdentificationService } from '@/identification/identificationService';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
-import { NoopOcrEngine } from '@/identification/ocr/ocrEngine';
+import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
@@ -38,7 +38,9 @@ export async function initialize(): Promise<Dependencies> {
   }
   const db = await dbPromise;
   if (!deps) {
-    const ocrEngine: OcrEngine = new NoopOcrEngine();
+    // Moteur OCR natif (ML Kit via expo-mlkit-ocr). Sur CI / hors Dev Build,
+    // l'import est paresseux dans `recognize` : il ne casse pas les tests.
+    const ocrEngine: OcrEngine = new MlKitOcrEngine();
     deps = {
       magazineRepository: new MagazineRepository(db),
       collectionRepository: new CollectionRepository(db),

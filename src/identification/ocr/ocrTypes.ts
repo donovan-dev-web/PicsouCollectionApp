@@ -1,17 +1,20 @@
 /**
  * Types du flux OCR (M-05, US-ID-03 / US-ID-05).
  *
- * La partie "moteur OCR" (reconnaissance brute sur des images caméra) est un
- * module **natif** (Google ML Kit Text Recognition) qui ne peut être validé que
- * sur un Development Build. Pour ne pas bloquer la CI, le pipeline logique
- * (analyse, parsing, confiance) est testable et dépend d'une interface `OcrEngine`,
- * dont l'implémentation native est isolée (`mlKitOcrEngine.ts`).
+ * Le pipeline logique (analyse, parsing, confiance) est testable et dépend d'une
+ * interface `OcrEngine`. L'implémentation native (`MlKitOcrEngine`) s'appuie sur
+ * le module Expo `expo-mlkit-ocr` (Google ML Kit on-device), **image-based** : on
+ * capture une photo via `expo-camera` (`takePictureAsync`) puis on reconnaît le
+ * texte à partir de son URI. Le module natif n'est disponible que sur un
+ * Development Build (valider sur téléphone physique) — il ne bloque pas la CI.
  */
 
-/** Une frame caméra analysée. Seul le texte reconnu par le moteur nous intéresse. */
+/**
+ * Entrée d'une frame analysée. `native` transporte l'URI de l'image capturée
+ * (sortie de `takePictureAsync`) ; opaque pour le pipeline logique.
+ */
 export type OcrFrame = {
-  /** Pointeur natif / image ; opaque pour le pipeline logique. */
-  native: unknown;
+  native: string | null;
   width: number;
   height: number;
 };

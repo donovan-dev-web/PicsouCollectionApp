@@ -29,6 +29,9 @@ type FormValues = {
 type Props = {
   initial?: Magazine;
   initialBarcode?: string;
+  initialPublication?: string;
+  initialIssueNumber?: number | null;
+  initialYear?: string | null;
   submitLabel: string;
   onSubmit: (input: CreateMagazineInput) => Promise<void> | void;
 };
@@ -40,7 +43,15 @@ function publicationDateFrom(month: string | null, year: string | null): string 
   return `${year}-${month}`;
 }
 
-export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }: Props) {
+export function MagazineForm({
+  initial,
+  initialBarcode,
+  initialPublication,
+  initialIssueNumber,
+  initialYear,
+  submitLabel,
+  onSubmit,
+}: Props) {
   const colors = useThemeColors();
   const router = useRouter();
   const magazines = useCollectionStore((s) => s.magazines);
@@ -48,14 +59,20 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
   const [values, setValues] = useState<FormValues>(() => {
     const date = initial?.publicationDate ?? '';
     const [year, month] = date.length === 7 ? date.split('-') : ['', ''];
+    const prefilledYear = initialYear ?? (year || null);
     return {
-      publication: initial?.publication ?? '',
-      issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
+      publication: initialPublication ?? initial?.publication ?? '',
+      issueNumber:
+        initialIssueNumber != null
+          ? String(initialIssueNumber)
+          : initial?.issueNumber != null
+            ? String(initial.issueNumber)
+            : '',
       edition: initial?.edition ?? '',
       language: initial?.language ?? '',
       condition: initial?.condition ?? '',
       month: month || null,
-      year: year || null,
+      year: prefilledYear || null,
       barcode: initial?.barcode ?? initialBarcode ?? '',
       notes: initial?.notes ?? '',
     };

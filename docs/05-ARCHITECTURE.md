@@ -211,17 +211,20 @@ interface OcrEngine { recognize(frame): Promise<OcrFrameResult> }  // OcrFrameRe
 parseOcrText(raw): OcrParseResult      // publication, issueNumber, date, confidence (0..1)
 isConfident(parse): boolean            // seuil MIN_CONFIDENCE
 
-// ocrEngine.ts      (défaut CI-safe)
-NoopOcrEngine                        // retourne toujours null (ne bloque pas la CI)
+// ocrEngine.ts      (moteur de repli CI-safe)
+NoopOcrEngine                        // retourne toujours null
 
-// mlKitOcrEngine.ts (natif, à tester physiquement)
-MlKitOcrEngine                       // Google ML Kit Text Recognition, chargement paresseux
+// mlKitOcrEngine.ts (natif, à tester physiquement) — MOTEUR PAR DÉFAUT
+MlKitOcrEngine                       // Google ML Kit via expo-mlkit-ocr (import paresseux, image-based)
 ```
 
 **Isolation** : l'écran `/scan/camera` dépend uniquement de l'interface `OcrEngine`
-injectée via `dependencies.getDeps()`. Le moteur par défaut est `NoopOcrEngine` ;
-l'implémentation native (`MlKitOcrEngine`) est **isolée** et doit être **activée dans
-`initialize()`** après validation sur Development Build — elle ne bloque pas la CI.
+injectée via `dependencies.getDeps()`. Par défaut (`dependencies.initialize()`), le
+moteur est `MlKitOcrEngine` : il capture une photo via `expo-camera`
+(`takePictureAsync`) et appelle `expo-mlkit-ocr`'s `recognizeText(uri)`. L'import du
+module natif est **paresseux** (dans `recognize`) : sur CI / hors Development Build il
+retourne `null` sans bloquer les tests. `NoopOcrEngine` reste disponible comme repli.
+<b>La reconnaissance brute se valide sur téléphone physique</b> (Development Build).
 
 #### `collectionService.ts`
 ```ts
@@ -280,9 +283,11 @@ unknown       → Navigation vers result.tsx (Absent)
 
 ### 6.4 Identification par OCR
 ```
-Écran /scan/camera → intervalle d'analyse (ou 3 frames/s max)
+Écran /scan/camera → intervalle d'analyse (photo capturée via takePictureAsync)
    ↓
-ocrEngine.recognize(frame)            // OcrEngine injecté (NoopEngine par défaut, ML Kit sur device)
+cameraRef.takePictureAsync() → uri       // photo éphémère, aucune image persistée
+   ↓
+ocrEngine.recognize({ native: uri })     // OcrEngine par défaut = MlKitOcrEngine (expo-mlkit-ocr)
    ↓  { text }
 identificationService.identifyByOCR(text)
    ↓  parseOcrText → publication / issueNumber / date + confiance

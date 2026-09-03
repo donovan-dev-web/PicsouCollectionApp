@@ -5,8 +5,12 @@ import { useCollectionStore } from '@/store/use-collection-store';
 
 const mockBack = jest.fn();
 
+export const mockLocalSearchParams: { current: Record<string, string | undefined> } = {
+  current: {},
+};
+
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: () => mockLocalSearchParams.current,
   useFocusEffect: (callback: () => void) => callback(),
   useRouter: () => ({ back: mockBack }),
 }));
@@ -14,6 +18,7 @@ jest.mock('expo-router', () => ({
 describe('ManualEntryScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
+    mockLocalSearchParams.current = {};
     useCollectionStore.setState({
       addMagazine: jest.fn(),
     });
@@ -42,5 +47,18 @@ describe('ManualEntryScreen', () => {
 
     await waitFor(() => expect(addMagazine).toHaveBeenCalledTimes(1));
     expect(mockBack).toHaveBeenCalled();
+  });
+
+  it('pré-remplit le formulaire avec les infos extraites par l’OCR', () => {
+    mockLocalSearchParams.current = {
+      publication: 'Picsou Magazine',
+      issueNumber: '900',
+      year: '2023',
+    };
+
+    render(<ManualEntryScreen />);
+
+    expect(screen.getByTestId('field-publication')).toHaveProp('value', 'Picsou Magazine');
+    expect(screen.getByTestId('field-issue-number')).toHaveProp('value', '900');
   });
 });

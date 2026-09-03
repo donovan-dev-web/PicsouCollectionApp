@@ -295,7 +295,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - En cas de confiance insuffisante, une saisie manuelle est proposée ;
 - Aucune image n'est enregistrée.
 
-**Statut (M-05)** : le pipeline logique est livré et testé (`ocrTextParser`, `identificationService.identifyByOCR`, écran `/scan/camera`). La reconnaissance brute repose sur le moteur natif ML Kit, **isolé derrière l'interface `OcrEngine`** (`MlKitOcrEngine`) à activer après validation sur Development Build.
+**Statut (M-05)** : le pipeline logique est livré et testé (`ocrTextParser`, `identificationService.identifyByOCR`, écran `/scan/camera`). La reconnaissance brute repose sur `MlKitOcrEngine` (**expo-mlkit-ocr**, on-device), branché par défaut dans `dependencies.initialize()`. À **valider sur téléphone physique** (Development Build via `eas build`).
 
 **Priorité** : haute.
 

@@ -33,7 +33,13 @@ export type OcrLookupResult =
       date: string | null;
       confidence: number;
     }
-  | { status: 'unknown'; publication: string; issueNumber: number | null; confidence: number }
+  | {
+      status: 'unknown';
+      publication: string;
+      issueNumber: number | null;
+      date: string | null;
+      confidence: number;
+    }
   | { status: 'no-text' };
 
 export interface IdentificationRepository {
@@ -113,6 +119,6 @@ export class IdentificationService {
       };
     }
 
-    return { status: 'unknown', publication, issueNumber, confidence };
+    return { status: 'unknown', publication, issueNumber, date, confidence };
   }
 }

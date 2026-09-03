@@ -160,7 +160,7 @@ describe('CameraOcrScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-547');
   });
 
-  it('affiche la confiance insuffisante et ne repropose que réessayer/manuel', async () => {
+  it('affiche la confiance insuffisante avec réessayer, code-barres et manuel', async () => {
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -181,6 +181,31 @@ describe('CameraOcrScreen', () => {
     expect(screen.getByTestId('ocr-weak')).toBeTruthy();
     expect(screen.getByText('Confiance insuffisante')).toBeTruthy();
     expect(screen.queryByTestId('ocr-confirm')).toBeNull();
+    expect(screen.getByTestId('ocr-retry')).toBeTruthy();
+    expect(screen.getByTestId('ocr-barcode')).toBeTruthy();
+    expect(screen.getByTestId('ocr-manual')).toBeTruthy();
+  });
+
+  it('Scanner le code-barres (confiance insuffisante) mène au scan de code-barres', async () => {
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByOCR: jest.fn().mockResolvedValue({
+            status: 'weak',
+            publication: 'Picsou Magazine',
+            issueNumber: null,
+            date: null,
+            confidence: 0.4,
+          }),
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-barcode'));
+    expect(mockReplace).toHaveBeenCalledWith('/scan/barcode');
   });
 
   it('Réessayer relance l’analyse', async () => {
@@ -229,5 +254,34 @@ describe('CameraOcrScreen', () => {
 
     expect(screen.getByTestId('ocr-unknown')).toBeTruthy();
     expect(screen.getByText(/Non trouvé en collection/)).toBeTruthy();
+  });
+
+  it('Saisir manuellement (non trouvé) pré-remplit la saisie avec les infos OCR', async () => {
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByOCR: jest.fn().mockResolvedValue({
+            status: 'unknown',
+            publication: 'Picsou Magazine',
+            issueNumber: 900,
+            date: '2023',
+            confidence: 1,
+          }),
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-manual'));
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: '/scan/manual',
+      params: {
+        publication: 'Picsou Magazine',
+        issueNumber: '900',
+        year: '2023',
+      },
+    });
   });
 });

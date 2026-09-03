@@ -200,19 +200,21 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Identifier un magazine sans code-barres à partir du flux caméra.
 
-**Statut : En cours** — le pipeline logique (parsing, confiance, écran `/scan/camera`, repli US-ID-05) est livré et **entièrement testé** ; l'**intégration du module natif** ML Kit est à **valider sur téléphone physique** (Development Build). L'implémentation native est isolée derrière une interface `OcrEngine` (`MlKitOcrEngine`), à activer dans `dependencies.initialize()` une fois le module branché.
+**Statut : Validé sur téléphone physique** — le pipeline logique (parsing, confiance, écran `/scan/camera`, repli US-ID-05) est livré et **entièrement testé**. Le module natif **`expo-mlkit-ocr`** (Google ML Kit, on-device) est **installé et branché** (plugins configurés dans `app.json`, `MlKitOcrEngine` par défaut dans `dependencies.initialize()`, capture photo via `takePictureAsync`), et la reconnaissance brute a été **validée sur téléphone physique** (dev build `eas build`). Deux correctifs post-test intégrés : **repli code-barres** en confiance insuffisante et **pré-remplissage** de la saisie manuelle avec les infos OCR (publication / numéro / année).
 
 | Tâche | Story | Statut |
 |---|---|---|
-| Valider la librairie OCR native | US-ID-03 | À valider (device) |
-| Intégrer le module OCR | US-ID-03 | Isolé (`MlKitOcrEngine`), à activer |
+| Valider la librairie OCR native | US-ID-03 | `expo-mlkit-ocr` installé, à valider (device) |
+| Intégrer le module OCR | US-ID-03 | Fait (`MlKitOcrEngine` par défaut, plugin configuré) |
 | Extraire publication / numéro / date | US-ID-03 | Fait (parser testé) |
 | Calculer la confiance | US-ID-03 | Fait (`ocrTextParser`) |
 | Afficher les résultats + confiance | US-ID-03 | Fait (écran `/scan/camera`) |
 | Proposer réessayer / saisie manuelle | US-ID-05 | Fait (confiance faible / inconnu) |
+| Repli code-barres (confiance faible) | US-ID-05 | Fait (retour test physique) |
+| Pré-remplir saisie manuelle avec l'OCR | US-ID-05 | Fait (publication / numéro / année) |
 | Tests OCR (échecs de confiance) | US-QA-02 | Fait (parser, service, écran) |
 
-**Livrables** : identification OCR fonctionnelle avec gestion de confiance — livrée côté logique, module natif à valider sur device (**208 tests / 31 suites, ~93 % de couverture**).
+**Livrables** : identification OCR + module natif branché (`expo-mlkit-ocr`) — validé sur téléphone physique (**211 tests / 31 suites, ~93 % de couverture**).
 
 ---
 
