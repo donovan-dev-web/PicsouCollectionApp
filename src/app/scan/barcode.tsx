@@ -46,6 +46,8 @@ export default function BarcodeScreen() {
           barcode: stabilized,
         },
       });
+    } else if (result.status === 'ambiguous') {
+      router.replace({ pathname: '/scan/multiple', params: { barcode: stabilized } });
     } else if (result.status === 'unknown') {
       router.replace({ pathname: '/scan/result', params: { barcode: stabilized } });
     } else {
