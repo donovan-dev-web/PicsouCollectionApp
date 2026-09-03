@@ -44,6 +44,8 @@ describe('EditMagazineScreen', () => {
     expect(screen.getByTestId('field-publication').props.value).toBe('Picsou Magazine');
     expect(screen.getByTestId('field-issue-number').props.value).toBe('547');
     expect(screen.getByTestId('field-edition').props.value).toBe('standard');
+
+    fireEvent.press(screen.getByTestId('details-toggle'));
     expect(screen.getByTestId('field-barcode').props.value).toBe('3271234567890');
   });
 
@@ -62,6 +64,7 @@ describe('EditMagazineScreen', () => {
       country: 'FR',
       publicationDate: '2023-03',
       barcode: '3271234567890',
+      notes: null,
     });
     await waitFor(() => expect(mockBack).toHaveBeenCalled());
   });

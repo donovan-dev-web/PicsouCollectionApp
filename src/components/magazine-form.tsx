@@ -2,18 +2,27 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { AutocompleteInput } from '@/components/autocomplete-input';
+import { SelectField } from '@/components/select-field';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { consumePendingBarcode } from '@/lib/pending-barcode';
+import { useCollectionStore } from '@/store/use-collection-store';
 import type { CreateMagazineInput, Magazine } from '@/types';
+
+const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const;
+
+const YEARS = Array.from({ length: 40 }, (_, i) => String(2025 - i));
 
 type FormValues = {
   publication: string;
   issueNumber: string;
   edition: string;
   country: string;
-  publicationDate: string;
+  month: string | null;
+  year: string | null;
   barcode: string;
+  notes: string;
 };
 
 type Props = {
@@ -23,22 +32,42 @@ type Props = {
   onSubmit: (input: CreateMagazineInput) => Promise<void> | void;
 };
 
+function publicationDateFrom(month: string | null, year: string | null): string | null {
+  if (!month || !year) {
+    return null;
+  }
+  return `${year}-${month}`;
+}
+
 export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }: Props) {
   const colors = useThemeColors();
   const router = useRouter();
-  const [values, setValues] = useState<FormValues>({
-    publication: initial?.publication ?? '',
-    issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
-    edition: initial?.edition ?? '',
-    country: initial?.country ?? '',
-    publicationDate: initial?.publicationDate ?? '',
-    barcode: initial?.barcode ?? initialBarcode ?? '',
+  const magazines = useCollectionStore((s) => s.magazines);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [values, setValues] = useState<FormValues>(() => {
+    const date = initial?.publicationDate ?? '';
+    const [year, month] = date.length === 7 ? date.split('-') : ['', ''];
+    return {
+      publication: initial?.publication ?? '',
+      issueNumber: initial?.issueNumber != null ? String(initial.issueNumber) : '',
+      edition: initial?.edition ?? '',
+      country: initial?.country ?? '',
+      month: month || null,
+      year: year || null,
+      barcode: initial?.barcode ?? initialBarcode ?? '',
+      notes: initial?.notes ?? '',
+    };
   });
   const [submitting, setSubmitting] = useState(false);
+
   const styles = makeStyles(colors);
 
-  const set = (key: keyof FormValues) => (value: string) =>
+  const set = (key: keyof FormValues, value: string | null) =>
     setValues((prev) => ({ ...prev, [key]: value }));
+
+  const publications = [...new Set(magazines.map((m) => m.publication))];
+  const editions = [...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e))];
+  const countries = [...new Set(magazines.map((m) => m.country).filter((c): c is string => !!c))];
 
   const openBarcodeScanner = () => {
     router.push('/scan/form-barcode');
@@ -65,8 +94,9 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
       issueNumber: values.issueNumber.trim() ? Number(values.issueNumber) : null,
       edition: values.edition.trim() || null,
       country: values.country.trim() || null,
-      publicationDate: values.publicationDate.trim() || null,
+      publicationDate: publicationDateFrom(values.month, values.year),
       barcode: values.barcode.trim() || null,
+      notes: values.notes.trim() || null,
     };
     try {
       await onSubmit(input);
@@ -77,13 +107,13 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
 
   return (
     <View style={styles.form}>
-      <Text style={styles.label}>Publication *</Text>
-      <TextInput
-        style={styles.input}
+      {/* Section essentielle (toujours visible) */}
+      <AutocompleteInput
+        label="Publication *"
         value={values.publication}
-        onChangeText={set('publication')}
+        options={publications}
+        onChangeText={(v) => set('publication', v)}
         placeholder="Ex : Picsou Magazine"
-        placeholderTextColor={colors.textSecondary}
         testID="field-publication"
         accessibilityLabel="Publication"
       />
@@ -92,7 +122,7 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
       <TextInput
         style={styles.input}
         value={values.issueNumber}
-        onChangeText={set('issueNumber')}
+        onChangeText={(v) => set('issueNumber', v)}
         placeholder="Ex : 547"
         keyboardType="number-pad"
         placeholderTextColor={colors.textSecondary}
@@ -100,60 +130,99 @@ export function MagazineForm({ initial, initialBarcode, submitLabel, onSubmit }:
         accessibilityLabel="Numéro"
       />
 
-      <Text style={styles.label}>Édition</Text>
-      <TextInput
-        style={styles.input}
+      <AutocompleteInput
+        label="Édition"
         value={values.edition}
-        onChangeText={set('edition')}
+        options={editions}
+        onChangeText={(v) => set('edition', v)}
         placeholder="Ex : édition française"
-        placeholderTextColor={colors.textSecondary}
         testID="field-edition"
         accessibilityLabel="Édition"
       />
 
-      <Text style={styles.label}>Pays</Text>
-      <TextInput
-        style={styles.input}
-        value={values.country}
-        onChangeText={set('country')}
-        placeholder="Ex : FR"
-        placeholderTextColor={colors.textSecondary}
-        testID="field-country"
-        accessibilityLabel="Pays"
-      />
+      {/* Bouton « Plus de détails » */}
+      <Pressable
+        style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
+        onPress={() => setDetailsOpen((o) => !o)}
+        testID="details-toggle"
+        accessibilityRole="button">
+        <Text style={styles.detailsToggleText}>
+          {detailsOpen ? '▲ Masquer les détails' : '▼ Plus de détails'}
+        </Text>
+      </Pressable>
 
-      <Text style={styles.label}>Date de publication</Text>
-      <TextInput
-        style={styles.input}
-        value={values.publicationDate}
-        onChangeText={set('publicationDate')}
-        placeholder="Ex : 2023-03"
-        placeholderTextColor={colors.textSecondary}
-        testID="field-publication-date"
-        accessibilityLabel="Date de publication"
-      />
+      {detailsOpen && (
+        <View style={styles.details}>
+          <AutocompleteInput
+            label="Pays"
+            value={values.country}
+            options={countries}
+            onChangeText={(v) => set('country', v)}
+            placeholder="Ex : FR"
+            testID="field-country"
+            accessibilityLabel="Pays"
+          />
 
-      <Text style={styles.label}>Code-barres</Text>
-      <View style={styles.barcodeRow}>
-        <TextInput
-          style={[styles.input, styles.barcodeInput]}
-          value={values.barcode}
-          onChangeText={set('barcode')}
-          placeholder="Ex : 3271234000011"
-          keyboardType="number-pad"
-          placeholderTextColor={colors.textSecondary}
-          testID="field-barcode"
-          accessibilityLabel="Code-barres"
-        />
-        <Pressable
-          style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
-          onPress={openBarcodeScanner}
-          testID="barcode-scan"
-          accessibilityRole="button"
-          accessibilityLabel="Scanner le code-barres">
-          <Text style={styles.scanButtonText}>▣ Scanner</Text>
-        </Pressable>
-      </View>
+          <Text style={styles.label}>Date de publication</Text>
+          <View style={styles.dateRow}>
+            <View style={styles.dateCol}>
+              <SelectField
+                label="Mois"
+                placeholder="—"
+                value={values.month}
+                options={MONTHS}
+                onSelect={(v) => set('month', v)}
+                testID="select-month"
+              />
+            </View>
+            <View style={styles.dateCol}>
+              <SelectField
+                label="Année"
+                placeholder="—"
+                value={values.year}
+                options={YEARS}
+                onSelect={(v) => set('year', v)}
+                testID="select-year"
+              />
+            </View>
+          </View>
+
+          <Text style={styles.label}>Code-barres</Text>
+          <View style={styles.barcodeRow}>
+            <TextInput
+              style={[styles.input, styles.barcodeInput]}
+              value={values.barcode}
+              onChangeText={(v) => set('barcode', v)}
+              placeholder="Ex : 3271234000011"
+              keyboardType="default"
+              autoCapitalize="characters"
+              placeholderTextColor={colors.textSecondary}
+              testID="field-barcode"
+              accessibilityLabel="Code-barres"
+            />
+            <Pressable
+              style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+              onPress={openBarcodeScanner}
+              testID="barcode-scan"
+              accessibilityRole="button"
+              accessibilityLabel="Scanner le code-barres">
+              <Text style={styles.scanButtonText}>▣ Scanner</Text>
+            </Pressable>
+          </View>
+
+          <Text style={styles.label}>Notes</Text>
+          <TextInput
+            style={[styles.input, styles.notesInput]}
+            value={values.notes}
+            onChangeText={(v) => set('notes', v)}
+            placeholder="Informations complémentaires…"
+            multiline
+            placeholderTextColor={colors.textSecondary}
+            testID="field-notes"
+            accessibilityLabel="Notes"
+          />
+        </View>
+      )}
 
       <Pressable
         style={[styles.submit, !canSubmit && styles.submitDisabled]}
@@ -185,6 +254,33 @@ function makeStyles(colors: ThemeColors) {
       paddingVertical: Spacing.two,
       fontSize: 16,
       color: colors.text,
+    },
+    notesInput: {
+      minHeight: 72,
+      textAlignVertical: 'top',
+    },
+    detailsToggle: {
+      marginTop: Spacing.three,
+      alignSelf: 'flex-start',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 8,
+      backgroundColor: colors.backgroundElement,
+    },
+    detailsToggleText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.accent,
+    },
+    details: {
+      gap: Spacing.two,
+    },
+    dateRow: {
+      flexDirection: 'row',
+      gap: Spacing.three,
+    },
+    dateCol: {
+      flex: 1,
     },
     barcodeRow: {
       flexDirection: 'row',
