@@ -150,6 +150,59 @@ describe('magazineRepository.findByBarcode', () => {
   });
 });
 
+describe('magazineRepository.findManyByBarcode', () => {
+  it('retourne toutes les editions partageant le meme code-barres', async () => {
+    const first = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      barcode: '3271232567890',
+    });
+    const second = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 548,
+      barcode: '3271232567890',
+    });
+
+    const result = await repo.findManyByBarcode('3271232567890');
+
+    expect(result.map((m) => m.issueNumber)).toEqual([547, 548]);
+    expect(result.map((m) => m.id)).toEqual([first.id, second.id]);
+  });
+
+  it('compte les exemplaires possedes pour chaque edition', async () => {
+    const mag = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      barcode: '3271232567890',
+    });
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
+      'c1',
+      mag.id,
+      '2026-09-01T10:00:00Z',
+    );
+    await testDb.runAsync(
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
+      'c2',
+      mag.id,
+      '2026-09-01T10:00:00Z',
+    );
+
+    const result = await repo.findManyByBarcode('3271232567890');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].quantity).toBe(2);
+  });
+
+  it('retourne une liste vide pour un code-barres inconnu', async () => {
+    const result = await repo.findManyByBarcode('9999999999999');
+
+    expect(result).toEqual([]);
+  });
+});
+
 describe('magazineRepository.list', () => {
   it('trie par publication puis numero', async () => {
     await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });

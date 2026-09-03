@@ -37,6 +37,7 @@ L'application comporte les écrans suivants (navigation Expo Router) :
 | Caméra / OCR | `/scan/camera` | Reconnaissance par flux caméra |
 | Saisie manuelle | `/scan/manual` | Formulaire de saisie |
 | Résultat | `/scan/result` | Possédé / Absent |
+| Plusieurs éditions | `/scan/multiple` | Code-barres → liste d'éditions |
 | Ma Collection | `/collection` | Liste, recherche, filtres |
 | Fiche Magazine | `/collection/[id]` | Détail d'une édition |
 | Paramètres | `/settings` | Sauvegarde, données, version |
@@ -258,6 +259,33 @@ Absent de la collection
 
 - **Scanner à nouveau** → `/scan/barcode` ;
 - **Saisir manuellement** → `/scan/manual` en pré-remplissant le code-barres scanné, pour accélérer la création de l'édition.
+
+### 7.3 Plusieurs éditions pour un même code-barres
+
+> **Origine (retours M-04R) :** un code-barres n'est pas unique (voir §8) ; le même code peut correspondre à plusieurs éditions (numéros/éditions différents). Le flux mène alors vers `/scan/multiple`.
+
+L'écran `/scan/multiple` affiche le **nombre d'éditions** correspondant au code scanné et une **liste cliquable** : chaque ligne mène à la fiche de l'édition correspondante.
+
+```
+Plusieurs éditions pour ce code
+
+2 éditions trouvées
+Code-barres : 3271234000011
+
+┌───────────────────────────────┐
+│  Picsou Magazine      n° 547  │
+│  🔴 Possédé (1)               │
+└───────────────────────────────┘
+┌───────────────────────────────┐
+│  Picsou Magazine      n° 548  │
+│  🟢 Absent                    │
+└───────────────────────────────┘
+
+[ Scanner à nouveau ]
+```
+
+- **Chaque ligne** → `/collection/[id]` (fiche de l'édition) ;
+- **Scanner à nouveau** → `/scan/barcode`.
 
 ---
 

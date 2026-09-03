@@ -175,6 +175,34 @@ describe('BarcodeScreen', () => {
     );
   });
 
+  it('navigue vers /scan/multiple quand le code correspond à plusieurs éditions', async () => {
+    const identifyByBarcode = jest.fn().mockResolvedValue({
+      status: 'ambiguous',
+      magazines: [
+        { ...makeMagazine({ id: 'mag-1', issueNumber: 547 }), quantity: 1 },
+        { ...makeMagazine({ id: 'mag-2', issueNumber: 548 }), quantity: 0 },
+      ],
+    });
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByBarcode,
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<BarcodeScreen />);
+
+    await scanTimes('5901234123457');
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/scan/multiple',
+        params: { barcode: '5901234123457' },
+      }),
+    );
+  });
+
   it('n’émet qu’une seule recherche par code stabilisé', async () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(

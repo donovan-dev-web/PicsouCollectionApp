@@ -67,6 +67,20 @@ export class MagazineRepository {
     return row ? toMagazine(row) : null;
   }
 
+  async findManyByBarcode(barcode: string): Promise<MagazineListItem[]> {
+    const rows = await this.db.getAllAsync<
+      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
+    >(
+      `${LIST_SELECT}
+       WHERE m.barcode = ?
+       GROUP BY m.id
+       ORDER BY m.publication, m.issue_number`,
+      barcode,
+    );
+
+    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+  }
+
   async list(): Promise<MagazineListItem[]> {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }

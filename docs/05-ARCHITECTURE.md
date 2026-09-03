@@ -171,6 +171,7 @@ Opérations sur les éditions :
 
 ```ts
 findByBarcode(barcode): Promise<Magazine | null>
+findManyByBarcode(barcode): Promise<MagazineListItem[]>
 findById(id): Promise<MagazineDetail | null>
 list(): Promise<MagazineListItem[]>
 search(query): Promise<MagazineListItem[]>
@@ -194,6 +195,8 @@ deleteCopy(id): Promise<void>
 #### `identificationService.ts`
 ```ts
 identifyByBarcode(barcode): Promise<MagazineIdentification | null>
+// Retourne "found" (1 édition), "ambiguous" (plusieurs éditions pour le même code)
+// ou "unknown" / "invalid".
 identifyByOCR(text): Promise<MagazineIdentification | null>
 identifyManually(data): Promise<MagazineIdentification>
 ```
@@ -246,11 +249,11 @@ magazineRepository / collectionRepository (SQL)
    ↓  code détecté
 identificationService.identifyByBarcode(code)
    ↓
-magazineRepository.findByBarcode(code)
+magazineRepository.findManyByBarcode(code)   // liste des éditions partageant ce code
    ↓
-collectionService.checkPossession(magazineId)
-   ↓
-Navigation vers result.tsx avec le résultat
+found (1)     → Navigation vers result.tsx
+ambiguous (>1) → Navigation vers multiple.tsx (compte + liste cliquable)
+unknown       → Navigation vers result.tsx (Absent)
 ```
 
 ---
