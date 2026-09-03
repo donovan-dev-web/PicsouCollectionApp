@@ -110,28 +110,22 @@ Identifier le magazine
 
 ### 4.2 Code connu
 
+Si le code-barres correspond à une édition **enregistrée** dans la base, le scan transmet `id`, `publication` et `issueNumber` à l'**écran Résultat** (voir §7.1) :
+
 ```
-Magazine trouvé
-Picsou Magazine
-N° 547
-Édition française
-
-🔴 DÉJÀ POSSÉDÉ   (ou 🟢 ABSENT)
-
-[ ✓ C'est bien ce magazine ]
-[ Essayer une autre méthode ]
+ℹ️ → Écran Résultat « Déjà dans votre collection »
+       [ Voir la fiche ] [ Scanner à nouveau ] [ Saisir manuellement ]
 ```
 
-La confirmation permet de vérifier visuellement que l'identification correspond bien au magazine physique avant d'accéder au résultat.
+Le collectionneur peut consulter la fiche de l'édition ou continuer à scanner.
 
 ### 4.3 Code inconnu
 
-```
-Code-barres inconnu
-Aucune correspondance trouvée dans votre collection.
+Si le code-barres n'est associé à **aucune édition**, le scan transmet le `barcode` à l'**écran Résultat** (voir §7.2), qui propose de **saisir manuellement** l'édition (le scan seul ne crée jamais l'édition, voir §4.1) :
 
-[ Identifier avec la caméra ]
-[ Saisir manuellement ]
+```
+ℹ️ → Écran Résultat « Absent de la collection »
+       [ Scanner à nouveau ] [ Saisir manuellement ] (code-barres pré-rempli)
 ```
 
 ### 4.4 Scan en continu / scan multiple
@@ -217,43 +211,53 @@ Date           [ (facultatif) ]
 
 ## 7. Écran Résultat
 
-### 7.1 Magazine déjà possédé
+> **Origine (retour test physique, #93) :** cet écran est la cible de la navigation après un scan de code-barres. Il distingue deux situations selon que le code-barres est déjà lié à une édition de la base ou non.
+
+Le flux scanner aboutit sur `/scan/result` en transmettant par paramètres :
+- `id` (éditer si le code est **connu**), `publication`, `issueNumber` ;
+- `barcode` (toujours, pour récupérer la saisie manuelle en cas de code inconnu).
+
+### 7.1 Magazine déjà possédé (code connu)
+
+Si le code-barres correspond à une édition enregistrée, l'écran affiche `Déjà dans votre collection` avec la fiche de l'édition.
 
 ```
+Déjà dans votre collection
+
 ┌───────────────────────────────┐
-│       🔴 DÉJÀ POSSÉDÉ         │
-│                               │
-│       Picsou Magazine         │
+│          Picsou Magazine      │
 │             N° 547            │
-│                               │
-│       Édition française       │
-│                               │
-│       Exemplaire(s) : 1       │
-│                               │
-│ [ Fermer ]                    │
 └───────────────────────────────┘
+
+[ Voir la fiche ]
+[ Scanner à nouveau ]
+[ Saisir manuellement ]
 ```
 
-Le collectionneur peut prendre sa décision immédiatement.
+- **Voir la fiche** → `/collection/[id]` (remplace le résultat par la fiche d'édition) ;
+- **Scanner à nouveau** → `/scan/barcode` ;
+- **Saisir manuellement** → `/scan/manual`.
 
-### 7.2 Magazine non possédé
+### 7.2 Magazine non possédé (code inconnu)
+
+Si le code-barres est **inconnu**, l'écran affiche `Absent de la collection` : le scan seul ne crée jamais l'édition (voir §4.1), il faut la saisir manuellement.
 
 ```
+Absent de la collection
+
 ┌───────────────────────────────┐
-│       🟢 NON POSSÉDÉ          │
+│ Ce magazine n'existe pas     │
+│ encore dans votre collection.│
 │                               │
-│       Picsou Magazine         │
-│             N° 548            │
-│                               │
-│       Édition française       │
-│                               │
-│ [ Ajouter à la collection ]   │
-│                               │
-│ [ Fermer ]                    │
+│ Code-barres : 3271234000011  │
 └───────────────────────────────┘
+
+[ Scanner à nouveau ]
+[ Saisir manuellement ]
 ```
 
-`Ajouter à la collection` ajoute l'exemplaire en un geste.
+- **Scanner à nouveau** → `/scan/barcode` ;
+- **Saisir manuellement** → `/scan/manual` en pré-remplissant le code-barres scanné, pour accélérer la création de l'édition.
 
 ---
 
@@ -309,9 +313,9 @@ Inventaire complet et consultable de la collection.
 **Éléments** :
 - bannière de statut (Possédé 🔴 / Absent 🟢) ;
 - numéro en grand ;
-- chips de métadonnées (publication, édition, pays, date) ;
+- chips de métadonnées (publication, édition, langue, état, date) ;
 - code-barres ;
-- liste des **exemplaires** avec, pour chacun : état, notes, date d'ajout.
+- liste des **exemplaires** avec, pour chacun : notes, date d'ajout.
 
 > **Retour client (UX) :** l'information **essentielle** de la fiche est la réponse « possédé ou non ». Les champs de détail des exemplaires (état, notes, date) sont un **bonus**, toujours **optionnels** et jamais obligatoires. Ils ne doivent jamais ralentir le parcours principal.
 
@@ -392,7 +396,7 @@ L'application vérifie :
 ## 14. Règles transverses
 
 ### 14.1 Identité des données
-- le numéro seul ne suffit **jamais** : l'identification combine publication + numéro + édition + pays + date.
+- le numéro seul ne suffit **jamais** : l'identification combine publication + numéro + édition + langue + date.
 
 ### 14.2 Pas de persistance d'images
 - les frames caméra et les résultats OCR sont éphémères.

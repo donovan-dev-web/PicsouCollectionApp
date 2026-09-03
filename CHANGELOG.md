@@ -7,6 +7,31 @@
 
 ---
 
+## [0.5.0] — 2026-09-03
+
+> Cinquième release : **retours du test sur appareil physique post-v0.4.0** — fiabilisation du scan, saisie assistée et gestion de la collection (M-04R).
+
+### Added
+- **Écran résultat après scan** et **scan accessible depuis le formulaire** de saisie — `US-COL-08`
+- **Lecture robuste multi-format** des codes-barres (alphanumériques non tronqués, vote majoritaire anti faux-positifs) — `US-ID-07`
+- **Saisie assistée avec suggestions** anti-doublons et date Année/Mois — `US-COL-07`
+- **Ajouts récents cliquables** vers la fiche de l'édition — `US-ACC-05`
+- **Pagination de la collection** (20/page) et **filtres par numéro et édition** — `US-COL-09`, `US-COL-10`
+- **Bascule manuelle du thème** clair/sombre, persistée en base et réglable depuis les paramètres — `US-SET-01`
+- Champ **Langue** (ex-pays) et **État** sur l'édition ; **code-barres autorisé en doublon** (un même code peut correspondre à des numéros/éditions différents) — retours M-04R
+- Tests et couverture étendus sur scan, formulaire, thème, fiche et collection
+
+### Changed
+- Migration de schéma **v3** : `country` → `language`, `condition` déplacé de `collection_items` vers `magazines` (l'état caractérise l'édition)
+- Migration de schéma **v4** : index `idx_magazines_barcode` passé en **non unique**
+- Formulaire : zone « Plus de détails » **scrollable** (accès au bouton d'enregistrement sans refermer la section)
+- Formulaire : **affichage des erreurs de soumission** sous le formulaire au lieu d'un échec silencieux
+
+### Fixed
+- Correction du **test flaky FOREIGN KEY** (`error.code` + garde `PRAGMA foreign_keys`) pour des tests DB stables en CI
+
+---
+
 ## [0.4.0] — 2026-09-02
 
 > Quatrième release technique : **scan code-barres** pour identifier une édition en brocante (M-04).

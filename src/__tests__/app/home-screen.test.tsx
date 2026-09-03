@@ -94,7 +94,6 @@ describe('HomeScreen (ajouts recents)', () => {
           copy: {
             id: 'c1',
             magazineId: 'm1',
-            condition: 'neuf',
             notes: null,
             dateAdded: '2026-09-01T10:00:00Z',
           },
@@ -104,7 +103,6 @@ describe('HomeScreen (ajouts recents)', () => {
           copy: {
             id: 'c2',
             magazineId: 'm2',
-            condition: null,
             notes: 'coffret',
             dateAdded: '2026-08-20T10:00:00Z',
           },
@@ -119,6 +117,30 @@ describe('HomeScreen (ajouts recents)', () => {
     expect(screen.getByText('Picsou Magazine n°547')).toBeTruthy();
     expect(screen.getByText('Super Picsou Géant')).toBeTruthy();
     expect(screen.getByText('2026-09-01')).toBeTruthy();
+  });
+
+  it('navigue vers le detail de l edition au tap sur un ajout recent', () => {
+    useCollectionStore.setState({
+      loading: false,
+      loaded: true,
+      recentCopies: [
+        {
+          copy: {
+            id: 'c1',
+            magazineId: 'm1',
+            notes: null,
+            dateAdded: '2026-09-01T10:00:00Z',
+          },
+          magazine: { id: 'm1', publication: 'Picsou Magazine', issueNumber: 547 },
+        },
+      ],
+    });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getAllByTestId('recent-item')[0]);
+
+    expect(mockPush).toHaveBeenCalledWith('/collection/m1');
   });
 
   it('affiche un etat vide sans ajouts', () => {

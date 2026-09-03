@@ -38,7 +38,8 @@ const magazine: MagazineListItem = {
   publication: 'Picsou Magazine',
   issueNumber: 547,
   edition: null,
-  country: null,
+  language: null,
+  condition: null,
   publicationDate: null,
   barcode: null,
   notes: null,
@@ -89,7 +90,6 @@ describe('useCollectionStore', () => {
     mockAddCopy.mockResolvedValue({
       id: 'c1',
       magazineId: 'mag-1',
-      condition: null,
       notes: null,
       dateAdded: 'x',
     });
@@ -121,7 +121,6 @@ describe('useCollectionStore', () => {
         copy: {
           id: 'c1',
           magazineId: 'mag-1',
-          condition: null,
           notes: null,
           dateAdded: '2026-09-01T10:00:00Z',
         },

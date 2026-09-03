@@ -114,8 +114,7 @@ Une vue complète de la collection avec :
 - **Scan en continu** : ajouter plusieurs magazines à la suite depuis la collection.
 
 ### 📇 Fiche Magazine — le détail qui compte
-Pour chaque numéro, une fiche complète : publication, numéro, édition, pays, date, code-barres, et surtout la **liste des exemplaires possédés** avec pour chacun :
-- l'**état** (Très Bon État, État Moyen, etc.) ;
+Pour chaque numéro, une fiche complète : publication, numéro, édition, état, langue, date, code-barres, et la **liste des exemplaires possédés** avec pour chacun :
 - la **date d'ajout** ;
 - des **notes personnelles** (ex. « acheté 0,50 € en brocante à Lille »).
 
@@ -123,7 +122,7 @@ Pour chaque numéro, une fiche complète : publication, numéro, édition, pays,
 Les statistiques de la collection, l'**export** et l'**import** de sauvegarde, le choix du thème (clair/sombre) et de la langue.
 
 ### ♻️ Gestion des doublons — sans jugement
-Si l'utilisateur tente d'ajouter une édition déjà possédée, l'application l'avertit puis lui laisse le choix d'**ajouter un second exemplaire** s'il le souhaite. On peut très bien posséder deux exemplaires du même numéro — chacun garde alors sa propre fiche d'état.
+Si l'utilisateur tente d'ajouter une édition déjà possédée, l'application l'avertit puis lui laisse le choix d'**ajouter un second exemplaire** s'il le souhaite. On peut très bien posséder deux exemplaires du même numéro — l'édition porte alors son état, et chaque exemplaire garde ses notes et sa date d'ajout.
 
 ---
 
@@ -172,7 +171,7 @@ Dernière méthode, toujours disponible. Utilisée si :
 - la couverture est trop abîmée ;
 - ou simplement si l'utilisateur préfère saisir.
 
-Le formulaire est **volontairement court** : publication, numéro, édition, éventuellement date et pays.
+Le formulaire est **volontairement court** : publication, numéro, édition, éventuellement date et langue.
 
 ### ↪️ L'ordre des méthodes en cas d'échec
 ```
@@ -189,7 +188,7 @@ Le numéro seul ne suffit **jamais**. Le n°30 de *Picsou Magazine*, de *Super P
 
 L'identification combine toujours le maximum d'informations disponibles :
 ```
-Publication + Numéro + Édition + Pays + Date (éventuelle)
+Publication + Numéro + Édition + Langue + Date (éventuelle)
 ```
 C'est cette rigueur qui garantit des réponses fiables — la clé de la confiance dans l'outil.
 
@@ -285,7 +284,7 @@ Sept écrans structurent l'application, chacun en version **clair** et **sombre*
 Compteur de collection en grand chiffre, boutons **Scanner** et **Ajouter** proéminents, liste des **ajouts récents**. Navigation inférieure : Accueil / Ma Collection / Paramètres.
 
 ### 8.2 Ajouter à la collection
-Deux voies d'entrée : le **Scanner** (grand bouton) et un **formulaire** (publication, numéro, édition, pays, date). Bouton d'ajout collé en bas pour un geste final naturel.
+Deux voies d'entrée : le **Scanner** (grand bouton) et un **formulaire** (publication, numéro, édition, langue, date). Bouton d'ajout collé en bas pour un geste final naturel.
 
 ### 8.3 Identifier
 Le choix des trois méthodes, avec un **aperçu caméra** évocateur (réticule de scan animé). La barre de navigation est volontairement masquée pour concentrer l'attention sur la tâche : **identifier**.
@@ -294,7 +293,7 @@ Le choix des trois méthodes, avec un **aperçu caméra** évocateur (réticule 
 Vue liste à haute densité avec **recherche**, **filtres** (type de publication, époque) et bouton flottant de scanner qui permet le **scan en continu**. Chaque entrée affiche la miniature, le numéro en grand et un **badge de statut** (Possédé / Manquant).
 
 ### 8.5 Fiche Magazine
-La fiche détaillée : bannière de statut, numéro en grand, chips de métadonnées, informations d'édition et **liste des exemplaires** avec leur état et leurs notes.
+La fiche détaillée : bannière de statut, numéro en grand, chips de métadonnées, informations d'édition (dont l'état) et **liste des exemplaires** avec leurs notes et dates d'ajout.
 
 ### 8.6 Paramètres
 Statistiques, **export/import** de la collection, thème, langue, version de l'application.

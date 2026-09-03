@@ -8,6 +8,7 @@ const mockUpdateMagazine = jest.fn();
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: 'mag-1' }),
+  useFocusEffect: (callback: () => void) => callback(),
   useRouter: () => ({ back: mockBack }),
 }));
 
@@ -16,7 +17,8 @@ const detail = {
   publication: 'Picsou Magazine',
   issueNumber: 547,
   edition: 'standard',
-  country: 'FR',
+  language: 'FR',
+  condition: null,
   publicationDate: '2023-03',
   barcode: '3271234567890',
   notes: null,
@@ -43,6 +45,8 @@ describe('EditMagazineScreen', () => {
     expect(screen.getByTestId('field-publication').props.value).toBe('Picsou Magazine');
     expect(screen.getByTestId('field-issue-number').props.value).toBe('547');
     expect(screen.getByTestId('field-edition').props.value).toBe('standard');
+
+    fireEvent.press(screen.getByTestId('details-toggle'));
     expect(screen.getByTestId('field-barcode').props.value).toBe('3271234567890');
   });
 
@@ -58,9 +62,11 @@ describe('EditMagazineScreen', () => {
       publication: 'Mickey Parade',
       issueNumber: 600,
       edition: 'standard',
-      country: 'FR',
+      language: 'FR',
+      condition: null,
       publicationDate: '2023-03',
       barcode: '3271234567890',
+      notes: null,
     });
     await waitFor(() => expect(mockBack).toHaveBeenCalled());
   });

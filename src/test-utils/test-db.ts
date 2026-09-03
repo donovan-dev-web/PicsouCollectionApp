@@ -5,6 +5,11 @@ export function createTestDatabase(): Database & { close(): void } {
   const db = new BetterSqlite3(':memory:');
   db.pragma('foreign_keys = ON');
 
+  const fkState = db.pragma('foreign_keys', { simple: true }) as number;
+  if (fkState !== 1) {
+    throw new Error('Les contraintes de clés étrangères doivent être actives dans les tests.');
+  }
+
   return {
     async execAsync(sql: string): Promise<void> {
       db.exec(sql);

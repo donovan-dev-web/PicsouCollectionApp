@@ -55,10 +55,10 @@ describe('validateBarcode', () => {
     });
   });
 
-  it('rejette un code sans chiffres', () => {
+  it('rejette un code sans chiffres trop court', () => {
     expect(validateBarcode('abc')).toEqual({
       valid: false,
-      reason: 'Aucun chiffre détecté.',
+      reason: 'Format de code-barres non supporté.',
     });
   });
 
@@ -66,6 +66,38 @@ describe('validateBarcode', () => {
     expect(validateBarcode('123')).toEqual({
       valid: false,
       reason: 'Format de code-barres non supporté.',
+    });
+  });
+
+  it('accepte un code alphanumérique non standard (GENERIC) sans le convertir', () => {
+    expect(validateBarcode('ABC-123456')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: 'ABC-123456',
+    });
+  });
+
+  it('accepte un code avec symboles et préserve les caractères', () => {
+    expect(validateBarcode('@9876-54321')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: '@9876-54321',
+    });
+  });
+
+  it('préserve un zéro de tête (pas de conversion numérique)', () => {
+    expect(validateBarcode('0487 001122')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: '0487 001122',
+    });
+  });
+
+  it('accepte une longueur numérique inhabituelle (format non standard)', () => {
+    expect(validateBarcode('11223344556677889900')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: '11223344556677889900',
     });
   });
 });

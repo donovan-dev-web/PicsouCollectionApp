@@ -31,7 +31,7 @@ describe('magazineRepository.create', () => {
       publication: 'Picsou Magazine',
       issueNumber: 547,
       edition: 'standard',
-      country: 'FR',
+      language: 'FR',
       publicationDate: '2023-03',
       barcode: '3271234567890',
       notes: 'Mention bimestriel',
@@ -42,7 +42,7 @@ describe('magazineRepository.create', () => {
       publication: 'Picsou Magazine',
       issueNumber: 547,
       edition: 'standard',
-      country: 'FR',
+      language: 'FR',
       publicationDate: '2023-03',
       barcode: '3271234567890',
       notes: 'Mention bimestriel',
@@ -77,9 +77,30 @@ describe('magazineRepository.create', () => {
   });
 
   it('accepte un code-barres null (ancien magazine)', async () => {
-    const magazine = await repo.create({ publication: 'Mickey Parade', country: 'FR' });
+    const magazine = await repo.create({ publication: 'Mickey Parade', language: 'FR' });
 
     expect(magazine.barcode).toBeNull();
+  });
+
+  it('autorise le meme code-barres pour des numeros differents (index non unique)', async () => {
+    const first = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      barcode: '3271232567890',
+    });
+    const second = await repo.create({
+      publication: 'Picsou Magazine',
+      issueNumber: 548,
+      barcode: '3271232567890',
+    });
+
+    expect(first.issueNumber).toBe(547);
+    expect(second.issueNumber).toBe(548);
+    const rows = await testDb.getAllAsync<{ id: string; issue_number: number }>(
+      'SELECT id, issue_number FROM magazines WHERE barcode = ? ORDER BY issue_number',
+      '3271232567890',
+    );
+    expect(rows.map((r) => r.issue_number)).toEqual([547, 548]);
   });
 });
 
@@ -88,7 +109,7 @@ describe('magazineRepository.findByBarcode', () => {
     const created = await repo.create({
       publication: 'Picsou Magazine',
       issueNumber: 547,
-      country: 'FR',
+      language: 'FR',
       barcode: '3271234567890',
     });
 
@@ -99,7 +120,7 @@ describe('magazineRepository.findByBarcode', () => {
         id: created.id,
         publication: 'Picsou Magazine',
         issueNumber: 547,
-        country: 'FR',
+        language: 'FR',
         barcode: '3271234567890',
         notes: null,
         ocrText: null,
@@ -151,22 +172,22 @@ describe('magazineRepository.list', () => {
     const double = await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
 
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c1',
       single.id,
       '2026-09-01T10:00:00Z',
     );
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c2',
       double.id,
       '2026-09-01T10:00:00Z',
     );
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c3',
       double.id,
       '2026-09-01T10:00:00Z',
@@ -245,8 +266,8 @@ describe('magazineRepository.search', () => {
   it('calcule la quantite pour chaque resultat', async () => {
     const mag = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c1',
       mag.id,
       '2026-09-01T10:00:00Z',
@@ -264,23 +285,23 @@ describe('magazineRepository.findById', () => {
       publication: 'Picsou Magazine',
       issueNumber: 547,
       edition: 'standard',
-      country: 'FR',
+      language: 'FR',
+      condition: 'neuf',
       publicationDate: '2023-03',
       barcode: '3271234567890',
       notes: 'Mention bimestriel',
     });
 
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, ?, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c1',
       mag.id,
-      'neuf',
       '2026-09-01T10:00:00Z',
     );
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c2',
       mag.id,
       '2026-09-02T10:00:00Z',
@@ -293,7 +314,8 @@ describe('magazineRepository.findById', () => {
       publication: 'Picsou Magazine',
       issueNumber: 547,
       edition: 'standard',
-      country: 'FR',
+      language: 'FR',
+      condition: 'neuf',
       barcode: '3271234567890',
       notes: 'Mention bimestriel',
       ocrText: null,
@@ -302,11 +324,10 @@ describe('magazineRepository.findById', () => {
     expect(detail?.copies[0]).toEqual({
       id: 'c2',
       magazineId: mag.id,
-      condition: null,
       notes: null,
       dateAdded: '2026-09-02T10:00:00Z',
     });
-    expect(detail?.copies[1]).toMatchObject({ id: 'c1', condition: 'neuf' });
+    expect(detail?.copies[1]).toMatchObject({ id: 'c1', notes: null });
   });
 
   it('renvoie une liste de copies vide pour une edition non possedee', async () => {
@@ -330,7 +351,7 @@ describe('magazineRepository.update', () => {
     const created = await repo.create({
       publication: 'Picsou Magazine',
       issueNumber: 547,
-      country: 'FR',
+      language: 'FR',
       barcode: '3271234567890',
     });
     const originalUpdatedAt = created.updatedAt;
@@ -341,7 +362,7 @@ describe('magazineRepository.update', () => {
       publication: 'Picsou Magazine (Édition Deluxe)',
       issueNumber: 548,
       edition: 'deluxe',
-      country: 'FR',
+      language: 'FR',
       publicationDate: '2024-01',
       barcode: '3271234567891',
     });
@@ -351,7 +372,7 @@ describe('magazineRepository.update', () => {
       publication: 'Picsou Magazine (Édition Deluxe)',
       issueNumber: 548,
       edition: 'deluxe',
-      country: 'FR',
+      language: 'FR',
       publicationDate: '2024-01',
       barcode: '3271234567891',
     });
@@ -411,8 +432,8 @@ describe('magazineRepository.delete', () => {
   it('supprime l edition et ses exemplaires en cascade', async () => {
     const mag = await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
     await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, NULL, NULL, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, NULL, ?)`,
       'c1',
       mag.id,
       '2026-09-01T10:00:00Z',

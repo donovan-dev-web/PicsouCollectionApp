@@ -20,7 +20,8 @@ const detail = {
   publication: 'Picsou Magazine',
   issueNumber: 547,
   edition: 'standard',
-  country: 'FR',
+  language: 'FR',
+  condition: 'neuf',
   publicationDate: '2023-03',
   barcode: '3271234567890',
   notes: 'Mention bimestriel',
@@ -31,7 +32,6 @@ const detail = {
     {
       id: 'c1',
       magazineId: 'mag-1',
-      condition: 'neuf',
       notes: null,
       dateAdded: '2026-09-01T10:00:00Z',
     },
@@ -70,6 +70,7 @@ describe('MagazineDetailScreen', () => {
     expect(screen.getByTestId('detail-issue')).toHaveTextContent('n° 547');
     expect(screen.getAllByText('standard').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('FR').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('neuf').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('3271234567890').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -86,7 +87,7 @@ describe('MagazineDetailScreen', () => {
     render(<MagazineDetailScreen />);
 
     expect(screen.getAllByTestId('detail-copy')).toHaveLength(1);
-    expect(screen.getAllByText('neuf').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('01/09/2026').length).toBeGreaterThanOrEqual(1);
   });
 
   it('affiche Absent et un message quand aucun exemplaire', async () => {

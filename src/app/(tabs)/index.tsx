@@ -50,13 +50,19 @@ export default function HomeScreen() {
           </Text>
         ) : (
           recentCopies.map(({ copy, magazine }) => (
-            <View key={copy.id} style={styles.recentItem} testID="recent-item">
+            <Pressable
+              key={copy.id}
+              style={({ pressed }) => [styles.recentItem, pressed && styles.buttonPressed]}
+              onPress={() => router.push(`/collection/${magazine.id}`)}
+              testID="recent-item"
+              accessibilityRole="button"
+              accessibilityLabel={`Voir ${magazine.publication}${magazine.issueNumber != null ? ` numéro ${magazine.issueNumber}` : ''}`}>
               <Text style={styles.recentItemTitle}>
                 {magazine.publication}
                 {magazine.issueNumber != null ? ` n°${magazine.issueNumber}` : ''}
               </Text>
               <Text style={styles.recentItemDate}>{copy.dateAdded.slice(0, 10)}</Text>
-            </View>
+            </Pressable>
           ))
         )}
       </View>

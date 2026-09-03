@@ -5,7 +5,6 @@ import { generateId } from '@/utils/id';
 type CollectionItemRow = {
   id: string;
   magazine_id: string;
-  condition: string | null;
   notes: string | null;
   date_added: string;
 };
@@ -14,7 +13,6 @@ function toCollectionItem(row: CollectionItemRow): CollectionItem {
   return {
     id: row.id,
     magazineId: row.magazine_id,
-    condition: row.condition,
     notes: row.notes,
     dateAdded: row.date_added,
   };
@@ -30,17 +28,15 @@ export class CollectionRepository {
     const item: CollectionItem = {
       id: generateId(),
       magazineId,
-      condition: input.condition ?? null,
       notes: input.notes ?? null,
       dateAdded: new Date().toISOString(),
     };
 
     await this.db.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, condition, notes, date_added)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+       VALUES (?, ?, ?, ?)`,
       item.id,
       item.magazineId,
-      item.condition,
       item.notes,
       item.dateAdded,
     );
@@ -59,7 +55,7 @@ export class CollectionRepository {
 
   async listByMagazine(magazineId: string): Promise<CollectionItem[]> {
     const rows = await this.db.getAllAsync<CollectionItemRow>(
-      `SELECT id, magazine_id, condition, notes, date_added
+      `SELECT id, magazine_id, notes, date_added
        FROM collection_items
        WHERE magazine_id = ?
        ORDER BY date_added DESC`,
@@ -77,7 +73,6 @@ export class CollectionRepository {
     const rows = await this.db.getAllAsync<{
       copy_id: string;
       copy_magazine_id: string;
-      copy_condition: string | null;
       copy_notes: string | null;
       copy_date_added: string;
       magazine_publication: string;
@@ -85,7 +80,6 @@ export class CollectionRepository {
     }>(
       `SELECT c.id AS copy_id,
               c.magazine_id AS copy_magazine_id,
-              c.condition AS copy_condition,
               c.notes AS copy_notes,
               c.date_added AS copy_date_added,
               m.publication AS magazine_publication,
@@ -101,7 +95,6 @@ export class CollectionRepository {
       copy: {
         id: row.copy_id,
         magazineId: row.copy_magazine_id,
-        condition: row.copy_condition,
         notes: row.copy_notes,
         dateAdded: row.copy_date_added,
       },

@@ -54,7 +54,7 @@ Les champs `metadata`, `notes`, `ocr_text` étaient séparés dans une table dé
 ### 2.2 Simplification de `magazine_barcodes`
 La séparation des codes-barres dans une table dédiée (1:N) n'est **pas nécessaire dans le MVP** : une édition a au plus un code-barres dans la quasi-totalité des cas réels.
 
-**Décision :** le code-barres devient un **attribut `barcode`** de la table `magazines`, avec un index unique.
+**Décision :** le code-barres devient un **attribut `barcode`** de la table `magazines`, avec un index simple (non unique) pour autoriser les doublons (un même code peut correspondre à plusieurs numéros/éditions).
 
 > **Évolution possible :** si un besoin réel de plusieurs codes-barres par édition apparaît, une migration vers une table `magazine_barcodes` (1:N) pourra être réalisée. Le format d'export JSON a volontairement été conçu pour supporter cette évolution (champ `barcodes` sous forme de tableau).
 
@@ -72,9 +72,10 @@ Identifie et décrit une édition précise d'un magazine.
 | `publication` | TEXT | `string` | ✅ | Nom de la série |
 | `issue_number` | INTEGER | `number \| null` | ❌ | Numéro (peut être null pour hors-séries) |
 | `edition` | TEXT | `string \| null` | ❌ | Édition |
-| `country` | TEXT | `string \| null` | ❌ | Code pays (ex. "FR") |
+| `language` | TEXT | `string \| null` | ❌ | Langue de l'édition (ex. "FR") |
+| `condition` | TEXT | `string \| null` | ❌ | État de l'édition (ex. "neuf", "usé") |
 | `publication_date` | TEXT | `string \| null` | ❌ | Date ISO (ex. "2023-03") |
-| `barcode` | TEXT | `string \| null` | ❌ | Code-barres (EAN-13 / ISBN), index unique |
+| `barcode` | TEXT | `string \| null` | ❌ | Code-barres (EAN-13 / ISBN), index non unique (doublons permis) |
 | `notes` | TEXT | `string \| null` | ❌ | Notes sur l'édition |
 | `ocr_text` | TEXT | `string \| null` | ❌ | Texte brut OCR éphémère conservé en aide |
 | `created_at` | TEXT | `string` | ✅ | Timestamp ISO 8601 |
@@ -88,7 +89,6 @@ Un exemplaire physique réellement possédé d'une édition.
 |---|---|---|---|---|
 | `id` | TEXT | `string` | ✅ | Identifiant unique (UUID) |
 | `magazine_id` | TEXT | `string` | ✅ | Référence vers `magazines.id` |
-| `condition` | TEXT | `string \| null` | ❌ | État (ex. "bon", "moyen") |
 | `notes` | TEXT | `string \| null` | ❌ | Notes personnelles de l'exemplaire |
 | `date_added` | TEXT | `string` | ✅ | Timestamp ISO 8601 d'ajout |
 
@@ -104,7 +104,8 @@ type Magazine = {
   publication: string;
   issueNumber: number | null;
   edition: string | null;
-  country: string | null;
+  language: string | null;
+  condition: string | null;
   publicationDate: string | null;
   barcode: string | null;
   notes: string | null;
@@ -123,7 +124,6 @@ type MagazineListItem = Magazine & {
 type CollectionItem = {
   id: string;
   magazineId: string;
-  condition: string | null;
   notes: string | null;
   dateAdded: string;
 };
@@ -134,7 +134,7 @@ type MagazineIdentification = {
   publication: string;
   issueNumber?: number | null;
   edition?: string | null;
-  country?: string | null;
+  language?: string | null;
   publicationDate?: string | null;
   barcode?: string | null;
   confidence: number; // 0..1
@@ -156,7 +156,7 @@ type MagazineDetail = Magazine & {
 ### 5.1 Recherche par code-barres (scan)
 
 ```sql
-SELECT id, publication, issue_number, edition, country, publication_date, barcode
+SELECT id, publication, issue_number, edition, language, condition, publication_date, barcode
 FROM magazines
 WHERE barcode = ?;
 ```
@@ -184,7 +184,8 @@ SELECT
     m.publication,
     m.issue_number,
     m.edition,
-    m.country,
+    m.language,
+    m.condition,
     m.publication_date,
     m.barcode,
     COUNT(c.id) AS quantity
@@ -211,7 +212,7 @@ Les deux requêtes peuvent être exécutées de manière indépendante par le re
 ### 5.5 Recherche textuelle (collection)
 
 ```sql
-SELECT id, publication, issue_number, edition, country, publication_date, barcode
+SELECT id, publication, issue_number, edition, language, condition, publication_date, barcode
 FROM magazines
 WHERE publication LIKE ? OR CAST(issue_number AS TEXT) LIKE ?
 ORDER BY publication, issue_number;
@@ -241,7 +242,8 @@ Le format d'export est **indépendant** de l'implémentation SQLite. Il est con�
       "publication": "Picsou Magazine",
       "issueNumber": 547,
       "edition": "standard",
-      "country": "FR",
+      "language": "FR",
+      "condition": "good",
       "publicationDate": "2023-03",
       "barcode": "3271234567890",
       "notes": null,
@@ -250,7 +252,6 @@ Le format d'export est **indépendant** de l'implémentation SQLite. Il est con�
       "copies": [
         {
           "id": "9c1d2e3f-...",
-          "condition": "good",
           "notes": "Acheté 0,50 € en brocante à Lille",
           "dateAdded": "2026-08-30T14:30:00Z"
         }
@@ -287,7 +288,7 @@ Toute modification de structure incrémente `version` et documente la migration.
 
 | Table | Index | Type | Rôle |
 |---|---|---|---|
-| `magazines` | `barcode` | UNIQUE | Recherche scan immédiate |
+| `magazines` | `barcode` | normal (non unique) | Recherche scan immédiate ; doublons permis |
 | `magazines` | `(publication, issue_number)` | normal | Tri et recherche collection |
 | `collection_items` | `magazine_id` | normal | Jointure et comptage |
 
@@ -307,8 +308,8 @@ Pour une collection de quelques milliers de magazines, SQLite reste très perfor
 | Tables | `magazines`, `collection_items` |
 | Schéma | Simple et orienté document |
 | `magazine_details` | Supprimée (champs inlines dans `magazines`) |
-| `magazine_barcodes` | Simplifiée en colonne `barcode` unique |
-| Code-barres | EAN-13 / ISBN, index unique |
+| `magazine_barcodes` | Simplifiée en colonne `barcode` (non unique) |
+| Code-barres | EAN-13 / ISBN, index non unique (doublons permis) |
 | Export JSON | Format `picsou-collection` v1 |
 | TypeScript | camelCase, mapping explicit dans les repositories |
-| Index | barcode UNIQUE, (publication, issue_number), collection_items.magazine_id |
+| Index | barcode (non unique), (publication, issue_number), collection_items.magazine_id |

@@ -4,11 +4,11 @@ import BarcodeScreen from '@/app/scan/barcode';
 import { setDepsForTest, type Dependencies } from '@/dependencies';
 import type { Magazine } from '@/types';
 
+const mockReplace = jest.fn();
 const mockBack = jest.fn();
-const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: mockBack, push: mockPush }),
+  useRouter: () => ({ back: mockBack, replace: mockReplace }),
 }));
 
 const mockRequestPermission = jest.fn();
@@ -32,7 +32,8 @@ function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
     publication: 'Picsou Magazine',
     issueNumber: 547,
     edition: 'standard',
-    country: 'FR',
+    language: 'FR',
+    condition: null,
     publicationDate: '2023-03',
     barcode: '5901234123457',
     notes: null,
@@ -47,17 +48,37 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
     collectionRepository: {} as Dependencies['collectionRepository'],
+    settingsRepository: {
+      getColorScheme: jest.fn().mockResolvedValue('system'),
+      setColorScheme: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Dependencies['settingsRepository'],
     identificationService: {
-      identifyByBarcode: jest.fn().mockResolvedValue({ status: 'unknown' }),
+      identify: jest.fn(),
     } as unknown as Dependencies['identificationService'],
     ...overrides,
   };
 }
 
+function scan() {
+  const camera = screen.getByTestId('camera-view');
+  return camera.props.onBarcodeScanned;
+}
+
+/** Émet `times` lectures identiques pour atteindre le seuil du stabilisateur (3 par défaut). */
+function scanTimes(code: string, type = 'ean13', times = 3) {
+  return (async () => {
+    for (let i = 0; i < times; i++) {
+      await act(async () => {
+        scan()({ data: code, type });
+      });
+    }
+  })();
+}
+
 describe('BarcodeScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
-    mockPush.mockClear();
+    mockReplace.mockClear();
     setDepsForTest(stubDeps());
   });
 
@@ -67,7 +88,7 @@ describe('BarcodeScreen', () => {
     expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('affiche code inconnu et propose la saisie manuelle quand rien ne correspond', async () => {
+  it('ne lance la recherche qu’après stabilisation de la lecture (3 lectures identiques)', async () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(
       stubDeps({
@@ -79,19 +100,31 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    const camera = screen.getByTestId('camera-view');
+    // Une seule lecture (voire deux) ne doit pas déclencher de recherche
     await act(async () => {
-      camera.props.onBarcodeScanned({ data: '5901234123457', type: 'ean13' });
+      scan()({ data: '5901234123457', type: 'ean13' });
     });
+    expect(identifyByBarcode).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(screen.getByText('Code-barres inconnu')).toBeTruthy());
-    expect(identifyByBarcode).toHaveBeenCalledWith('5901234123457');
+    await act(async () => {
+      scan()({ data: '5901234123457', type: 'ean13' });
+    });
+    expect(identifyByBarcode).not.toHaveBeenCalled();
 
-    fireEvent.press(screen.getByTestId('unknown-manual'));
-    expect(mockPush).toHaveBeenCalledWith('/scan/manual');
+    // La 3e lecture stabilise le code → la recherche est lancée
+    await act(async () => {
+      scan()({ data: '5901234123457', type: 'ean13' });
+    });
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/scan/result',
+        params: { barcode: '5901234123457' },
+      }),
+    );
+    expect(identifyByBarcode).toHaveBeenCalledTimes(1);
   });
 
-  it('affiche le magazine trouvé quand le code existe en base', async () => {
+  it('navigue vers le résultat quand le magazine existe en base', async () => {
     const magazine = makeMagazine();
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'found', magazine });
     setDepsForTest(
@@ -104,17 +137,61 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    const camera = screen.getByTestId('camera-view');
-    await act(async () => {
-      camera.props.onBarcodeScanned({ data: '5901234123457', type: 'ean13' });
-    });
+    await scanTimes('5901234123457');
 
-    await waitFor(() => expect(screen.getByText('Magazine trouvé')).toBeTruthy());
-    expect(screen.getByText('Picsou Magazine')).toBeTruthy();
-    expect(screen.getByText('N° 547')).toBeTruthy();
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/scan/result',
+        params: {
+          id: 'mag-1',
+          publication: 'Picsou Magazine',
+          issueNumber: '547',
+          barcode: '5901234123457',
+        },
+      }),
+    );
+    expect(identifyByBarcode).toHaveBeenCalledWith('5901234123457');
   });
 
-  it('affiche une erreur pour un code invalide', async () => {
+  it('navigue vers le résultat quand le code est inconnu', async () => {
+    const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByBarcode,
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<BarcodeScreen />);
+
+    await scanTimes('5901234123457');
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/scan/result',
+        params: { barcode: '5901234123457' },
+      }),
+    );
+  });
+
+  it('n’émet qu’une seule recherche par code stabilisé', async () => {
+    const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByBarcode,
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<BarcodeScreen />);
+
+    await scanTimes('5901234123457', 'ean13', 6);
+    expect(identifyByBarcode).toHaveBeenCalledTimes(1);
+  });
+
+  it('affiche une erreur et permet de réessayer pour un code invalide', async () => {
     const identifyByBarcode = jest
       .fn()
       .mockResolvedValue({ status: 'invalid', reason: 'EAN-13 invalide (checksum).' });
@@ -128,33 +205,12 @@ describe('BarcodeScreen', () => {
 
     render(<BarcodeScreen />);
 
-    const camera = screen.getByTestId('camera-view');
-    await act(async () => {
-      camera.props.onBarcodeScanned({ data: '5901234123458', type: 'ean13' });
-    });
+    await scanTimes('5901234123458');
 
-    await waitFor(() => expect(screen.getByText('Code non reconnu')).toBeTruthy());
-    expect(screen.getByTestId('invalid-reason')).toBeTruthy();
-  });
+    await waitFor(() => expect(screen.getByTestId('invalid-reason')).toBeTruthy());
+    expect(mockReplace).not.toHaveBeenCalled();
 
-  it('permet de scanner à nouveau après un résultat', async () => {
-    setDepsForTest(
-      stubDeps({
-        identificationService: {
-          identifyByBarcode: jest.fn().mockResolvedValue({ status: 'unknown' }),
-        } as unknown as Dependencies['identificationService'],
-      }),
-    );
-
-    render(<BarcodeScreen />);
-
-    const camera = screen.getByTestId('camera-view');
-    await act(async () => {
-      camera.props.onBarcodeScanned({ data: '5901234123457', type: 'ean13' });
-    });
-    await waitFor(() => expect(screen.getByText('Code-barres inconnu')).toBeTruthy());
-
-    fireEvent.press(screen.getByTestId('unknown-retry'));
+    fireEvent.press(screen.getByTestId('invalid-retry'));
     await waitFor(() => expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy());
   });
 });

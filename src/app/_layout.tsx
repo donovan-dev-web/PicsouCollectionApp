@@ -1,21 +1,26 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { initialize } from '@/dependencies';
+import { useEffectiveColorScheme } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
+import { useSettingsStore } from '@/store/use-settings-store';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const scheme = useEffectiveColorScheme();
   const loadCollection = useCollectionStore((s) => s.load);
+  const loadColorScheme = useSettingsStore((s) => s.loadColorScheme);
 
   useEffect(() => {
-    initialize().then(loadCollection);
-  }, [loadCollection]);
+    initialize().then(async () => {
+      await loadColorScheme();
+      await loadCollection();
+    });
+  }, [loadColorScheme, loadCollection]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="scan/index" />
@@ -23,7 +28,7 @@ export default function RootLayout() {
         <Stack.Screen name="collection/[id]/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="collection/[id]/edit" options={{ presentation: 'modal' }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }

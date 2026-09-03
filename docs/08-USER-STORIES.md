@@ -16,7 +16,8 @@
 6. [Épique 4 — Identification](#6-épique-4--identification)
 7. [Épique 5 — Export / Import](#7-épique-5--export--import)
 8. [Épique 6 — Qualité & publication](#8-épique-6--qualité--publication)
-9. [Représentation graphique](#9-représentation-graphique)
+9. [Épique 7 — Paramètres](#9-épique-7--paramètres)
+10. [Représentation graphique](#10-représentation-graphique)
 
 ---
 
@@ -59,7 +60,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **enregistrer une nouvelle édition** afin de **l'ajouter à ma collection**.
 
 **Critères d'acceptation** :
-- Je peux saisir publication (obligatoire), numéro, édition, pays, date, code-barres ;
+- Je peux saisir publication (obligatoire), numéro, édition, langue, état, date, code-barres ;
 - Un identifiant UUID est généré ;
 - Un magazine sans numéro est autorisé (hors-série) ;
 - La date de création est enregistrée.
@@ -90,7 +91,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **ajouter/modifier/supprimer un exemplaire** afin de **gérer les multiples copies d'une même édition**.
 
 **Critères d'acceptation** :
-- J'ajoute un exemplaire avec état, notes et date ;
+- J'ajoute un exemplaire avec notes et date ;
 - Je supprime un exemplaire ;
 - Supprimer une édition supprime ses exemplaires (cascade).
 
@@ -135,6 +136,15 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : moyenne.
 
+### US-ACC-05 — Ouvrir une fiche depuis les ajouts récents
+> En tant que **Marc**, je veux **appuyer sur un ajout récent** afin de **ouvrir directement la fiche du magazine concerné**.
+
+**Critères d'acceptation** :
+- Chaque élément de la section « Ajouts récents » est tapable ;
+- Un appui mène à la fiche détaillée du magazine.
+
+**Priorité** : moyenne.
+
 ---
 
 ## 5. Épique 3 — Ajout & collection
@@ -162,8 +172,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **ouvrir la fiche détaillée d'un magazine** afin de **voir ses exemplaires et informations**.
 
 **Critères d'acceptation** :
-- La fiche affiche publication, numéro, édition, pays, date, code-barres ;
-- Elle liste les exemplaires avec état, notes et date ;
+- La fiche affiche publication, numéro, édition, langue, état, date, code-barres ;
+- Elle liste les exemplaires avec notes et date ;
 - Elle affiche le statut Possédé/Absent.
 
 **Priorité** : haute.
@@ -172,7 +182,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > En tant que **Marc**, je veux **modifier les informations d'une édition** afin de **corriger une erreur de saisie**.
 
 **Critères d'acceptation** :
-- Je peux modifier publication, numéro, édition, pays, date, code-barres ;
+- Je peux modifier publication, numéro, édition, langue, état, date, code-barres ;
 - La date de modification est mise à jour.
 
 **Priorité** : moyenne.
@@ -192,6 +202,48 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Critères d'acceptation** :
 - Une alerte indique le nombre d'exemplaires actuels ;
 - Je peux ajouter quand même ou annuler.
+
+**Priorité** : haute.
+
+### US-COL-07 — Saisie assistée avec suggestions
+> En tant que **Marc**, je veux **des suggestions pendant la saisie manuelle** afin de **gagner du temps et éviter les doublons ou les différences de casse** (édition, nom, langue…).
+
+**Critères d'acceptation** :
+- Des suggestions apparaissent dès le début de la frappe sur certains champs (publication, édition, langue) ;
+- Je peux choisir une suggestion pour remplir le champ ;
+- Une même valeur écrite différemment (casse) n'est pas dupliquée.
+
+**Priorité** : haute.
+
+### US-COL-08 — Formulaire complet en deux sections
+> En tant que **Marc**, je veux **un formulaire de saisie complet, découpé en deux sections** afin de **saisir l'essentiel rapidement et avoir accès aux détails seulement si besoin**.
+
+**Critères d'acceptation** :
+- Tous les champs du modèle sont présents (publication, numéro, édition, langue, date, code-barres, état, notes…) ;
+- La section principale contient les informations obligatoires/essentielles ;
+- Un bouton « Plus de détails » déplie la section des champs optionnels ;
+- Le champ date se saisit via des listes déroulantes Année / Mois ;
+- Le code-barres peut être saisi manuellement **ou scanné** depuis le formulaire (bouton scan).
+
+**Priorité** : haute.
+
+### US-COL-09 — Paginer la collection
+> En tant que **Marc**, je veux **afficher la collection par pages** afin de **ne pas charger les milliers de magazines d'un coup**.
+
+**Critères d'acceptation** :
+- La liste charge par pages de 20 magazines ;
+- Une pagination numérotée est affichée sous la liste pour naviguer ;
+- Changer de page recharge la liste sans casser le tri.
+
+**Priorité** : haute.
+
+### US-COL-10 — Filtrer la collection par numéro et édition
+> En tant que **Marc**, je veux **filtrer la collection par numéro et par édition** afin de **retrouver précisément une édition**.
+
+**Critères d'acceptation** :
+- Le champ de recherche textuel est remplacé par un champ **numéro** ;
+- À côté, une liste déroulante des **éditions** (option « Toutes les éditions » par défaut) ;
+- Les résultats sont affichés avec le badge de statut.
 
 **Priorité** : haute.
 
@@ -258,6 +310,17 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Critères d'acceptation** :
 - Après échec code-barres → proposition caméra puis manuelle ;
 - La méthode échouée n'est pas reproposée dans le même parcours.
+
+**Priorité** : haute.
+
+### US-ID-07 — Lecture robuste et multi-format du code-barres
+> En tant que **Marc**, je veux **un scan fiable même pour les magazines au format de code-barres moins standard** afin de **ne pas rater une édition**.
+
+**Critères d'acceptation** :
+- Les codes-barres **alphanumériques / symboles** sont lus sans conversion numérique (un code commençant par `0` n'est pas tronqué) ;
+- Le format de lecture n'est pas limité à EAN-13 : les formats non standard sont acceptés ;
+- Plusieurs lectures d'un même scan sont réalisées et le code **le plus récurrent** est retenu pour éviter les faux positifs (lecture trop rapide, orientation) ;
+- La recherche n'est lancée qu'après stabilisation de la lecture.
 
 **Priorité** : haute.
 
@@ -329,13 +392,27 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 ---
 
-## 9. Représentation graphique
+## 9. Épique 7 — Paramètres
+
+### US-SET-01 — Basculer le thème manuellement
+> En tant que **Marc**, je veux **choisir le thème clair ou sombre manuellement** afin de **forcer un affichage même si le thème système diffère**.
+
+**Critères d'acceptation** :
+- Un réglage est disponible dans les Paramètres pour choisir le thème (système / clair / sombre) ;
+- Le choix manuel prime sur le thème système ;
+- Le choix est mémorisé entre les lancements.
+
+**Priorité** : moyenne.
+
+---
+
+## 10. Représentation graphique
 
 ```
 ┌─────────────────── ÉPIQUES ───────────────────┐
 │                                               │
 │  DB ── Accueil ── Collection ── Identification│
-│  Export/Import ── Qualité & Publication       │
+│  Export/Import ── Paramètres ── Qualité       │
 │                                               │
 └───────────────────────────────────────────────┘
                         │
@@ -354,9 +431,10 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Épique | Stories | Nb |
 |---|---|---|
 | Base de données | US-DB-01 à 05 | 5 |
-| Accueil | US-ACC-01 à 04 | 4 |
-| Ajout & collection | US-COL-01 à 06 | 6 |
-| Identification | US-ID-01 à 06 | 6 |
+| Accueil | US-ACC-01 à 05 | 5 |
+| Ajout & collection | US-COL-01 à 10 | 10 |
+| Identification | US-ID-01 à 07 | 7 |
 | Export / Import | US-BK-01 à 03 | 3 |
+| Paramètres | US-SET-01 | 1 |
 | Qualité & publication | US-QA-01 à 03 | 3 |
-| **Total** | | **27** |
+| **Total** | | **34** |
