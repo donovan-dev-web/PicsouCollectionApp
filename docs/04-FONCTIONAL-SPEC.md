@@ -159,6 +159,8 @@ Si le code-barres n'est associé à **aucune édition**, le scan transmet le `ba
 4. Arrêter l'analyse dès que le résultat est suffisamment fiable ;
 5. **Aucune image n'est enregistrée** — analyse éphémère.
 
+> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : par défaut `NoopOcrEngine` (CI), l'implémentation native `MlKitOcrEngine` (ML Kit) est **à activer dans `dependencies.initialize()` après validation sur Development Build**.
+
 ### 5.2 Résultat OCR
 
 ```

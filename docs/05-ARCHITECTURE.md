@@ -172,6 +172,7 @@ Opérations sur les éditions :
 ```ts
 findByBarcode(barcode): Promise<Magazine | null>
 findManyByBarcode(barcode): Promise<MagazineListItem[]>
+findByPublicationAndIssue(publication, issueNumber): Promise<Magazine | null>
 findById(id): Promise<MagazineDetail | null>
 list(): Promise<MagazineListItem[]>
 search(query): Promise<MagazineListItem[]>
@@ -194,12 +195,33 @@ deleteCopy(id): Promise<void>
 
 #### `identificationService.ts`
 ```ts
-identifyByBarcode(barcode): Promise<MagazineIdentification | null>
-// Retourne "found" (1 édition), "ambiguous" (plusieurs éditions pour le même code)
-// ou "unknown" / "invalid".
-identifyByOCR(text): Promise<MagazineIdentification | null>
+identifyByBarcode(barcode): Promise<BarcodeLookupResult>
+// found (1 édition) / ambiguous (plusieurs pour le même code) / unknown / invalid
+identifyByOCR(text): Promise<OcrLookupResult>
+// found / weak (confiance insuffisante) / unknown / no-text
 identifyManually(data): Promise<MagazineIdentification>
 ```
+
+#### `ocr/` — moteur OCR (M-05, US-ID-03)
+```ts
+// ocrTypes.ts
+interface OcrEngine { recognize(frame): Promise<OcrFrameResult> }  // OcrFrameResult = { text } | null
+
+// ocrTextParser.ts  (pur, testable)
+parseOcrText(raw): OcrParseResult      // publication, issueNumber, date, confidence (0..1)
+isConfident(parse): boolean            // seuil MIN_CONFIDENCE
+
+// ocrEngine.ts      (défaut CI-safe)
+NoopOcrEngine                        // retourne toujours null (ne bloque pas la CI)
+
+// mlKitOcrEngine.ts (natif, à tester physiquement)
+MlKitOcrEngine                       // Google ML Kit Text Recognition, chargement paresseux
+```
+
+**Isolation** : l'écran `/scan/camera` dépend uniquement de l'interface `OcrEngine`
+injectée via `dependencies.getDeps()`. Le moteur par défaut est `NoopOcrEngine` ;
+l'implémentation native (`MlKitOcrEngine`) est **isolée** et doit être **activée dans
+`initialize()`** après validation sur Development Build — elle ne bloque pas la CI.
 
 #### `collectionService.ts`
 ```ts
@@ -254,6 +276,20 @@ magazineRepository.findManyByBarcode(code)   // liste des éditions partageant c
 found (1)     → Navigation vers result.tsx
 ambiguous (>1) → Navigation vers multiple.tsx (compte + liste cliquable)
 unknown       → Navigation vers result.tsx (Absent)
+```
+
+### 6.4 Identification par OCR
+```
+Écran /scan/camera → intervalle d'analyse (ou 3 frames/s max)
+   ↓
+ocrEngine.recognize(frame)            // OcrEngine injecté (NoopEngine par défaut, ML Kit sur device)
+   ↓  { text }
+identificationService.identifyByOCR(text)
+   ↓  parseOcrText → publication / issueNumber / date + confiance
+found   → afiche la couverture reconnue + [Confirmer → /collection/[id]]
+weak    → "Confiance insuffisante" + [Réessayer] [Saisie manuelle]
+unknown → "Non trouvé" + [Saisie manuelle] [Réessayer]
+no-text → on continue d'analyser
 ```
 
 ---

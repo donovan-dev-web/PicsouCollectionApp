@@ -59,14 +59,25 @@ export default function ScanResultScreen() {
           </Pressable>
         )}
 
-        <Pressable
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-          onPress={() => router.replace('/scan/barcode')}
-          testID="result-rescan"
-          accessibilityRole="button"
-          accessibilityLabel="Scanner à nouveau">
-          <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
-        </Pressable>
+        {exists ? (
+          <Pressable
+            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            onPress={() => router.replace('/scan/barcode')}
+            testID="result-rescan"
+            accessibilityRole="button"
+            accessibilityLabel="Scanner à nouveau">
+            <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+            onPress={() => router.replace('/scan/camera')}
+            testID="result-camera"
+            accessibilityRole="button"
+            accessibilityLabel="Rechercher par caméra (OCR)">
+            <Text style={styles.primaryButtonText}>Caméra / OCR</Text>
+          </Pressable>
+        )}
 
         <Pressable
           style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}

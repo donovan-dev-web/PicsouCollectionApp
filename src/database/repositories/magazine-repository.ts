@@ -81,6 +81,33 @@ export class MagazineRepository {
     return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
   }
 
+  /**
+   * Recherche une édition par publication + numéro. Sert au rapprochement OCR
+   * (M-05) : on connaît « Picsou Magazine, n° 547 » et on cherche l'édition en base.
+   */
+  async findByPublicationAndIssue(
+    publication: string,
+    issueNumber: number | null,
+  ): Promise<Magazine | null> {
+    const safePublication = publication.trim();
+    if (!safePublication || issueNumber === null) {
+      return null;
+    }
+
+    const row = await this.db.getFirstAsync<MagazineRow>(
+      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
+              barcode, notes, ocr_text, created_at, updated_at
+       FROM magazines
+       WHERE lower(publication) = lower(?) AND issue_number = ?
+       ORDER BY created_at ASC
+       LIMIT 1`,
+      safePublication,
+      issueNumber,
+    );
+
+    return row ? toMagazine(row) : null;
+  }
+
   async list(): Promise<MagazineListItem[]> {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }

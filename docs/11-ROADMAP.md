@@ -44,7 +44,7 @@ Phase 2  ███████████████████████�
 Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
 Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
 Phase 4R ██████████████████████████████  Terminé ✓ (v0.5.0)
-Phase 5  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 5  ████████████░░░░░░░░░░░░░░░░░░  En cours (logique OCR livrée, module natif à valider sur device)
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -200,17 +200,19 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Identifier un magazine sans code-barres à partir du flux caméra.
 
-| Tâche | Story |
-|---|---|
-| Valider la librairie OCR native | US-ID-03 |
-| Intégrer le module OCR | US-ID-03 |
-| Extraire publication / numéro / date | US-ID-03 |
-| Calculer la confiance | US-ID-03 |
-| Afficher les résultats + confiance | US-ID-03 |
-| Proposer réessayer / saisie manuelle | US-ID-05 |
-| Tests OCR (échecs de confiance) | US-QA-02 |
+**Statut : En cours** — le pipeline logique (parsing, confiance, écran `/scan/camera`, repli US-ID-05) est livré et **entièrement testé** ; l'**intégration du module natif** ML Kit est à **valider sur téléphone physique** (Development Build). L'implémentation native est isolée derrière une interface `OcrEngine` (`MlKitOcrEngine`), à activer dans `dependencies.initialize()` une fois le module branché.
 
-**Livrables** : identification OCR fonctionnelle avec gestion de confiance.
+| Tâche | Story | Statut |
+|---|---|---|
+| Valider la librairie OCR native | US-ID-03 | À valider (device) |
+| Intégrer le module OCR | US-ID-03 | Isolé (`MlKitOcrEngine`), à activer |
+| Extraire publication / numéro / date | US-ID-03 | Fait (parser testé) |
+| Calculer la confiance | US-ID-03 | Fait (`ocrTextParser`) |
+| Afficher les résultats + confiance | US-ID-03 | Fait (écran `/scan/camera`) |
+| Proposer réessayer / saisie manuelle | US-ID-05 | Fait (confiance faible / inconnu) |
+| Tests OCR (échecs de confiance) | US-QA-02 | Fait (parser, service, écran) |
+
+**Livrables** : identification OCR fonctionnelle avec gestion de confiance — livrée côté logique, module natif à valider sur device (**208 tests / 31 suites, ~93 % de couverture**).
 
 ---
 
