@@ -3,11 +3,13 @@ import { getDatabase } from '@/database/db';
 import { migrate } from '@/database/migrations';
 import { CollectionRepository } from '@/database/repositories/collection-repository';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
+import { SettingsRepository } from '@/database/repositories/settings-repository';
 import { IdentificationService } from '@/identification/identificationService';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
   collectionRepository: CollectionRepository;
+  settingsRepository: SettingsRepository;
   identificationService: IdentificationService;
 }
 
@@ -36,6 +38,7 @@ export async function initialize(): Promise<Dependencies> {
     deps = {
       magazineRepository: new MagazineRepository(db),
       collectionRepository: new CollectionRepository(db),
+      settingsRepository: new SettingsRepository(db),
       identificationService: new IdentificationService(new MagazineRepository(db)),
     };
   }
