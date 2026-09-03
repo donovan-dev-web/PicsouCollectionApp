@@ -2,6 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { CameraView as CameraViewType } from 'expo-camera';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
@@ -12,7 +13,14 @@ const ANALYSIS_INTERVAL_MS = 500;
 
 type OcrState =
   | { status: 'analyzing' }
-  | { status: 'weak'; confidence: number; message: string }
+  | {
+      status: 'weak';
+      publication: string;
+      issueNumber: number | null;
+      date: string | null;
+      confidence: number;
+      message: string;
+    }
   | {
       status: 'found';
       id: string;
@@ -21,7 +29,13 @@ type OcrState =
       date: string | null;
       confidence: number;
     }
-  | { status: 'unknown'; publication: string; issueNumber: number | null; confidence: number };
+  | {
+      status: 'unknown';
+      publication: string;
+      issueNumber: number | null;
+      date: string | null;
+      confidence: number;
+    };
 
 export default function CameraOcrScreen() {
   const router = useRouter();
@@ -31,6 +45,7 @@ export default function CameraOcrScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [state, setState] = useState<OcrState>({ status: 'analyzing' });
   const inFlight = useRef(false);
+  const cameraRef = useRef<CameraViewType>(null);
 
   useEffect(() => {
     if (!permission?.granted) {
@@ -47,11 +62,10 @@ export default function CameraOcrScreen() {
       }
       inFlight.current = true;
       try {
-        const frame = await ocrEngine.recognize({
-          native: null,
-          width: 0,
-          height: 0,
-        });
+        // Capture éphémère d'une photo (aucune image persistée) → URI.
+        const photo = await cameraRef.current?.takePictureAsync?.();
+        const uri = photo?.uri ?? null;
+        const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
         if (!frame) {
           return;
         }
@@ -62,6 +76,9 @@ export default function CameraOcrScreen() {
         if (result.status === 'weak') {
           setState({
             status: 'weak',
+            publication: result.publication,
+            issueNumber: result.issueNumber,
+            date: result.date,
             confidence: result.confidence,
             message: 'Impossible d’identifier précisément ce magazine.',
           });
@@ -72,6 +89,7 @@ export default function CameraOcrScreen() {
             status: 'unknown',
             publication: result.publication,
             issueNumber: result.issueNumber,
+            date: result.date,
             confidence: result.confidence,
           });
           return;
@@ -97,7 +115,26 @@ export default function CameraOcrScreen() {
   };
 
   const goManual = () => {
-    router.replace('/scan/manual');
+    // Pré-remplissage du formulaire manuel avec les infos extraites par l'OCR
+    // (US-ID-05, correctif M-05) : publication, numéro et année.
+    const params: Record<string, string> = {};
+    if (state.status === 'weak' || state.status === 'unknown' || state.status === 'found') {
+      if (state.publication && state.publication !== 'Publication inconnue') {
+        params.publication = state.publication;
+      }
+      if (state.issueNumber != null) {
+        params.issueNumber = String(state.issueNumber);
+      }
+      const year = state.date ?? null;
+      if (year) {
+        params.year = year;
+      }
+    }
+    router.replace({ pathname: '/scan/manual', params });
+  };
+
+  const goBarcode = () => {
+    router.replace('/scan/barcode');
   };
 
   if (!permission) {
@@ -142,7 +179,7 @@ export default function CameraOcrScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing="back" testID="ocr-camera-view" />
+      <CameraView ref={cameraRef} style={styles.camera} facing="back" testID="ocr-camera-view" />
 
       {isAnalyzing ? (
         <View style={styles.overlay} pointerEvents="none">
@@ -165,6 +202,13 @@ export default function CameraOcrScreen() {
                 testID="ocr-retry"
                 accessibilityRole="button">
                 <Text style={styles.primaryButtonText}>Réessayer avec la caméra</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+                onPress={goBarcode}
+                testID="ocr-barcode"
+                accessibilityRole="button">
+                <Text style={styles.secondaryButtonText}>Scanner le code-barres</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}

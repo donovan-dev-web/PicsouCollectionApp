@@ -167,6 +167,18 @@ jobs:
 
 > **Actuellement** : les builds EAS sont lancés **manuellement** via `eas build` (profils `development`, `preview`, `production` définis dans `eas.json`). Le build `preview` produit un **APK** installable sur téléphone ; le build `production` produit un **AAB** prêt pour le Play Store.
 
+### 5.0 Validation M-05 sur téléphone physique (OCR)
+
+Le module OCR `expo-mlkit-ocr` (Google ML Kit) est **natif** : il n'est pas disponible dans Expo Go. Pour le valider sur un **téléphone Android physique** :
+
+```bash
+eas build --profile preview --platform android   # produit un APK installable
+# ou, pour un Development Build (débogage JS + module natif) :
+eas build --profile development --platform android
+```
+
+À la première exécution, le module est récupéré via le prebuild (config plugins `expo-mlkit-ocr` + `expo-build-properties` déjà paramétrés dans `app.json`). Une fois l'APK installé, ouvrir **Scan → Caméra / OCR** et viser une couverture : le texte reconnu doit alimenter l'écran `/scan/camera`.
+
 ### 5.1 À venir — Workflow GitHub (build automatique sur release)
 
 Le workflow ci-dessous sera activé pour automatiser le build de production sur `main` ou sur un tag `v*` :

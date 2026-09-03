@@ -159,7 +159,7 @@ Si le code-barres n'est associé à **aucune édition**, le scan transmet le `ba
 4. Arrêter l'analyse dès que le résultat est suffisamment fiable ;
 5. **Aucune image n'est enregistrée** — analyse éphémère.
 
-> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : par défaut `NoopOcrEngine` (CI), l'implémentation native `MlKitOcrEngine` (ML Kit) est **à activer dans `dependencies.initialize()` après validation sur Development Build**.
+> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : `MlKitOcrEngine` est **branché par défaut** dans `dependencies.initialize()` (Google ML Kit via `expo-mlkit-ocr`, image-based). L'écran `/scan/camera` capture une photo (`takePictureAsync`) et appelle `recognizeText(uri)`. **À valider sur Development Build (téléphone physique)** ; hors bibliothèque native, `recognize` retourne `null` (repli none).
 
 ### 5.2 Résultat OCR
 
@@ -181,8 +181,15 @@ Confiance : élevée
 Impossible d'identifier précisément ce magazine.
 
 [ Réessayer avec la caméra ]
+[ Scanner le code-barres ]
 [ Saisir manuellement ]
 ```
+
+> **Correctif M-05 (retour test physique) :** la saisie manuelle (états *faible* et
+> *non trouvé*) **pré-remplit** le formulaire avec les informations extraites par
+> l'OCR (**publication**, **numéro**, **année**), comme le scan code-barres
+> pré-remplit déjà `barcode` (§7.2). Un bouton **Scanner le code-barres** est
+> proposé en cas de confiance insuffisante, en plus de réessayer / saisir manuellement.
 
 L'application **ne présente jamais** une identification OCR comme certaine.
 

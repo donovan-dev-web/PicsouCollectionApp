@@ -9,7 +9,12 @@ import type { CreateMagazineInput } from '@/types';
 
 export default function ManualEntryScreen() {
   const router = useRouter();
-  const { barcode } = useLocalSearchParams<{ barcode?: string }>();
+  const { barcode, publication, issueNumber, year } = useLocalSearchParams<{
+    barcode?: string;
+    publication?: string;
+    issueNumber?: string;
+    year?: string;
+  }>();
   const addMagazine = useCollectionStore((s) => s.addMagazine);
   const colors = useThemeColors();
   const styles = makeStyles(colors);
@@ -24,7 +29,14 @@ export default function ManualEntryScreen() {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.title}>Ajouter une édition</Text>
-      <MagazineForm submitLabel="Enregistrer" initialBarcode={barcode} onSubmit={handleSubmit} />
+      <MagazineForm
+        submitLabel="Enregistrer"
+        initialBarcode={barcode}
+        initialPublication={publication}
+        initialIssueNumber={issueNumber ? Number(issueNumber) : null}
+        initialYear={year}
+        onSubmit={handleSubmit}
+      />
     </KeyboardAvoidingView>
   );
 }
