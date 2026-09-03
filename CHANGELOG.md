@@ -9,6 +9,26 @@
 
 ## [0.5.0] — 2026-09-03
 
+> Sixième release : **identification par caméra / OCR** — lecture de la couverture, confiance et replis vers les autres méthodes (M-05).
+
+### Added
+- **Identification par camera / OCR** (`/scan/camera`) : lecture de la couverture, extraction **publication / numéro / date** et **niveau de confiance** — `US-ID-03`
+- Parser OCR pur et testable (`ocrTextParser`) + service `identifyByOCR` (rapprochement base par publication + numéro) — `US-ID-03`
+- Module natif **`expo-mlkit-ocr`** (Google ML Kit Text Recognition, **on-device / hors ligne**) branché par défaut ; capture photo éphémère via `expo-camera` — validé sur **téléphone physique** — `US-ID-03`
+- **Statuts de résultat** : `found` / `weak` / `unknown` / `no-text`, avec confirmation, réessayer et saisie manuelle — `US-ID-03`, `US-ID-05`
+- **Méthodes de repli après échec** (OCR) : écran résultat → **Caméra/OCR** puis **Saisie manuelle**, sans reproposer la méthode échouée — `US-ID-05`
+- **Repli code-barres** en confiance insuffisante (retour test physique) — `US-ID-05`
+- **Pré-remplissage de la saisie manuelle** avec les infos OCR (**publication / numéro / année**) — retour test physique, `US-ID-05`
+- Plugins natifs configurés : `expo-mlkit-ocr` (`iosEngine: auto`) et `expo-build-properties` (iOS `deploymentTarget: 16.4`)
+- Tests étendus : parser OCR, service `identifyByOCR`, écran `/scan/camera`, pré-remplissage formulaire — **211 tests / 31 suites, ~93 % de couverture**
+
+### Changed
+- `MlKitOcrEngine` (expo-mlkit-ocr) devient le **moteur OCR par défaut** dans `dependencies.initialize()` (import paresseux pour ne pas bloquer la CI)
+
+---
+
+## [0.4.1] — 2026-09-03
+
 > Cinquième release : **retours du test sur appareil physique post-v0.4.0** — fiabilisation du scan, saisie assistée et gestion de la collection (M-04R).
 
 ### Added

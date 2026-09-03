@@ -159,7 +159,7 @@ Si le code-barres n'est associé à **aucune édition**, le scan transmet le `ba
 4. Arrêter l'analyse dès que le résultat est suffisamment fiable ;
 5. **Aucune image n'est enregistrée** — analyse éphémère.
 
-> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : `MlKitOcrEngine` est **branché par défaut** dans `dependencies.initialize()` (Google ML Kit via `expo-mlkit-ocr`, image-based). L'écran `/scan/camera` capture une photo (`takePictureAsync`) et appelle `recognizeText(uri)`. **À valider sur Development Build (téléphone physique)** ; hors bibliothèque native, `recognize` retourne `null` (repli none).
+> **Statut M-05 :** le flux logique (parsing, confiance, écran, repli US-ID-05) est livré et testé. La reconnaissance brute s'appuie sur l'interface `OcrEngine` : `MlKitOcrEngine` est **branché par défaut** dans `dependencies.initialize()` (Google ML Kit via `expo-mlkit-ocr`, image-based). L'écran `/scan/camera` capture une photo (`takePictureAsync`) et appelle `recognizeText(uri)`. **Validé sur téléphone physique** (v0.5.0) ; hors bibliothèque native, `recognize` retourne `null` (repli none).
 
 ### 5.2 Résultat OCR
 

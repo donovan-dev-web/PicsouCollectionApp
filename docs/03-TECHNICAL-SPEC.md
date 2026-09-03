@@ -135,7 +135,7 @@ L'OCR extrait :
 
 Un **niveau de confiance** (0..1) est calculé. En cas de confiance insuffisante, l'utilisateur peut réessayer ou saisir manuellement. L'application n'invente jamais une identification avec certitude.
 
-> **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est **branché par défaut** (`MlKitOcrEngine`) via `expo-mlkit-ocr` (Google ML Kit Text Recognition, on-device, hors ligne) : `dependencies.initialize()` l'utilise, l'écran `/scan/camera` capture une photo via `expo-camera` (`takePictureAsync`) puis appelle `recognizeText(uri)`. L'import du module natif est **paresseux** pour ne pas bloquer la CI. `expo-build-properties` force le iOS `deploymentTarget` à 16.4 (exigence ML Kit). **La reconnaissance se valide sur un Development Build (téléphone physique) via `eas build`** ; hors bibliothèque native, `recognize` retourne `null` (repli `NoopOcrEngine`).
+> **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est **branché par défaut** (`MlKitOcrEngine`) via `expo-mlkit-ocr` (Google ML Kit Text Recognition, on-device, hors ligne) : `dependencies.initialize()` l'utilise, l'écran `/scan/camera` capture une photo via `expo-camera` (`takePictureAsync`) puis appelle `recognizeText(uri)`. L'import du module natif est **paresseux** pour ne pas bloquer la CI. `expo-build-properties` force le iOS `deploymentTarget` à 16.4 (exigence ML Kit). La reconnaissance a été **validée sur téléphone physique** (v0.5.0) ; hors bibliothèque native, `recognize` retourne `null` (repli `NoopOcrEngine`).
 
 ---
 
@@ -248,12 +248,14 @@ Priorités :
 }
 ```
 
-### Dépendance OCR (module natif, à valider)
+### Dépendance OCR (module natif, validé)
 ```json
 {
-  "@react-native-ml-kit/text-recognition": "^2.x"
+  "expo-mlkit-ocr": "^0.2.7",
+  "expo-build-properties": "~57.0.16"
 }
 ```
+Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.
 
 ---
 

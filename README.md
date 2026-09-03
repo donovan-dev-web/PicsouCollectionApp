@@ -9,7 +9,7 @@
 ![Database](https://img.shields.io/badge/Base%20de%20donne%CC%81es-Locale%20SQLite-orange?style=for-the-badge&logo=sqlite&logoColor=white&color=47A248)
 ![Offline](https://img.shields.io/badge/Offline%20First-100%25-brightgreen?style=for-the-badge&logo=cloud-offline&color=2E7D32)
 ![Status](https://img.shields.io/badge/Statut-En%20de%CC%81veloppement-informational?style=for-the-badge&color=00629E)
-![Version](https://img.shields.io/badge/Version-0.2.0-yellow?style=for-the-badge&color=FDD835)
+![Version](https://img.shields.io/badge/Version-0.5.0-yellow?style=for-the-badge&color=FDD835)
 
 <br/>
 
@@ -127,7 +127,7 @@ PicsouCollectionApp/
 | **Base de données** | SQLite (`expo-sqlite`) |
 | **État** | Zustand |
 | **Caméra** | `expo-camera` |
-| **OCR** | Google ML Kit Text Recognition |
+| **OCR** | Google ML Kit Text Recognition (`expo-mlkit-ocr`) |
 | **Fichiers** | `expo-file-system` + `expo-sharing` |
 | **Tests** | Jest (`jest-expo`) + `expo-doctor` |
 | **Build / CI** | EAS Build (development / preview / production) + Git Flow, GitHub Actions |
@@ -141,9 +141,10 @@ PicsouCollectionApp/
 | **0 — Cadrage** | Problème, offline, stack, UX | ✅ Terminé |
 | **1 — Initialisation** | Projet Expo, TypeScript, Router, SQLite, EAS, CI | ✅ Terminé — **v0.1.0** |
 | **2 — Base de données** | Migrations, repositories, gestion collection | ✅ Terminé — **v0.2.0** |
-| **3 — Interface principale** | Accueil, collection, ajout, paramètres, navigation | ⬜ À venir |
-| **4 — Scan code-barres** | Intégration caméra, détection, recherche | ⬜ À venir |
-| **5 — Caméra / OCR** | Librairie OCR, extraction, confiance | ⬜ À venir |
+| **3 — Interface principale** | Accueil, collection, ajout, paramètres, navigation | ✅ Terminé — **v0.3.0** |
+| **4 — Scan code-barres** | Intégration caméra, détection, recherche | ✅ Terminé — **v0.4.0** |
+| **4R — Retours test** | Fiabilisation scan, saisie assistée, collection | ✅ Terminé — **v0.4.1** |
+| **5 — Caméra / OCR** | Librairie OCR (`expo-mlkit-ocr`), extraction, confiance | ✅ Terminé — **v0.5.0** |
 | **6 — Parcours complet** | Scan en continu, identification → Possédé / Manquant | ⬜ À venir |
 | **7 — Export / Import** | Format JSON v1, partage, restauration | ⬜ À venir |
 | **8 — Optimisation & qualité** | Performance, requêtes, couverture de tests | ⬜ À venir |
