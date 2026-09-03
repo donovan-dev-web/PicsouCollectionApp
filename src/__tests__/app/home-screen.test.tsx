@@ -121,6 +121,31 @@ describe('HomeScreen (ajouts recents)', () => {
     expect(screen.getByText('2026-09-01')).toBeTruthy();
   });
 
+  it('navigue vers le detail de l edition au tap sur un ajout recent', () => {
+    useCollectionStore.setState({
+      loading: false,
+      loaded: true,
+      recentCopies: [
+        {
+          copy: {
+            id: 'c1',
+            magazineId: 'm1',
+            condition: null,
+            notes: null,
+            dateAdded: '2026-09-01T10:00:00Z',
+          },
+          magazine: { id: 'm1', publication: 'Picsou Magazine', issueNumber: 547 },
+        },
+      ],
+    });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getAllByTestId('recent-item')[0]);
+
+    expect(mockPush).toHaveBeenCalledWith('/collection/m1');
+  });
+
   it('affiche un etat vide sans ajouts', () => {
     useCollectionStore.setState({ loading: false, loaded: true, recentCopies: [] });
 
