@@ -43,8 +43,8 @@ Phase 1  ███████████████████████�
 Phase 2  ██████████████████████████████  Terminé ✓ (v0.2.0)
 Phase 3  ██████████████████████████████  Terminé ✓ (v0.3.0)
 Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
-Phase 4R ██████████████████████████████  Terminé ✓ (v0.5.0)
-Phase 5  ████████████░░░░░░░░░░░░░░░░░░  En cours (logique OCR livrée, module natif à valider sur device)
+Phase 4R ██████████████████████████████  Terminé ✓ (v0.4.1)
+Phase 5  ██████████████████████████████  Terminé ✓ (v0.5.0)
 Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -179,7 +179,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Intégrer les retours du test sur appareil physique post-v0.4.0, stabiliser le scan et fiabiliser la saisie avant l'OCR.
 
-**Statut : Terminé ✓** — livré en **release `v0.5.0`**.
+**Statut : Terminé ✓** — livré en **release `v0.4.1`**.
 
 | Tâche | Story |
 |---|---|
@@ -200,11 +200,11 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Identifier un magazine sans code-barres à partir du flux caméra.
 
-**Statut : Validé sur téléphone physique** — le pipeline logique (parsing, confiance, écran `/scan/camera`, repli US-ID-05) est livré et **entièrement testé**. Le module natif **`expo-mlkit-ocr`** (Google ML Kit, on-device) est **installé et branché** (plugins configurés dans `app.json`, `MlKitOcrEngine` par défaut dans `dependencies.initialize()`, capture photo via `takePictureAsync`), et la reconnaissance brute a été **validée sur téléphone physique** (dev build `eas build`). Deux correctifs post-test intégrés : **repli code-barres** en confiance insuffisante et **pré-remplissage** de la saisie manuelle avec les infos OCR (publication / numéro / année).
+**Statut : Terminé ✓ (release `v0.5.0`)** — le pipeline logique (parsing, confiance, écran `/scan/camera`, repli US-ID-05) est livré et **entièrement testé**. Le module natif **`expo-mlkit-ocr`** (Google ML Kit, on-device) est **installé et branché** (plugins configurés dans `app.json`, `MlKitOcrEngine` par défaut dans `dependencies.initialize()`, capture photo via `takePictureAsync`), et la reconnaissance brute a été **validée sur téléphone physique** (dev build `eas build`). Deux correctifs post-test intégrés : **repli code-barres** en confiance insuffisante et **pré-remplissage** de la saisie manuelle avec les infos OCR (publication / numéro / année).
 
 | Tâche | Story | Statut |
 |---|---|---|
-| Valider la librairie OCR native | US-ID-03 | `expo-mlkit-ocr` installé, à valider (device) |
+| Valider la librairie OCR native | US-ID-03 | Fait (`expo-mlkit-ocr`, validé device) |
 | Intégrer le module OCR | US-ID-03 | Fait (`MlKitOcrEngine` par défaut, plugin configuré) |
 | Extraire publication / numéro / date | US-ID-03 | Fait (parser testé) |
 | Calculer la confiance | US-ID-03 | Fait (`ocrTextParser`) |
