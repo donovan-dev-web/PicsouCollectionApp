@@ -203,6 +203,42 @@ describe('magazineRepository.findManyByBarcode', () => {
   });
 });
 
+describe('magazineRepository.findByPublicationAndIssue', () => {
+  it('retrouve une édition par publication + numéro', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 548 });
+
+    const result = await repo.findByPublicationAndIssue('Picsou Magazine', 547);
+
+    expect(result).not.toBeNull();
+    expect(result?.issueNumber).toBe(547);
+    expect(result?.publication).toBe('Picsou Magazine');
+  });
+
+  it('est insensible à la casse sur la publication', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 300 });
+
+    const result = await repo.findByPublicationAndIssue('picsou magazine', 300);
+
+    expect(result?.issueNumber).toBe(300);
+  });
+
+  it('renvoie null si le numéro ne correspond pas', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+
+    const result = await repo.findByPublicationAndIssue('Picsou Magazine', 999);
+
+    expect(result).toBeNull();
+  });
+
+  it('renvoie null si le numéro est absent ou la publication vide', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547 });
+
+    expect(await repo.findByPublicationAndIssue('Picsou Magazine', null)).toBeNull();
+    expect(await repo.findByPublicationAndIssue('  ', 547)).toBeNull();
+  });
+});
+
 describe('magazineRepository.list', () => {
   it('trie par publication puis numero', async () => {
     await repo.create({ publication: 'Mickey Parade', issueNumber: 2 });

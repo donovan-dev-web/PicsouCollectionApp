@@ -87,4 +87,15 @@ describe('ScanResultScreen', () => {
       params: { barcode: '5901234123457' },
     });
   });
+
+  it('propose la caméra/OCR puis le manuel après échec du code-barres (absent)', () => {
+    params = { barcode: '5901234123457' };
+
+    render(<ScanResultScreen />);
+
+    // US-ID-05 : la méthode échouée (code-barres) n'est pas reproposée.
+    expect(screen.queryByTestId('result-rescan')).toBeNull();
+    fireEvent.press(screen.getByTestId('result-camera'));
+    expect(mockReplace).toHaveBeenCalledWith('/scan/camera');
+  });
 });

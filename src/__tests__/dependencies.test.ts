@@ -24,6 +24,7 @@ const stubDeps: Dependencies = {
   collectionRepository: {} as Dependencies['collectionRepository'],
   settingsRepository: {} as Dependencies['settingsRepository'],
   identificationService: {} as Dependencies['identificationService'],
+  ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
 };
 
 describe('dependencies', () => {

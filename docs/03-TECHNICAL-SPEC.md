@@ -135,7 +135,7 @@ L'OCR extrait :
 
 Un **niveau de confiance** (0..1) est calculé. En cas de confiance insuffisante, l'utilisateur peut réessayer ou saisir manuellement. L'application n'invente jamais une identification avec certitude.
 
-> **Note technique :** la librairie exacte du module natif sera **validée lors du développement du prototype OCR** (Phase 4). Les pistes : `@react-native-ml-kit/text-recognition` ou implémentation native personnalisée.
+> **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est isolé dans `mlKitOcrEngine.ts` (Google ML Kit Text Recognition, chargement paresseux) : il est **à activer dans `dependencies.initialize()` après validation sur Development Build**. Piste : `@react-native-ml-kit/text-recognition` ou implémentation native dédiée. Par défaut (`NoopOcrEngine`), l'écran `/scan/camera` est câblé mais ne reconnaît rien — sans bloquer la CI.
 
 ---
 
