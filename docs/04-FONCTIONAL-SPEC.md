@@ -144,6 +144,8 @@ Si le code-barres n'est associé à **aucune édition**, le scan transmet le `ba
 - Si un code-barres est **inconnu** pendant un scan en continu, l'application propose de **basculer en saisie manuelle** (le code-barres seul ne crée jamais l'édition, voir 4.1) ;
 - Chaque ajout est confirmé individuellement pour éviter les doublons involontaires.
 
+> **Statut M-06 (US-ID-06) :** implémenté sur `/scan/barcode` (bouton « Scan en continu » ou paramètre `?continuous=1`) — l'écran caméra reste affiché après chaque scan, un **pop-up de confirmation** (« Ajouté à la collection » + « Scanner le suivant ») valide chaque ajout, un bouton **« Arrêter le scan en continu »** permet de sortir du mode, et un code **inconnu** ouvre la **saisie manuelle**.
+
 ---
 
 ## 5. Flux Caméra / OCR
@@ -237,16 +239,22 @@ Déjà dans votre collection
 ┌───────────────────────────────┐
 │          Picsou Magazine      │
 │             N° 547            │
+│        🔴 Possédé (1)         │
 └───────────────────────────────┘
 
+[ Ajouter un exemplaire ]
 [ Voir la fiche ]
 [ Scanner à nouveau ]
 [ Saisir manuellement ]
 ```
 
+- Le badge affiche **🔴 Possédé (N)** avec le **nombre d'exemplaires** (si N = 0, l'édition est **🟢 Absent** et un bouton « **Ajouter à la collection** » fait un **ajout direct**) — `US-ID-04` ;
+- **Ajouter un exemplaire** → alerte doublon (§8) puis ajout — `US-ID-04`, `US-COL-06` ;
 - **Voir la fiche** → `/collection/[id]` (remplace le résultat par la fiche d'édition) ;
 - **Scanner à nouveau** → `/scan/barcode` ;
 - **Saisir manuellement** → `/scan/manual`.
+
+> **Statut M-06 (US-ID-04, US-COL-06) :** le badge de possession (Possédé (N) / Absent), l'**ajout direct** d'une édition absente et la **confirmation doublon** (Ajouter quand même / Annuler) sont **implémentés et testés** (écran `/scan/result`, action store `addExistingCopy`).
 
 ### 7.2 Magazine non possédé (code inconnu)
 
@@ -314,6 +322,8 @@ Voulez-vous ajouter un deuxième exemplaire ?
 
 - Choix laissé à l'utilisateur ;
 - chaque exemplaire conserve sa propre fiche (état, notes, date).
+
+> **Statut M-06 (US-COL-06) :** implémenté — à l'ajout d'une édition **déjà possédée** (écran résultat ou **scan en continu**), l'application affiche « **Vous possédez déjà ce magazine — Exemplaires actuels : N** » avec **Ajouter quand même / Annuler**. Chaque exemplaire ajouté reste un `collection_item` distinct (fiche, notes, date propres).
 
 ---
 

@@ -45,7 +45,7 @@ Phase 3  ███████████████████████�
 Phase 4  ██████████████████████████████  Terminé ✓ (v0.4.0)
 Phase 4R ██████████████████████████████  Terminé ✓ (v0.4.1)
 Phase 5  ██████████████████████████████  Terminé ✓ (v0.5.0)
-Phase 6  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 6  ██████████████████████████████  Terminé ✓ (v0.6.0)
 Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
@@ -222,19 +222,21 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Pouvoir effectuer toute l'utilisation réelle en brocante.
 
-| Tâche | Story |
-|---|---|
-| Écran choix de méthode | US-ID-01 |
-| Flux : scan → identification → Possédé / Absent | US-ID-02, US-ID-04 |
-| Flux : OCR → identification → Possédé / Absent | US-ID-03, US-ID-04 |
-| Flux : manuel → vérification → Possédé / Absent | US-COL-01, US-ID-04 |
-| Gestion de l'échec → méthode suivante | US-ID-05 |
-| Scan en continu (plusieurs magazines à la suite) | US-ID-06 |
-| Ajout direct depuis résultat (Absent) | US-ID-04 |
-| Gestion doublons | US-COL-06 |
-| Saisie manuelle avec saisie code-barres | US-COL-01 |
+**Statut : Terminé ✓ (release `v0.6.0`)** — les étapes manquantes (résultat possédé/absent avec compte, gestion des doublons, scan en continu) sont livrées et testées. La boucle complète scan → identification → Possédé / Absent → ajout est fluidifiée.
 
-**Livrables** : parcours d'identification complet et fluide.
+| Tâche | Story | Statut |
+|---|---|---|
+| Écran choix de méthode | US-ID-01 | Fait (M-04) |
+| Flux : scan → identification → Possédé / Absent | US-ID-02, US-ID-04 | Fait (résultat avec compte + ajout direct) |
+| Flux : OCR → identification → Possédé / Absent | US-ID-03, US-ID-04 | Fait (M-05 + résultat) |
+| Flux : manuel → vérification → Possédé / Absent | US-COL-01, US-ID-04 | Fait |
+| Gestion de l'échec → méthode suivante | US-ID-05 | Fait (M-05) |
+| Scan en continu (plusieurs magazines à la suite) | US-ID-06 | Fait (écran caméra maintenu, confirmation à chaque ajout) |
+| Ajout direct depuis résultat (Absent) | US-ID-04 | Fait (« Ajouter à la collection ») |
+| Gestion doublons | US-COL-06 | Fait (alerte « Exemplaires actuels : N », Ajouter quand même / Annuler) |
+| Saisie manuelle avec saisie code-barres | US-COL-01 | Fait (bouton scan du formulaire) |
+
+**Livrables** : parcours d'identification complet et fluide — **220 tests / 31 suites, ~94 % de couverture**.
 
 ---
 

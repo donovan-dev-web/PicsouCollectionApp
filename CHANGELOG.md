@@ -7,6 +7,19 @@
 
 ---
 
+## [0.6.0] — 2026-09-04
+
+> Septième release : **parcours complet en brocante** — résultat possédé/absent avec compte, gestion des doublons et scan en continu (M-06).
+
+### Added
+- **Écran résultat possédé/absent** : affichage du **nombre d'exemplaires** (🔴 Possédé (N)) et, pour une édition absente, bouton **« Ajouter à la collection »** en **ajout direct** — `US-ID-04`
+- **Gestion des doublons** : à l'ajout d'une édition déjà possédée, alerte **« Exemplaires actuels : N »** avec choix **Ajouter quand même / Annuler** — `US-COL-06`
+- **Nouvelle action store `addExistingCopy`** : ajoute un exemplaire à une édition existante (incrémente `quantity`, `totalCopies` et `detail.copies`)
+- **Scan en continu** (`/scan/barcode`, bouton ou `?continuous=1`) : l'écran caméra reste affiché, chaque magazine est ajouté puis un **pop-up de confirmation** « Ajouté à la collection » permet de **scanner le suivant** ; bouton **« Arrêter le scan en continu »** ; un **code inconnu** bascule vers la **saisie manuelle** — `US-ID-06`
+- Tests étendus : écran résultat (possédé/absent, doublon, ajout direct) et scan en continu (bascule, doublon, ajout direct, code inconnu) — **220 tests / 31 suites, ~94 % de couverture**
+
+---
+
 ## [0.5.0] — 2026-09-03
 
 > Sixième release : **identification par caméra / OCR** — lecture de la couverture, confiance et replis vers les autres méthodes (M-05).

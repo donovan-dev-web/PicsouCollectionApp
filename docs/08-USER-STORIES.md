@@ -204,6 +204,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - Une alerte indique le nombre d'exemplaires actuels ;
 - Je peux ajouter quand même ou annuler.
 
+**Statut (M-06)** : à l'ajout d'une édition **déjà possédée**, l'écran résultat et le **scan en continu** affichent « **Exemplaires actuels : N** » avec les choix **Ajouter quand même / Annuler**. Ajout possible d'un second exemplaire (chaque exemplaire garde sa propre fiche via `addExistingCopy`).
+
 **Priorité** : haute.
 
 ### US-COL-07 — Saisie assistée avec suggestions
@@ -284,6 +286,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - Un bouton permet d'arrêter le scan en continu ;
 - Si un code-barres est inconnu, l'application me dirige vers la saisie manuelle.
 
+**Statut (M-06)** : mode **scan en continu** sur `/scan/barcode` (bouton « Scan en continu » ou `?continuous=1`). Après un scan **connu**, l'écran caméra reste affiché : édition **déjà possédée** → confirmation doublon ; édition **absente** → ajout direct ; puis **pop-up « Ajouté à la collection »** → « Scanner le suivant ». Un **code inconnu** propose la **saisie manuelle**. Bouton « **Arrêter le scan en continu** ».
+
 **Priorité** : haute.
 
 ### US-ID-03 — Identifier par caméra/OCR
@@ -305,6 +309,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Critères d'acceptation** :
 - 🔴 Possédé : affichage du nombre d'exemplaires ;
 - 🟢 Absent : bouton d'ajout direct.
+
+**Statut (M-06)** : l'écran `/scan/result` charge l'édition et affiche **🔴 Possédé (N)** (nombre d'exemplaires) avec « **Ajouter un exemplaire** », ou **🟢 Absent** avec « **Ajouter à la collection** » (ajout direct). Pour un code inconnu, la saisie manuelle est proposée.
 
 **Priorité** : haute.
 
