@@ -397,10 +397,12 @@ Application
 
 ## 12. Export JSON
 
+**Statut : livré (v0.7.0, US-BK-01).**
+
 ### Comportement
 1. Read toutes les éditions + leurs exemplaires depuis SQLite ;
 2. Construit le fichier au format `picsou-collection` v1 (voir `06-DATA-MODEL.md`) ;
-3. Écrit dans un fichier temporaire (`expo-file-system`) ;
+3. Écrit dans un fichier (`expo-file-system`) ;
 4. Propose le partage / enregistrement (`expo-sharing`).
 
 ### Règles
@@ -432,6 +434,8 @@ L'application vérifie :
 - que le fichier est bien un export de l'application (`format === "picsou-collection"`) ;
 - que la version est compatible (`version === 1`) ;
 - que les données sont valides et sans corruption évidente.
+
+**Statut (v0.7.0, US-BK-02 / US-BK-03)** : livré et testé — validations via `BackupService.validateCollection`/`importCollection` (rejet par `InvalidBackupError` sans modifier les données), double confirmation avant remplacement.
 
 ### 13.3 Stratégie de conflit (décision retenue)
 **Remplacement complet** : après confirmation explicite, la collection existante est remplacée par celle du fichier importé.

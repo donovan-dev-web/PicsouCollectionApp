@@ -7,6 +7,21 @@
 
 ---
 
+## [0.7.0] — 2026-09-04
+
+> Huitième release : **export / import de la collection** — sauvegarde JSON `picsou-collection` v1, restauration sur un nouveau téléphone et gestion des fichiers invalides (M-07).
+
+### Added
+- **Exporter la collection** (Paramètres → Sauvegarde) : génération d'un fichier JSON au format **`picsou-collection` v1**, proposé au partage natif — `US-BK-01`
+- **Importer une collection** (Paramètres → Sauvegarde) : sélection d'un fichier, validation (format, version, intégrité), **double confirmation** puis **remplacement complet** de la collection — `US-BK-02`
+- **Fichier d'import invalide** : tout fichier mal formé / mauvais format / version non prise en charge est **rejeté sans toucher aux données**, avec un **message explicite** — `US-BK-03`
+- Nouveau service **`BackupService`** : sérialisation de toutes les éditions + exemplaires, validation stricte, et remplacement en **transaction** (rollback intégral en cas d'erreur)
+- Écran Paramètres : nouvelle section **Sauvegarde** (export / import + récapitulatif avant remplacement) ; couleur `success` ajoutée au design system
+- Dépendances natives : `expo-sharing`, `expo-document-picker`, `expo-file-system`
+- Tests étendus : service backup, écran Paramètres (export/import, fichier invalide) — **242 tests / 33 suites, ~94 % de couverture**
+
+---
+
 ## [0.6.0] — 2026-09-04
 
 > Septième release : **parcours complet en brocante** — résultat possédé/absent avec compte, gestion des doublons et scan en continu (M-06).
