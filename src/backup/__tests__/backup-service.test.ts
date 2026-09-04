@@ -119,9 +119,25 @@ describe('BackupService.importCollection', () => {
     const before = await service.exportCollection();
 
     const file = await service.exportCollection();
-    file.magazines.push({ ...file.magazines[0], id: file.magazines[0].id });
+    file.magazines.push({ ...file.magazines[0], id: 'edition-soumise-a-echec' });
 
-    await expect(service.importCollection(service.toJson(file))).rejects.toThrow();
+    // On force un échec déterministe lors de la 2e insertion d'édition, sans
+    // dépendre du comportement de la contrainte de clé primaire (flaky en CI).
+    const originalRun = testDb.runAsync;
+    let magazineInserts = 0;
+    testDb.runAsync = jest.fn(async (sql: string, ...params: unknown[]) => {
+      if (sql.includes('INSERT INTO magazines')) {
+        magazineInserts += 1;
+        if (magazineInserts === 2) {
+          throw new Error('Échec d’insertion forcé');
+        }
+      }
+      return originalRun(sql, ...params);
+    });
+
+    await expect(service.importCollection(service.toJson(file))).rejects.toThrow(
+      'Échec d’insertion forcé',
+    );
 
     const after = await service.exportCollection();
     expect(after.magazines).toEqual(before.magazines);
