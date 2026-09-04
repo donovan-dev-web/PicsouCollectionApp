@@ -10,6 +10,8 @@ function stubDeps(): Dependencies {
     collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
+    backupService: {} as Dependencies['backupService'],
+    fileGateway: {} as Dependencies['fileGateway'],
     settingsRepository: {
       getColorScheme: getColorSchemeMock,
       setColorScheme: setColorSchemeMock,

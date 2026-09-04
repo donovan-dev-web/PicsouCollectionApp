@@ -71,6 +71,8 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
       identify: jest.fn(),
     } as unknown as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
+    backupService: {} as Dependencies['backupService'],
+    fileGateway: {} as Dependencies['fileGateway'],
     ...overrides,
   };
 }

@@ -201,6 +201,26 @@ export class BackupService {
   }
 
   /**
+   * Valide uniquement le contenu d'un fichier, sans modifier les données.
+   * Utilisé pour afficher un récapitulatif et demander confirmation **avant**
+   * le remplacement (§14.4). Rejette via {@link InvalidBackupError} (US-BK-03).
+   */
+  async validateCollection(raw: string): Promise<ImportSummary> {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      throw new InvalidBackupError('Fichier invalide : le contenu n’est pas un JSON lisible.');
+    }
+
+    const file = parseBackupFile(parsed);
+    return {
+      magazines: file.magazines.length,
+      copies: file.magazines.reduce((total, magazine) => total + magazine.copies.length, 0),
+    };
+  }
+
+  /**
    * Importe une sauvegarde JSON en remplaçant la collection existante.
    * Toute erreur de validation ou d'écriture → transaction annulée, données
    * intactes (stratégie « remplacement complet », cf. fonctionnelle §13.3).

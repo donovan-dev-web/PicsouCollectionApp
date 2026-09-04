@@ -57,6 +57,8 @@ function stubDeps(findMany: jest.Mock<Promise<MagazineListItem[]>, [string]>): D
       identifyByBarcode: jest.fn(),
     } as unknown as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
+    backupService: {} as Dependencies['backupService'],
+    fileGateway: {} as Dependencies['fileGateway'],
   };
 }
 
