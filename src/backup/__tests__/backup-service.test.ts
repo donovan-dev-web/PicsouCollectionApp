@@ -1,0 +1,176 @@
+import { createTestDatabase } from '@/test-utils/test-db';
+import { migrate } from '@/database/migrations';
+import { CollectionRepository } from '@/database/repositories/collection-repository';
+import { MagazineRepository } from '@/database/repositories/magazine-repository';
+import { BackupService, InvalidBackupError } from '@/backup/backup-service';
+import { BACKUP_FORMAT, BACKUP_VERSION } from '@/backup/backup-types';
+
+jest.mock('expo-crypto', () => {
+  let n = 0;
+  return {
+    randomUUID: jest.fn(() => {
+      n += 1;
+      return `b1a2c3d4-0000-4000-8000-${String(n).padStart(12, '0')}`;
+    }),
+  };
+});
+
+let testDb: ReturnType<typeof createTestDatabase>;
+let service: BackupService;
+let magazineRepo: MagazineRepository;
+let collectionRepo: CollectionRepository;
+
+beforeEach(async () => {
+  testDb = createTestDatabase();
+  await migrate(testDb);
+  magazineRepo = new MagazineRepository(testDb);
+  collectionRepo = new CollectionRepository(testDb);
+  service = new BackupService(testDb);
+});
+
+afterEach(async () => {
+  await testDb.close();
+});
+
+async function seedCollection(): Promise<void> {
+  const magazine = await magazineRepo.create({
+    publication: 'Picsou Magazine',
+    issueNumber: 547,
+    edition: 'standard',
+    language: 'FR',
+    condition: 'good',
+    publicationDate: '2023-03',
+    barcode: '3271234567890',
+    notes: 'n° spécial',
+  });
+  await collectionRepo.addCopy(magazine.id, { notes: 'Acheté 0,50 €' });
+  await collectionRepo.addCopy(magazine.id, { notes: 'Doublon' });
+}
+
+describe('BackupService.exportCollection', () => {
+  it('produit un export v1 avec toutes les éditions et exemplaires', async () => {
+    await seedCollection();
+
+    const file = await service.exportCollection();
+
+    expect(file.format).toBe(BACKUP_FORMAT);
+    expect(file.version).toBe(BACKUP_VERSION);
+    expect(file.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(file.appVersion).toBeTruthy();
+    expect(file.magazines).toHaveLength(1);
+    expect(file.magazines[0].publication).toBe('Picsou Magazine');
+    expect(file.magazines[0].issueNumber).toBe(547);
+    expect(file.magazines[0].copies).toHaveLength(2);
+  });
+
+  it('exporte une collection vide avec une liste magazines vide', async () => {
+    const file = await service.exportCollection();
+    expect(file.magazines).toEqual([]);
+  });
+
+  it('sérialise en JSON lisible', async () => {
+    await seedCollection();
+    const file = await service.exportCollection();
+    const json = service.toJson(file);
+
+    const parsed = JSON.parse(json);
+    expect(parsed.format).toBe(BACKUP_FORMAT);
+    expect(parsed.version).toBe(BACKUP_VERSION);
+    expect(parsed.magazines).toHaveLength(1);
+  });
+});
+
+describe('BackupService.importCollection', () => {
+  it('remplace la collection existante par le fichier importé', async () => {
+    await seedCollection();
+    const source = await service.exportCollection();
+
+    source.magazines[0].publication = 'Imported Magazine';
+    source.magazines[0].copies = source.magazines[0].copies.slice(0, 1);
+
+    const summary = await service.importCollection(service.toJson(source));
+
+    expect(summary).toEqual({ magazines: 1, copies: 1 });
+
+    const after = await service.exportCollection();
+    expect(after.magazines).toHaveLength(1);
+    expect(after.magazines[0].publication).toBe('Imported Magazine');
+    expect(after.magazines[0].copies).toHaveLength(1);
+  });
+
+  it('écrase entièrement même si le fichier contient moins d’éléments', async () => {
+    await seedCollection();
+
+    await service.importCollection(
+      service.toJson({
+        format: BACKUP_FORMAT,
+        version: BACKUP_VERSION,
+        exportedAt: '2026-09-01T00:00:00Z',
+        appVersion: '0.7.0',
+        magazines: [],
+      }),
+    );
+
+    expect((await service.exportCollection()).magazines).toEqual([]);
+  });
+
+  it('annule la transaction et laisse les données intactes si l’insertion échoue', async () => {
+    await seedCollection();
+    const before = await service.exportCollection();
+
+    const file = await service.exportCollection();
+    file.magazines.push({ ...file.magazines[0], id: file.magazines[0].id });
+
+    await expect(service.importCollection(service.toJson(file))).rejects.toThrow();
+
+    const after = await service.exportCollection();
+    expect(after.magazines).toEqual(before.magazines);
+    expect(after.magazines[0].copies).toEqual(before.magazines[0].copies);
+  });
+});
+
+describe('BackupService.importCollection — fichier invalide (US-BK-03)', () => {
+  it('rejette un JSON illisible', async () => {
+    await seedCollection();
+    await expect(service.importCollection('not json')).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('rejette un mauvais format', async () => {
+    const raw = JSON.stringify({ format: 'autre-app', version: 1, magazines: [] });
+    await expect(service.importCollection(raw)).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('rejette une version non prise en charge', async () => {
+    const raw = JSON.stringify({ format: BACKUP_FORMAT, version: 999, magazines: [] });
+    await expect(service.importCollection(raw)).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('rejette une édition sans publication', async () => {
+    const raw = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      magazines: [{ id: 'x', publication: '', copies: [] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('rejette une édition sans liste d’exemplaires', async () => {
+    const raw = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      magazines: [{ id: 'x', publication: 'P', copies: 'non-array' }],
+    });
+    await expect(service.importCollection(raw)).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('ne modifie pas les données à l’échec de validation', async () => {
+    await seedCollection();
+    const before = await service.exportCollection();
+
+    const invalid = JSON.stringify({ format: 'mauvais', version: 1, magazines: [] });
+    await expect(service.importCollection(invalid)).rejects.toBeInstanceOf(InvalidBackupError);
+
+    const after = await service.exportCollection();
+    expect(after.magazines).toEqual(before.magazines);
+  });
+});
