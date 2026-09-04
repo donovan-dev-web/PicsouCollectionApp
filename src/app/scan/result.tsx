@@ -1,8 +1,10 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { useCollectionStore } from '@/store/use-collection-store';
 
 export default function ScanResultScreen() {
   const router = useRouter();
@@ -15,8 +17,50 @@ export default function ScanResultScreen() {
     barcode?: string;
   }>();
 
-  const exists = Boolean(params.id);
+  const loadDetail = useCollectionStore((s) => s.loadDetail);
+  const detail = useCollectionStore((s) => s.detail);
+  const detailLoading = useCollectionStore((s) => s.detailLoading);
+  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
+
+  const id = params.id ?? '';
+  const exists = id !== '';
   const barcode = params.barcode ?? '';
+
+  useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        loadDetail(id);
+      }
+    }, [id, loadDetail]),
+  );
+
+  const resolved = detail != null && detail.id === id;
+  const owned = resolved && detail.copies.length > 0;
+  const ownedCount = resolved ? detail.copies.length : 0;
+
+  const handleAddCopy = () => {
+    if (!id) {
+      return;
+    }
+    const alreadyOwned = owned;
+
+    const perform = () => {
+      addExistingCopy(id);
+    };
+
+    if (alreadyOwned) {
+      Alert.alert(
+        'Vous possédez déjà ce magazine',
+        `Exemplaires actuels : ${ownedCount}\nVoulez-vous ajouter un deuxième exemplaire ?`,
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Ajouter quand même', style: 'destructive', onPress: perform },
+        ],
+      );
+    } else {
+      perform();
+    }
+  };
 
   const handleManual = () => {
     router.replace({
@@ -37,6 +81,17 @@ export default function ScanResultScreen() {
             {params.publication ?? 'Magazine'}
           </Text>
           {params.issueNumber ? <Text style={styles.issue}>N° {params.issueNumber}</Text> : null}
+          {resolved ? (
+            <Text
+              style={owned ? styles.ownedText : styles.absentText}
+              testID={`result-status-${owned ? 'owned' : 'absent'}`}>
+              {owned ? `🔴 Possédé (${ownedCount})` : '🟢 Absent'}
+            </Text>
+          ) : (
+            <Text style={styles.muted} testID="result-loading">
+              {detailLoading ? 'Vérification…' : 'Statut indisponible'}
+            </Text>
+          )}
         </View>
       ) : (
         <View style={styles.card}>
@@ -48,14 +103,27 @@ export default function ScanResultScreen() {
       )}
 
       <View style={styles.actions}>
-        {exists && (
+        {exists && resolved && (
           <Pressable
             style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={() => router.replace(`/collection/${params.id}`)}
+            onPress={handleAddCopy}
+            testID={owned ? 'result-add-copy' : 'result-add'}
+            accessibilityRole="button"
+            accessibilityLabel={owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}>
+            <Text style={styles.primaryButtonText}>
+              {owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}
+            </Text>
+          </Pressable>
+        )}
+
+        {exists && (
+          <Pressable
+            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            onPress={() => router.replace(`/collection/${id}`)}
             testID="result-view"
             accessibilityRole="button"
             accessibilityLabel="Voir la fiche du magazine">
-            <Text style={styles.primaryButtonText}>Voir la fiche</Text>
+            <Text style={styles.secondaryButtonText}>Voir la fiche</Text>
           </Pressable>
         )}
 
@@ -123,6 +191,26 @@ function makeStyles(colors: ThemeColors) {
     issue: {
       fontSize: 16,
       color: colors.textSecondary,
+    },
+    ownedText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#B3261E',
+      backgroundColor: '#FDE8E8',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.two,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    absentText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#137333',
+      backgroundColor: '#E6F4EA',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.two,
+      borderRadius: 8,
+      overflow: 'hidden',
     },
     message: {
       fontSize: 16,

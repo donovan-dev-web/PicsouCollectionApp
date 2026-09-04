@@ -16,6 +16,7 @@ interface CollectionState {
   loadRecent: () => Promise<void>;
   loadDetail: (id: string) => Promise<MagazineDetail | null>;
   addMagazine: (input: CreateMagazineInput) => Promise<MagazineListItem | null>;
+  addExistingCopy: (magazineId: string) => Promise<void>;
   updateMagazine: (id: string, input: CreateMagazineInput) => Promise<void>;
   removeMagazine: (id: string) => Promise<void>;
   clearDetail: () => void;
@@ -78,6 +79,21 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       totalCopies: state.totalCopies + 1,
     }));
     return item;
+  },
+
+  addExistingCopy: async (magazineId) => {
+    const { collectionRepository } = getDeps();
+    const copy = await collectionRepository.addCopy(magazineId);
+    set((state) => ({
+      magazines: state.magazines.map((m) =>
+        m.id === magazineId ? { ...m, quantity: m.quantity + 1 } : m,
+      ),
+      detail:
+        state.detail && state.detail.id === magazineId
+          ? { ...state.detail, copies: [...state.detail.copies, copy] }
+          : state.detail,
+      totalCopies: state.totalCopies + 1,
+    }));
   },
 
   updateMagazine: async (id, input) => {
