@@ -57,6 +57,8 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
     ocrEngine: {
       recognize: jest.fn().mockResolvedValue({ text: 'Picsou Magazine N° 547' }),
     } as unknown as OcrEngine,
+    backupService: {} as Dependencies['backupService'],
+    fileGateway: {} as Dependencies['fileGateway'],
     ...overrides,
   };
 }

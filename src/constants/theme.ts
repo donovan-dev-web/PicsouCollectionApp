@@ -16,6 +16,8 @@ export const Colors = {
     accentText: '#1F1B00',
     danger: '#B3261E',
     onDanger: '#FFFFFF',
+    success: '#1B7F3B',
+    onSuccess: '#FFFFFF',
   },
   dark: {
     text: '#FFFFFF',
@@ -26,6 +28,8 @@ export const Colors = {
     accentText: '#1F1B00',
     danger: '#F2B8B5',
     onDanger: '#410002',
+    success: '#7BC67E',
+    onSuccess: '#062B0A',
   },
 } as const;
 

@@ -7,6 +7,9 @@ import { SettingsRepository } from '@/database/repositories/settings-repository'
 import { IdentificationService } from '@/identification/identificationService';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
 import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
+import { BackupService } from '@/backup/backup-service';
+import { NativeFileGateway } from '@/backup/native-file-gateway';
+import type { FileGateway } from '@/backup/file-gateway';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
@@ -14,6 +17,8 @@ export interface Dependencies {
   settingsRepository: SettingsRepository;
   identificationService: IdentificationService;
   ocrEngine: OcrEngine;
+  backupService: BackupService;
+  fileGateway: FileGateway;
 }
 
 let dbPromise: Promise<Database> | null = null;
@@ -47,6 +52,8 @@ export async function initialize(): Promise<Dependencies> {
       settingsRepository: new SettingsRepository(db),
       identificationService: new IdentificationService(new MagazineRepository(db)),
       ocrEngine,
+      backupService: new BackupService(db),
+      fileGateway: new NativeFileGateway(),
     };
   }
   return deps;
