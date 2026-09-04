@@ -46,7 +46,7 @@ Phase 4  ███████████████████████�
 Phase 4R ██████████████████████████████  Terminé ✓ (v0.4.1)
 Phase 5  ██████████████████████████████  Terminé ✓ (v0.5.0)
 Phase 6  ██████████████████████████████  Terminé ✓ (v0.6.0)
-Phase 7  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 7  ██████████████████████████████  Terminé ✓ (v0.7.0)
 Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 ```
@@ -244,17 +244,19 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : Pouvoir sauvegarder et restaurer la collection sans serveur.
 
-| Tâche | Story |
-|---|---|
-| Export SQLite → JSON (`picsou-collection` v1) | US-BK-01 |
-| Partage du fichier (expo-sharing) | US-BK-01 |
-| Sélection fichier (expo-document-picker) | US-BK-02 |
-| Validation format / version | US-BK-02, US-BK-03 |
-| Import avec remplacement complet | US-BK-02 |
-| Messages d'erreur explicites | US-BK-03 |
-| Tests export/import | US-QA-02 |
+**Statut : Terminé ✓ (release `v0.7.0`)** — le service `BackupService`, la validation stricte (format / version / intégrité), la **double confirmation** et le **remplacement complet en transaction** sont livrés et testés.
 
-**Livrables** : export/import fiable et testé.
+| Tâche | Story | Statut |
+|---|---|---|
+| Export SQLite → JSON (`picsou-collection` v1) | US-BK-01 | Fait (`BackupService.exportCollection`) |
+| Partage du fichier (expo-sharing) | US-BK-01 | Fait (`NativeFileGateway.writeExport`) |
+| Sélection fichier (expo-document-picker) | US-BK-02 | Fait (`NativeFileGateway.pickAndReadJson`) |
+| Validation format / version | US-BK-02, US-BK-03 | Fait (rejet via `InvalidBackupError`) |
+| Import avec remplacement complet | US-BK-02 | Fait (`importCollection`, transaction) |
+| Messages d'erreur explicites | US-BK-03 | Fait (écran Paramètres, section Sauvegarde) |
+| Tests export/import | US-QA-02 | Fait (**242 tests / 33 suites, ~94 % de couverture**) |
+
+**Livrables** : export/import fiable et testé — **242 tests / 33 suites, ~94 % de couverture**.
 
 ---
 

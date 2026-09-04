@@ -347,6 +347,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - Toutes les éditions et exemplaires sont inclus.
 
 **Priorité** : haute.
+**Statut (M-07)** : livré et testé — `BackupService.exportCollection()` sérialise toutes les éditions + exemplaires au format `picsou-collection` v1 ; le partage est proposé via `expo-sharing` (section Sauvegarde des Paramètres).
 
 ### US-BK-02 — Importer une collection
 > En tant que **Marc**, je veux **importer un fichier JSON** afin de **restaurer ma collection sur un nouveau téléphone**.
@@ -357,6 +358,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - La collection existante est remplacée par celle du fichier.
 
 **Priorité** : haute.
+**Statut (M-07)** : livré et testé — le fichier est **validé** (format, version, intégrité) avant toute action, une **double confirmation** est demandée puis la collection existante est **remplacée** par celle du fichier (`importCollection`, en transaction).
 
 ### US-BK-03 — Gérer un fichier d'import invalide
 > En tant que **Marc**, je veux **un message clair si le fichier d'import est invalide** afin de **ne pas corrompre ma collection**.
@@ -366,6 +368,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - Un message d'erreur explicite est affiché.
 
 **Priorité** : moyenne.
+**Statut (M-07)** : livré et testé — tout fichier au mauvais format/version ou mal formé est **rejeté sans toucher aux données** (`InvalidBackupError`) avec un **message explicite** affiché dans l'écran Paramètres.
 
 ---
 
