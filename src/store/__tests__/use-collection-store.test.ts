@@ -188,4 +188,41 @@ describe('useCollectionStore', () => {
       useCollectionStore.getState().updateMagazine('inconnue', { publication: 'X' }),
     ).rejects.toThrow('Édition introuvable.');
   });
+
+  it('ajoute un exemplaire a une edition existante et incremente le compteur', async () => {
+    mockAddCopy.mockResolvedValue({
+      id: 'c2',
+      magazineId: 'mag-1',
+      notes: null,
+      dateAdded: '2026-09-02T10:00:00Z',
+    });
+    useCollectionStore.setState({ magazines: [magazine], totalCopies: 4 });
+
+    await useCollectionStore.getState().addExistingCopy('mag-1');
+
+    const state = useCollectionStore.getState();
+    expect(mockAddCopy).toHaveBeenCalledWith('mag-1');
+    expect(state.magazines[0].quantity).toBe(5);
+    expect(state.totalCopies).toBe(5);
+  });
+
+  it('rafraichit le detail avec la copie ajoutee si elle correspond', async () => {
+    const copy = {
+      id: 'c2',
+      magazineId: 'mag-1',
+      notes: null,
+      dateAdded: '2026-09-02T10:00:00Z',
+    };
+    mockAddCopy.mockResolvedValue(copy);
+    useCollectionStore.setState({
+      magazines: [magazine],
+      totalCopies: 4,
+      detail: { ...magazine, copies: [] },
+    });
+
+    await useCollectionStore.getState().addExistingCopy('mag-1');
+
+    const state = useCollectionStore.getState();
+    expect(state.detail?.copies).toEqual([copy]);
+  });
 });
