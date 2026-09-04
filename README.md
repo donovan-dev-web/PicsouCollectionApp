@@ -55,7 +55,7 @@ Son rôle : permettre à un collectionneur de **savoir instantanément s'il poss
 - **📚 Ma Collection** — inventaire avec recherche globale, filtres utiles (type de publication, époque/années, numéro) et tri.
 - **📇 Fiche Magazine** — détail d'une édition ; les détails de fiche (état, notes, date) sont optionnels.
 - **♻️ Gestion des doublons** — alerte puis choix de l'utilisateur (ajout d'un second exemplaire possible).
-- **📊 Paramètres** — statistiques, export/import de sauvegarde (JSON), thème, langue.
+- **📊 Paramètres** — statistiques, export/import de sauvegarde (JSON / CSV), thème, langue.
 
 > **Clarification importante** : un code-barres ne crée jamais une édition à lui seul. Il sert uniquement à retrouver une édition **déjà présente dans la base** ; à défaut, la saisie manuelle prend le relais.
 

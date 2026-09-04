@@ -195,6 +195,32 @@ Impossible d'identifier précisément ce magazine.
 
 L'application **ne présente jamais** une identification OCR comme certaine.
 
+### 5.4 Surcouche de scan ciblé (M-07R, US-ID-08)
+
+En plus du scan global de la couverture, la caméra affiche une **surcouche** avec les zones/étiquettes **« Nom »**, **« Numéro »**, **« Édition »**, chacune complétée **en direct** par l'OCR dès détection :
+
+```
+┌─────────────────────────────┐
+│  (flux caméra)              │
+│  Nom   : Picsou Magazine    │
+│  Numéro: 547                │
+│  Édition: (…)               │
+└─────────────────────────────┘
+```
+
+**Règles** :
+- la recherche n'est lancée que lorsque **nom + numéro** minimum sont détectés ;
+- l'utilisateur peut **pointer successivement** nom → numéro → édition pour affiner chaque champ ;
+- si la lecture **globale** ne donne pas une confiance suffisante, l'application propose de **scanner en pointant plus précisément** les informations (au lieu de conclure en échec).
+
+### 5.5 Vérification / correction et validation (M-07R, US-ID-09)
+
+En cas de confiance insuffisante, les informations détectées (**publication, numéro, date**) sont **affichées** pour vérification :
+- l'utilisateur peut **corriger** un champ avant de rechercher ;
+- il peut **confirmer** les informations et **outrepasser le niveau de confiance** s'il les juge correctes, lançant alors la recherche.
+
+Le message « confiance insuffisante » est donc toujours accompagné d'une possibilité de **valider / corriger**, en plus de réessayer.
+
 ---
 
 ## 6. Flux saisie manuelle
@@ -395,30 +421,37 @@ Application
 
 ---
 
-## 12. Export JSON
+## 12. Export (JSON / CSV)
 
-**Statut : livré (v0.7.0, US-BK-01).**
+**Statut : JSON livré (v0.7.0, US-BK-01) ; choix du format JSON/CSV à venir (M-07R, US-BK-04).**
 
 ### Comportement
-1. Read toutes les éditions + leurs exemplaires depuis SQLite ;
-2. Construit le fichier au format `picsou-collection` v1 (voir `06-DATA-MODEL.md`) ;
-3. Écrit dans un fichier (`expo-file-system`) ;
-4. Propose le partage / enregistrement (`expo-sharing`).
+1. L'utilisateur clique sur **« Exporter »** ;
+2. Une **sélection de format (JSON / CSV)** s'affiche ;
+3. Read toutes les éditions + leurs exemplaires depuis SQLite ;
+4. Construit le fichier au format choisi :
+   - **JSON** : `picsou-collection` v1 (voir `06-DATA-MODEL.md`) ;
+   - **CSV** : en-têtes standard du modèle (voir `06-DATA-MODEL.md`) ;
+5. Écrit dans un fichier (`expo-file-system`) ;
+6. Propose le partage / enregistrement (`expo-sharing`).
 
 ### Règles
 - export complet (toutes les éditions et exemplaires) ;
 - format portable et lisible ;
-- jamais une copie brute de SQLite.
+- jamais une copie brute de SQLite ;
+- l'**extension du fichier suit le format choisi** (`.json` / `.csv`).
 
 ---
 
-## 13. Import JSON
+## 13. Import (JSON / CSV)
 
 ### 13.1 Flux
 ```
+Choix du format (JSON / CSV)
+      ↓
 Sélection du fichier
       ↓
-Validation
+Validation (selon le format choisi)
       ↓
 Vérification version
       ↓
@@ -430,12 +463,12 @@ Import SQLite
 ```
 
 ### 13.2 Validations
-L'application vérifie :
-- que le fichier est bien un export de l'application (`format === "picsou-collection"`) ;
-- que la version est compatible (`version === 1`) ;
-- que les données sont valides et sans corruption évidente.
+L'application vérifie, **selon le format choisi dans la popup** :
+- **JSON** : fichier bien un export de l'application (`format === "picsou-collection"`), version compatible (`version === 1`), données valides et sans corruption évidente ;
+- **CSV** : **en-têtes attendus** présents et données cohérentes avec le modèle ;
+- si le fichier ne correspond **pas au format choisi**, un **message d'erreur explicite** est affiché **sans modifier les données**.
 
-**Statut (v0.7.0, US-BK-02 / US-BK-03)** : livré et testé — validations via `BackupService.validateCollection`/`importCollection` (rejet par `InvalidBackupError` sans modifier les données), double confirmation avant remplacement.
+**Statut (v0.7.0, US-BK-02 / US-BK-03)** : livré et testé pour JSON — validations via `BackupService.validateCollection`/`importCollection` (rejet par `InvalidBackupError` sans modifier les données), double confirmation avant remplacement. **Choix du format + CSV à venir (M-07R, US-BK-05).**
 
 ### 13.3 Stratégie de conflit (décision retenue)
 **Remplacement complet** : après confirmation explicite, la collection existante est remplacée par celle du fichier importé.
@@ -470,10 +503,15 @@ L'application vérifie :
 | Accueil | ✅ |
 | Scanner code-barres | ✅ |
 | Caméra / OCR | ✅ |
+| — Surcouche de scan ciblé | 🔜 (M-07R) |
+| — Validation / correction des infos détectées | 🔜 (M-07R) |
 | Saisie manuelle | ✅ |
 | Résultat Possédé / Absent | ✅ |
 | Gestion des doublons | ✅ |
 | Ma Collection (liste + recherche) | ✅ |
 | Fiche (modif / suppression) | ✅ |
 | Export JSON | ✅ |
+| Export CSV | 🔜 (M-07R) |
+| Import JSON | ✅ |
+| Import CSV | 🔜 (M-07R) |
 | Import JSON (remplacement) | ✅ |

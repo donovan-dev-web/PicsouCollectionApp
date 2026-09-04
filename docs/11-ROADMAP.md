@@ -19,9 +19,10 @@
 9. [Phase 5 — Caméra / OCR](#9-phase-5--caméra--ocr)
 10. [Phase 6 — Parcours complet](#10-phase-6--parcours-complet)
 11. [Phase 7 — Export / Import](#11-phase-7--export--import)
-12. [Phase 8 — Optimisation & qualité](#12-phase-8--optimisation--qualité)
-13. [Phase 9 — Tests terrain & publication](#13-phase-9--tests-terrain--publication)
-14. [Critères de sortie de chaque phase](#14-critères-de-sortie-de-chaque-phase)
+12. [Phase 7R — Retours test physique (v0.7.0)](#12-phase-7r--retours-test-physique-v070)
+13. [Phase 8 — Optimisation & qualité](#13-phase-8--optimisation--qualité)
+14. [Phase 9 — Tests terrain & publication](#14-phase-9--tests-terrain--publication)
+15. [Critères de sortie de chaque phase](#15-critères-de-sortie-de-chaque-phase)
 
 ---
 
@@ -66,9 +67,10 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 5 — Caméra / OCR | `M-05 — Caméra / OCR` | `US-ID-03`, `US-ID-05` | 2 |
 | 6 — Parcours complet | `M-06 — Parcours complet` | `US-ID-04`, `US-ID-06`, `US-COL-06` | 3 |
 | 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
+| 7R — Retours test | `M-07R — Retours test physique (v0.7.0)` | `US-ID-08..09` *(1 bug)*, `US-BK-04..05` | 5 |
 | 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02` | 1 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **64** |
+| **Total** | | | **69** |
 
 ---
 
@@ -260,7 +262,27 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 12. Phase 8 — Optimisation & qualité
+## 12. Phase 7R — Retours test physique (v0.7.0)
+
+**Objectif** : corriger les retours du **test physique sur la release `v0.7.0`** — améliorer l'OCR (surcouche de scan ciblé, validation manuelle) et enrichir l'export/import (choix du format JSON / CSV).
+
+**Statut : En cours** — issues créées dans le milestone `M-07R — Retours test physique (v0.7.0)`.
+
+| Tâche | Story | Statut |
+|---|---|---|
+| Surcouche caméra (nom / numéro / édition) + scan ciblé | US-ID-08 | À faire |
+| Recherche lancée après détection nom + numéro minimum | US-ID-08 | À faire |
+| Affichage des infos détectées en confiance insuffisante | US-ID-09 | À faire |
+| Correction / confirmation manuelle (outrepasser la confiance) | US-ID-09 | À faire |
+| Règle déterministe de confiance trop stricte (message récurrent) | (bug) | À faire |
+| Export avec choix du format (JSON / CSV) | US-BK-04 | À faire |
+| Import avec choix du format (JSON / CSV) + vérification | US-BK-05 | À faire |
+
+**Livrables** : OCR plus fiable et exploitable en conditions réelles ; sauvegarde au choix JSON ou CSV.
+
+---
+
+## 13. Phase 8 — Optimisation & qualité
 
 **Objectif** : Application performante, couverture de tests satisfaisante.
 
@@ -278,7 +300,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 13. Phase 9 — Tests terrain & publication
+## 14. Phase 9 — Tests terrain & publication
 
 **Objectif** : Validation réelle et publication Play Store.
 
@@ -295,7 +317,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 14. Critères de sortie de chaque phase
+## 15. Critères de sortie de chaque phase
 
 Pour chaque phase, les critères de sortie sont :
 
@@ -323,6 +345,7 @@ Pour chaque phase, les critères de sortie sont :
 | 5 — OCR | Identification par caméra | US-ID-03, US-ID-05 | 2 |
 | 6 — Parcours complet | Boucle complète | US-ID-04, US-ID-06, US-COL-06 | 3 |
 | 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
+| 7R — Retours test | Retours v0.7.0 (OCR + format) | US-ID-08..09 (1 bug), US-BK-04..05 | 5 |
 | 8 — Optimisation | Performance | US-QA-02 | 1 |
 | 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **64** |
+| **Total** | | | **69** |

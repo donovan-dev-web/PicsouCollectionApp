@@ -205,6 +205,7 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-05` | Caméra / OCR | Identification par OCR |
 | `M-06` | Parcours complet | Identification → Possédé / Absent |
 | `M-07` | Export / Import | Sauvegarde et restauration JSON |
+| `M-07R` | Retours test physique (v0.7.0) | Corrections post-test v0.7.0 : OCR ciblé, validation, format CSV |
 | `M-08` | Optimisation & qualité | Performance, tests, couverture |
 | `M-09` | Tests terrain & publication | Validation réelle, build Play Store |
 
@@ -400,7 +401,7 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 À l'initialisation du dépôt GitHub, configurer :
 
 - [ ] **Labels** : types, priorités, épiques, complexité (section 5) ;
-- [ ] **Milestones** : M-01 à M-09 (section 6) ;
+- [ ] **Milestones** : M-01 à M-09 (+ `M-04R`, `M-07R`) (section 6) ;
 - [ ] **Project** : board Kanban "Picsou Collection" (section 10) ;
 - [ ] **Branch protection** sur `main` et `develop` (section 7) ;
 - [ ] **Templates d'issue** (bug + tâche) via `.github/ISSUE_TEMPLATE/` ;
@@ -418,6 +419,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-09 (phases roadmap) |
+| Milestones | M-01 à M-09 (+ `M-04R`, `M-07R`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |
