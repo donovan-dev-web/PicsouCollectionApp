@@ -334,6 +334,29 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : haute.
 
+### US-ID-08 — Afficher les champs reconnus en surcouche caméra (scan ciblé)
+> En tant que **Marc**, je veux **voir par-dessus la caméra les champs (nom, numéro, édition) reconnus par l'OCR** afin de **pointer précisément chaque information et d'éviter les erreurs de lecture ou une confiance insuffisante (lumière, qualité du magazine)**.
+
+**Critères d'acceptation** :
+- La surcouche caméra affiche des zones/étiquettes **« Nom »**, **« Numéro »**, **« Édition »** ;
+- Chaque champ est **complété en direct** par l'OCR dès sa détection ;
+- La recherche n'est lancée que lorsque **nom + numéro** minimum sont détectés ;
+- L'utilisateur peut pointer successivement **nom → numéro → édition** pour affiner chaque champ ;
+- Si la lecture **globale** de la couverture ne donne pas une confiance suffisante, l'application propose de **scanner en pointant plus précisément** les informations.
+
+**Priorité** : haute.
+
+### US-ID-09 — Vérifier, corriger et valider les informations détectées (outrepasser la confiance)
+> En tant que **Marc**, je veux **voir les informations détectées et pouvoir les corriger ou les confirmer manuellement** afin de **continuer même quand la confiance de l'OCR est insuffisante**.
+
+**Critères d'acceptation** :
+- En cas de confiance insuffisante, les informations détectées (**publication, numéro, date**) sont **affichées** pour vérification manuelle ;
+- L'utilisateur peut **corriger** un champ avant de rechercher ;
+- Il peut **confirmer** les informations et **outrepasser le niveau de confiance** s'il les juge correctes, lançant alors la recherche ;
+- Le message « confiance insuffisante » est accompagné de cette possibilité de **valider / corriger**, pas uniquement de réessayer.
+
+**Priorité** : haute.
+
 ---
 
 ## 7. Épique 5 — Export / Import
@@ -369,6 +392,27 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : moyenne.
 **Statut (M-07)** : livré et testé — tout fichier au mauvais format/version ou mal formé est **rejeté sans toucher aux données** (`InvalidBackupError`) avec un **message explicite** affiché dans l'écran Paramètres.
+
+### US-BK-04 — Exporter en choisissant le format (JSON / CSV)
+> En tant que **Marc**, je veux **choisir le format d'export (JSON ou CSV)** afin de **sauvegarder selon mon besoin (sauvegarde complète ou tableur)**.
+
+**Critères d'acceptation** :
+- Le bouton **« Exporter »** affiche une **sélection de format (JSON / CSV)** ;
+- L'export est généré au format choisi (JSON : `picsou-collection` v1 ; CSV : colonnes standard du modèle) ;
+- Le fichier résultant est cohérent avec le format (extension, séparateur).
+
+**Priorité** : moyenne.
+
+### US-BK-05 — Importer en choisissant le format (JSON / CSV)
+> En tant que **Marc**, je veux **choisir le format d'import (JSON ou CSV)** afin de **restaurer la collection depuis un fichier dont je connais le format**.
+
+**Critères d'acceptation** :
+- Le bouton **« Importer »** affiche une **sélection de format (JSON / CSV)** ;
+- Le fichier sélectionné est validé selon le format choisi (JSON : `picsou-collection` ; CSV : **en-têtes attendus**) ;
+- En cas d'incohérence format/fichier, un **message d'erreur explicite** est affiché **sans modifier les données** ;
+- Le remplacement reste soumis à la **double confirmation**.
+
+**Priorité** : moyenne.
 
 ---
 
@@ -446,8 +490,8 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Base de données | US-DB-01 à 05 | 5 |
 | Accueil | US-ACC-01 à 05 | 5 |
 | Ajout & collection | US-COL-01 à 10 | 10 |
-| Identification | US-ID-01 à 07 | 7 |
-| Export / Import | US-BK-01 à 03 | 3 |
+| Identification | US-ID-01 à 09 | 9 |
+| Export / Import | US-BK-01 à 05 | 5 |
 | Paramètres | US-SET-01 | 1 |
 | Qualité & publication | US-QA-01 à 03 | 3 |
-| **Total** | | **34** |
+| **Total** | | **38** |
