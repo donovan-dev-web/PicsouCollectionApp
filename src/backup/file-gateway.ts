@@ -1,3 +1,5 @@
+import type { BackupFormat } from './backup-types';
+
 export type ExportOutput = {
   uri: string;
   shared: boolean;
@@ -15,6 +17,6 @@ export type PickedFile = {
  * métier (BackupService) reste indépendante de la plateforme.
  */
 export interface FileGateway {
-  writeExport(json: string): Promise<ExportOutput>;
-  pickAndReadJson(): Promise<PickedFile | null>;
+  writeExport(content: string, format: BackupFormat): Promise<ExportOutput>;
+  pickFile(format: BackupFormat): Promise<PickedFile | null>;
 }
