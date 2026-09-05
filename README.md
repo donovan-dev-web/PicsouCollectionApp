@@ -9,7 +9,7 @@
 ![Database](https://img.shields.io/badge/Base%20de%20donne%CC%81es-Locale%20SQLite-orange?style=for-the-badge&logo=sqlite&logoColor=white&color=47A248)
 ![Offline](https://img.shields.io/badge/Offline%20First-100%25-brightgreen?style=for-the-badge&logo=cloud-offline&color=2E7D32)
 ![Status](https://img.shields.io/badge/Statut-En%20de%CC%81veloppement-informational?style=for-the-badge&color=00629E)
-![Version](https://img.shields.io/badge/Version-0.7.0-yellow?style=for-the-badge&color=FDD835)
+![Version](https://img.shields.io/badge/Version-0.7.1-yellow?style=for-the-badge&color=FDD835)
 
 <br/>
 
@@ -147,6 +147,7 @@ PicsouCollectionApp/
 | **5 — Caméra / OCR** | Librairie OCR (`expo-mlkit-ocr`), extraction, confiance | ✅ Terminé — **v0.5.0** |
 | **6 — Parcours complet** | Scan en continu, identification → Possédé / Manquant, gestion doublons | ✅ Terminé — **v0.6.0** |
 | **7 — Export / Import** | Format JSON v1, partage, restauration | ✅ Terminé — **v0.7.0** |
+| **7R — Retours test** | OCR ciblé (surcouche + validation), confiance assouplie, export/import JSON ou CSV | ✅ Terminé — **v0.7.1** |
 | **8 — Optimisation & qualité** | Performance, requêtes, couverture de tests | ⬜ À venir |
 | **9 — Tests terrain & publication** | Vrais magazines, Play Store | ⬜ À venir |
 
