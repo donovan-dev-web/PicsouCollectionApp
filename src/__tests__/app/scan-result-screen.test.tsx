@@ -72,7 +72,7 @@ describe('ScanResultScreen', () => {
 
     expect(screen.getByText('Déjà dans votre collection')).toBeTruthy();
     expect(screen.getByText('Picsou Magazine')).toBeTruthy();
-    expect(screen.getByTestId('result-status-owned')).toHaveTextContent('🔴 Possédé (1)');
+    expect(screen.getByTestId('result-status-owned')).toHaveTextContent('✓ Possédé (1)');
     fireEvent.press(screen.getByTestId('result-view'));
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-1');
   });
@@ -102,7 +102,7 @@ describe('ScanResultScreen', () => {
     useCollectionStore.setState({ detail: magazine, detailLoading: false });
     render(<ScanResultScreen />);
 
-    expect(screen.getByTestId('result-status-absent')).toHaveTextContent('🟢 Absent');
+    expect(screen.getByTestId('result-status-absent')).toHaveTextContent('○ Absent');
     fireEvent.press(screen.getByTestId('result-add'));
 
     expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1');

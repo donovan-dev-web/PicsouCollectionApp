@@ -4,17 +4,18 @@ import HomeScreen from '@/app/(tabs)/index';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 const mockPush = jest.fn();
-const mockUseFocusEffect = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
-  useFocusEffect: (callback: () => void) => mockUseFocusEffect(callback),
+  // No-op : en prod useFocusEffect s'exécute après le rendu (effet), jamais
+  // pendant. L'ancien mock invoquait le callback en phase de rendu, ce qui
+  // créait un setState-dans-render artificiel (boucle infinie en test).
+  useFocusEffect: () => {},
 }));
 
 describe('HomeScreen (compteur)', () => {
   beforeEach(() => {
     mockPush.mockClear();
-    mockUseFocusEffect.mockClear();
   });
 
   it('affiche le nombre d exemplaires possedes', () => {
@@ -44,7 +45,7 @@ describe('HomeScreen (bouton Scanner)', () => {
 
     const button = screen.getByTestId('scan-button');
     expect(button).toBeTruthy();
-    expect(screen.getByText('📷 Scanner')).toBeTruthy();
+    expect(screen.getByText('Scanner')).toBeTruthy();
   });
 
   it('navigue vers l ecran de choix de methode au toucher', () => {
@@ -65,7 +66,7 @@ describe('HomeScreen (bouton Ajouter)', () => {
     render(<HomeScreen />);
 
     expect(screen.getByTestId('add-button')).toBeTruthy();
-    expect(screen.getByText('+ Ajouter')).toBeTruthy();
+    expect(screen.getByText('Ajouter')).toBeTruthy();
   });
 
   it('navigue vers la saisie manuelle au toucher', () => {
@@ -82,7 +83,6 @@ describe('HomeScreen (bouton Ajouter)', () => {
 describe('HomeScreen (ajouts recents)', () => {
   beforeEach(() => {
     mockPush.mockClear();
-    mockUseFocusEffect.mockImplementation((callback: () => void) => callback());
   });
 
   it('affiche la liste des derniers exemplaires ajoutes', () => {
@@ -116,7 +116,7 @@ describe('HomeScreen (ajouts recents)', () => {
     expect(screen.getAllByTestId('recent-item')).toHaveLength(2);
     expect(screen.getByText('Picsou Magazine n°547')).toBeTruthy();
     expect(screen.getByText('Super Picsou Géant')).toBeTruthy();
-    expect(screen.getByText('2026-09-01')).toBeTruthy();
+    expect(screen.getByText('1 sept. 2026')).toBeTruthy();
   });
 
   it('navigue vers le detail de l edition au tap sur un ajout recent', () => {
@@ -149,5 +149,24 @@ describe('HomeScreen (ajouts recents)', () => {
     render(<HomeScreen />);
 
     expect(screen.getByTestId('recent-empty')).toBeTruthy();
+  });
+
+  it('propose de scanner depuis l etat vide', () => {
+    useCollectionStore.setState({ loading: false, loaded: true, recentCopies: [] });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByTestId('recent-empty-cta'));
+
+    expect(mockPush).toHaveBeenCalledWith('/scan');
+  });
+
+  it('affiche l erreur du store dans le compteur', () => {
+    useCollectionStore.setState({ loading: false, loaded: true, error: 'Base inaccessible' });
+
+    render(<HomeScreen />);
+
+    expect(screen.getByTestId('counter-error')).toBeTruthy();
+    expect(screen.getByText('Base inaccessible')).toBeTruthy();
   });
 });

@@ -22,10 +22,22 @@ export function MagazineCard({ magazine, onPress }: Props) {
       onPress={onPress}
       testID="magazine-card"
       accessibilityRole="button"
-      accessibilityLabel={`${magazine.publication} numéro ${magazine.issueNumber}`}>
+      accessibilityLabel={
+        magazine.issueNumber != null
+          ? `${magazine.publication} numéro ${magazine.issueNumber}`
+          : magazine.publication
+      }
+      accessibilityHint="Voir la fiche de l'édition"
+      android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
       <View style={styles.header}>
-        <Text style={styles.publication}>{magazine.publication}</Text>
-        <Text style={styles.issue}>n° {magazine.issueNumber}</Text>
+        <Text style={styles.publication} numberOfLines={1} ellipsizeMode="tail">
+          {magazine.publication}
+        </Text>
+        {magazine.issueNumber != null ? (
+          <Text style={styles.issue} numberOfLines={1}>
+            n° {magazine.issueNumber}
+          </Text>
+        ) : null}
       </View>
       <StatusBadge owned={owned} quantity={magazine.quantity} />
     </Pressable>
@@ -47,6 +59,7 @@ function makeStyles(colors: ThemeColors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'baseline',
+      gap: Spacing.two,
     },
     publication: {
       fontSize: 17,
@@ -57,7 +70,7 @@ function makeStyles(colors: ThemeColors) {
     issue: {
       fontSize: 24,
       fontWeight: '800',
-      color: colors.accent,
+      color: colors.accentTextOnLight,
     },
   });
 }

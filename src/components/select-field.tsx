@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -46,9 +47,14 @@ export function SelectField<T extends string>({
         onPress={() => setOpen((o) => !o)}
         testID={testID}
         accessibilityRole="button"
-        accessibilityLabel={label}>
+        accessibilityLabel={label}
+        accessibilityState={{ expanded: open }}>
         <Text style={value ? styles.value : styles.placeholder}>{value || placeholder}</Text>
-        <Text style={styles.chevron}>{open ? '▲' : '▼'}</Text>
+        <Feather
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={20}
+          color={colors.textSecondary}
+        />
       </Pressable>
 
       {open && (
@@ -99,7 +105,8 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: colors.backgroundElement,
       borderRadius: 8,
       paddingHorizontal: Spacing.three,
-      paddingVertical: Spacing.three,
+      paddingVertical: Spacing.two,
+      minHeight: 44,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -107,14 +114,12 @@ function makeStyles(colors: ThemeColors) {
     value: {
       fontSize: 16,
       color: colors.text,
+      flexShrink: 1,
     },
     placeholder: {
       fontSize: 16,
       color: colors.textSecondary,
-    },
-    chevron: {
-      fontSize: 12,
-      color: colors.textSecondary,
+      flexShrink: 1,
     },
     pressed: {
       opacity: 0.7,
@@ -122,15 +127,18 @@ function makeStyles(colors: ThemeColors) {
     listContainer: {
       marginTop: Spacing.two,
       borderWidth: 1,
-      borderColor: colors.backgroundElement,
+      borderColor: colors.textSecondary,
       borderRadius: 8,
       overflow: 'hidden',
       backgroundColor: colors.background,
-    },
-    listContent: {
       maxHeight: 240,
     },
+    listContent: {
+      flexGrow: 0,
+    },
     option: {
+      justifyContent: 'center',
+      minHeight: 44,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
     },
@@ -143,7 +151,7 @@ function makeStyles(colors: ThemeColors) {
     },
     optionTextSelected: {
       fontSize: 15,
-      color: colors.accent,
+      color: colors.accentTextOnLight,
       fontWeight: '600',
     },
   });

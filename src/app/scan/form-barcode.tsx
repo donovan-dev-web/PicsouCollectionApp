@@ -1,7 +1,9 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -12,10 +14,12 @@ import { setPendingBarcode } from '@/lib/pending-barcode';
 export default function FormBarcodeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const styles = makeStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(colors, insets);
 
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
+  const [invalidCount, setInvalidCount] = useState(0);
   const stabilizer = useRef(new BarcodeStabilizer(3));
 
   const handleScan = ({ data }: { data: string; type: string }) => {
@@ -30,7 +34,7 @@ export default function FormBarcodeScreen() {
     const validation = scanBarcode(stabilized);
     if (validation.status !== 'found') {
       stabilizer.current.reset();
-      setScanning(true);
+      setInvalidCount((c) => c + 1);
       return;
     }
 
@@ -64,9 +68,19 @@ export default function FormBarcodeScreen() {
             <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
           </Pressable>
         ) : (
-          <Text style={styles.errorText} testID="permission-denied">
-            Permission refusée. Autorisez la caméra dans les réglages.
-          </Text>
+          <>
+            <Text style={styles.errorText} testID="permission-denied">
+              Permission refusée. Autorisez la caméra dans les réglages.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={() => void Linking.openSettings()}
+              testID="permission-settings"
+              accessibilityRole="button"
+              accessibilityLabel="Ouvrir les réglages">
+              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
+            </Pressable>
+          </>
         )}
         <Pressable
           style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
@@ -94,6 +108,11 @@ export default function FormBarcodeScreen() {
       <View style={styles.overlay} pointerEvents="none">
         <View style={styles.reticle} />
         <Text style={styles.scanHint}>Scannez le code-barres du magazine</Text>
+        {invalidCount > 0 ? (
+          <Text style={styles.invalidText} testID="form-invalid">
+            Code illisible, réalignez-le dans le cadre…
+          </Text>
+        ) : null}
       </View>
 
       <Pressable
@@ -102,13 +121,13 @@ export default function FormBarcodeScreen() {
         testID="scan-back"
         accessibilityRole="button"
         accessibilityLabel="Annuler">
-        <Text style={styles.backButtonText}>✕</Text>
+        <Feather name="x" size={22} color="#FFFFFF" />
       </Pressable>
     </View>
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -137,7 +156,20 @@ function makeStyles(colors: ThemeColors) {
     scanHint: {
       marginTop: Spacing.three,
       fontSize: 14,
+      lineHeight: 20,
       color: '#FFFFFF',
+      textAlign: 'center',
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    invalidText: {
+      marginTop: Spacing.two,
+      fontSize: 14,
+      lineHeight: 20,
+      color: '#FFD5D2',
       textAlign: 'center',
       backgroundColor: 'rgba(0,0,0,0.55)',
       paddingVertical: Spacing.two,
@@ -192,7 +224,7 @@ function makeStyles(colors: ThemeColors) {
     },
     backButton: {
       position: 'absolute',
-      top: 48,
+      top: insets.top + 12,
       left: Spacing.three,
       width: 44,
       height: 44,
@@ -200,10 +232,6 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: 'rgba(0,0,0,0.55)',
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    backButtonText: {
-      fontSize: 20,
-      color: '#FFFFFF',
     },
   });
 }

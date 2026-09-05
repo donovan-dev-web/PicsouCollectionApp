@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 
 import BarcodeScreen from '@/app/scan/barcode';
 import { setDepsForTest, type Dependencies } from '@/dependencies';
@@ -19,15 +20,14 @@ jest.mock('expo-router', () => ({
 
 const mockRequestPermission = jest.fn();
 
+let mockPermission = { granted: true, canAskAgain: true, status: 'granted' };
+
 jest.mock('expo-camera', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require('react-native');
   const MockCameraView = (props: any) => <View testID="camera-view" {...props} />;
   return {
-    useCameraPermissions: () => [
-      { granted: true, canAskAgain: true, status: 'granted' },
-      mockRequestPermission,
-    ],
+    useCameraPermissions: () => [mockPermission, mockRequestPermission],
     CameraView: MockCameraView,
   };
 });
@@ -101,6 +101,7 @@ describe('BarcodeScreen', () => {
     mockCountByMagazine.mockClear();
     mockAddExistingCopy.mockClear();
     mockContinuousParam = {};
+    mockPermission = { granted: true, canAskAgain: true, status: 'granted' };
     mockAddCopy.mockResolvedValue({
       id: 'c1',
       magazineId: 'mag-1',
@@ -356,5 +357,40 @@ describe('BarcodeScreen', () => {
       pathname: '/scan/manual',
       params: { barcode: '5901234123457' },
     });
+  });
+
+  it('permission définitivement refusée : propose d ouvrir les réglages', () => {
+    mockPermission = { granted: false, canAskAgain: false, status: 'denied' };
+    const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined);
+
+    render(<BarcodeScreen />);
+
+    expect(screen.getByTestId('permission-denied')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('permission-settings'));
+    expect(openSettings).toHaveBeenCalled();
+    openSettings.mockRestore();
+  });
+
+  it('la fiche doublon peut être fermée via la croix et reprend le scan', async () => {
+    mockContinuousParam = { continuous: '1' };
+    const magazine = makeMagazine();
+    const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'found', magazine });
+    mockCountByMagazine.mockResolvedValue(1);
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByBarcode,
+        } as unknown as Dependencies['identificationService'],
+      }),
+    );
+
+    render(<BarcodeScreen />);
+
+    await scanTimes('5901234123457');
+    await waitFor(() => expect(screen.getByTestId('pending-confirm')).toBeTruthy());
+
+    fireEvent.press(screen.getByTestId('pending-close'));
+    await waitFor(() => expect(screen.queryByTestId('pending-confirm')).toBeNull());
+    expect(mockAddExistingCopy).not.toHaveBeenCalled();
   });
 });

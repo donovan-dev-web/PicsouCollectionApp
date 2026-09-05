@@ -38,6 +38,6 @@ describe('MagazineCard', () => {
     render(<MagazineCard magazine={{ ...base, quantity: 0 }} />);
 
     expect(screen.getByTestId('status-absent')).toBeTruthy();
-    expect(screen.getByText('🟢 Absent')).toBeTruthy();
+    expect(screen.getByText('Absent')).toBeTruthy();
   });
 });

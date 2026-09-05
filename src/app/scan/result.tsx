@@ -4,6 +4,8 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { Screen } from '@/components/screen';
+import { toast } from '@/lib/toast';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 export default function ScanResultScreen() {
@@ -44,8 +46,9 @@ export default function ScanResultScreen() {
     }
     const alreadyOwned = owned;
 
-    const perform = () => {
-      addExistingCopy(id);
+    const perform = async () => {
+      await addExistingCopy(id);
+      toast(alreadyOwned ? 'Exemplaire ajouté à la collection' : 'Ajouté à la collection');
     };
 
     if (alreadyOwned) {
@@ -70,93 +73,95 @@ export default function ScanResultScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {exists ? 'Déjà dans votre collection' : 'Absent de la collection'}
-      </Text>
-
-      {exists ? (
-        <View style={styles.card}>
-          <Text style={styles.magazine} testID="result-magazine">
-            {params.publication ?? 'Magazine'}
-          </Text>
-          {params.issueNumber ? <Text style={styles.issue}>N° {params.issueNumber}</Text> : null}
-          {resolved ? (
-            <Text
-              style={owned ? styles.ownedText : styles.absentText}
-              testID={`result-status-${owned ? 'owned' : 'absent'}`}>
-              {owned ? `🔴 Possédé (${ownedCount})` : '🟢 Absent'}
-            </Text>
-          ) : (
-            <Text style={styles.muted} testID="result-loading">
-              {detailLoading ? 'Vérification…' : 'Statut indisponible'}
-            </Text>
-          )}
-        </View>
-      ) : (
-        <View style={styles.card}>
-          <Text style={styles.message}>
-            Ce magazine n&apos;existe pas encore dans votre collection.
-          </Text>
-          {barcode ? <Text style={styles.muted}>Code-barres : {barcode}</Text> : null}
-        </View>
-      )}
-
-      <View style={styles.actions}>
-        {exists && resolved && (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={handleAddCopy}
-            testID={owned ? 'result-add-copy' : 'result-add'}
-            accessibilityRole="button"
-            accessibilityLabel={owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}>
-            <Text style={styles.primaryButtonText}>
-              {owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}
-            </Text>
-          </Pressable>
-        )}
-
-        {exists && (
-          <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-            onPress={() => router.replace(`/collection/${id}`)}
-            testID="result-view"
-            accessibilityRole="button"
-            accessibilityLabel="Voir la fiche du magazine">
-            <Text style={styles.secondaryButtonText}>Voir la fiche</Text>
-          </Pressable>
-        )}
+    <Screen>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          {exists ? 'Déjà dans votre collection' : 'Absent de la collection'}
+        </Text>
 
         {exists ? (
-          <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-            onPress={() => router.replace('/scan/barcode')}
-            testID="result-rescan"
-            accessibilityRole="button"
-            accessibilityLabel="Scanner à nouveau">
-            <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
-          </Pressable>
+          <View style={styles.card}>
+            <Text style={styles.magazine} testID="result-magazine">
+              {params.publication ?? 'Magazine'}
+            </Text>
+            {params.issueNumber ? <Text style={styles.issue}>N° {params.issueNumber}</Text> : null}
+            {resolved ? (
+              <Text
+                style={owned ? styles.ownedText : styles.absentText}
+                testID={`result-status-${owned ? 'owned' : 'absent'}`}>
+                {owned ? `✓ Possédé (${ownedCount})` : '○ Absent'}
+              </Text>
+            ) : (
+              <Text style={styles.muted} testID="result-loading">
+                {detailLoading ? 'Vérification…' : 'Statut indisponible'}
+              </Text>
+            )}
+          </View>
         ) : (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={() => router.replace('/scan/camera')}
-            testID="result-camera"
-            accessibilityRole="button"
-            accessibilityLabel="Rechercher par caméra (OCR)">
-            <Text style={styles.primaryButtonText}>Caméra / OCR</Text>
-          </Pressable>
+          <View style={styles.card}>
+            <Text style={styles.message}>
+              Ce magazine n&apos;existe pas encore dans votre collection.
+            </Text>
+            {barcode ? <Text style={styles.muted}>Code-barres : {barcode}</Text> : null}
+          </View>
         )}
 
-        <Pressable
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-          onPress={handleManual}
-          testID="result-manual"
-          accessibilityRole="button"
-          accessibilityLabel="Saisir manuellement">
-          <Text style={styles.secondaryButtonText}>Saisir manuellement</Text>
-        </Pressable>
+        <View style={styles.actions}>
+          {exists && resolved && (
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={handleAddCopy}
+              testID={owned ? 'result-add-copy' : 'result-add'}
+              accessibilityRole="button"
+              accessibilityLabel={owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}>
+              <Text style={styles.primaryButtonText}>
+                {owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}
+              </Text>
+            </Pressable>
+          )}
+
+          {exists && (
+            <Pressable
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+              onPress={() => router.replace(`/collection/${id}`)}
+              testID="result-view"
+              accessibilityRole="button"
+              accessibilityLabel="Voir la fiche du magazine">
+              <Text style={styles.secondaryButtonText}>Voir la fiche</Text>
+            </Pressable>
+          )}
+
+          {exists ? (
+            <Pressable
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+              onPress={() => router.replace('/scan/barcode')}
+              testID="result-rescan"
+              accessibilityRole="button"
+              accessibilityLabel="Scanner à nouveau">
+              <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={() => router.replace('/scan/camera')}
+              testID="result-camera"
+              accessibilityRole="button"
+              accessibilityLabel="Rechercher par caméra (OCR)">
+              <Text style={styles.primaryButtonText}>Caméra / OCR</Text>
+            </Pressable>
+          )}
+
+          <Pressable
+            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            onPress={handleManual}
+            testID="result-manual"
+            accessibilityRole="button"
+            accessibilityLabel="Saisir manuellement">
+            <Text style={styles.secondaryButtonText}>Saisir manuellement</Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </Screen>
   );
 }
 
@@ -195,8 +200,8 @@ function makeStyles(colors: ThemeColors) {
     ownedText: {
       fontSize: 14,
       fontWeight: '700',
-      color: '#B3261E',
-      backgroundColor: '#FDE8E8',
+      color: colors.ownedText,
+      backgroundColor: colors.ownedBg,
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.two,
       borderRadius: 8,
@@ -205,8 +210,8 @@ function makeStyles(colors: ThemeColors) {
     absentText: {
       fontSize: 14,
       fontWeight: '700',
-      color: '#137333',
-      backgroundColor: '#E6F4EA',
+      color: colors.absentText,
+      backgroundColor: colors.absentBg,
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.two,
       borderRadius: 8,
@@ -231,7 +236,9 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
-      paddingVertical: Spacing.three,
+      minHeight: 48,
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
       borderRadius: 12,
     },
     primaryButtonText: {
@@ -243,7 +250,9 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.backgroundElement,
-      paddingVertical: Spacing.three,
+      minHeight: 48,
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
       borderRadius: 12,
     },
     secondaryButtonText: {

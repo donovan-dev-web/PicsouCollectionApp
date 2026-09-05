@@ -204,7 +204,25 @@ describe('CollectionScreen (pagination)', () => {
     fireEvent.press(screen.getByTestId('pagination-page-3'));
     fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
 
-    expect(screen.getByTestId('pagination-page-1').props.accessibilityState?.selected).toBe(true);
     expect(screen.getByText('Magazine 45')).toBeTruthy();
+    expect(screen.getByTestId('collection-result-count')).toHaveTextContent('1 résultat');
+  });
+
+  it('masque la pagination quand une seule page suffit', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
+
+    expect(screen.queryByTestId('pagination-page-1')).toBeNull();
+    expect(screen.queryByTestId('pagination-prev')).toBeNull();
+  });
+
+  it('efface les filtres via le bouton dédié', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
+    fireEvent.press(screen.getByTestId('filter-clear'));
+
+    expect(screen.getByTestId('pagination-page-1')).toBeTruthy();
   });
 });

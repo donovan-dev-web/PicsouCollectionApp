@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { AutocompleteInput } from '@/components/autocomplete-input';
 import { SelectField } from '@/components/select-field';
@@ -12,7 +13,8 @@ import type { CreateMagazineInput, Magazine } from '@/types';
 
 const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const;
 
-const YEARS = Array.from({ length: 40 }, (_, i) => String(2025 - i));
+/** Années dynamiques : année courante → -39 ans (M10-08, fini `2025` en dur). */
+const YEARS = Array.from({ length: 40 }, (_, i) => String(new Date().getFullYear() - i));
 
 type FormValues = {
   publication: string;
@@ -112,10 +114,15 @@ export function MagazineForm({
     if (!canSubmit) {
       return;
     }
+    const issueDigits = values.issueNumber.trim();
+    if (issueDigits && !/^\d+$/.test(issueDigits)) {
+      setFormError('Le numéro doit être composé uniquement de chiffres.');
+      return;
+    }
     setSubmitting(true);
     const input: CreateMagazineInput = {
       publication: values.publication.trim(),
-      issueNumber: values.issueNumber.trim() ? Number(values.issueNumber) : null,
+      issueNumber: issueDigits ? Number(issueDigits) : null,
       edition: values.edition.trim() || null,
       language: values.language.trim() || null,
       condition: values.condition.trim() || null,
@@ -175,9 +182,16 @@ export function MagazineForm({
         style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
         onPress={() => setDetailsOpen((o) => !o)}
         testID="details-toggle"
-        accessibilityRole="button">
+        accessibilityRole="button"
+        accessibilityLabel={detailsOpen ? 'Masquer les détails' : 'Afficher plus de détails'}
+        accessibilityState={{ expanded: detailsOpen }}>
+        <Feather
+          name={detailsOpen ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={colors.accentTextOnLight}
+        />
         <Text style={styles.detailsToggleText}>
-          {detailsOpen ? '▲ Masquer les détails' : '▼ Plus de détails'}
+          {detailsOpen ? 'Masquer les détails' : 'Plus de détails'}
         </Text>
       </Pressable>
 
@@ -247,7 +261,8 @@ export function MagazineForm({
               testID="barcode-scan"
               accessibilityRole="button"
               accessibilityLabel="Scanner le code-barres">
-              <Text style={styles.scanButtonText}>▣ Scanner</Text>
+              <Feather name="crop" size={18} color={colors.text} />
+              <Text style={styles.scanButtonText}>Scanner</Text>
             </Pressable>
           </View>
 
@@ -276,9 +291,15 @@ export function MagazineForm({
         onPress={handleSubmit}
         disabled={!canSubmit}
         testID="form-submit"
-        accessibilityRole="button">
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSubmit }}>
         <Text style={styles.submitText}>{submitting ? 'Enregistrement…' : submitLabel}</Text>
       </Pressable>
+      {!canSubmit && !submitting ? (
+        <Text style={styles.submitHint} testID="form-submit-hint">
+          Renseignez la publication pour enregistrer.
+        </Text>
+      ) : null}
     </ScrollView>
   );
 }
@@ -303,6 +324,7 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 8,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
+      minHeight: 44,
       fontSize: 16,
       color: colors.text,
     },
@@ -318,8 +340,12 @@ function makeStyles(colors: ThemeColors) {
       textAlign: 'center',
     },
     detailsToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
       marginTop: Spacing.three,
       alignSelf: 'flex-start',
+      minHeight: 44,
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.three,
       borderRadius: 8,
@@ -328,7 +354,7 @@ function makeStyles(colors: ThemeColors) {
     detailsToggleText: {
       fontSize: 15,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.accentTextOnLight,
     },
     details: {
       gap: Spacing.two,
@@ -349,12 +375,15 @@ function makeStyles(colors: ThemeColors) {
       flex: 1,
     },
     scanButton: {
+      flexDirection: 'row',
       alignItems: 'center',
+      gap: 6,
       justifyContent: 'center',
       backgroundColor: colors.backgroundElement,
       borderWidth: 1,
       borderColor: colors.accent,
       borderRadius: 8,
+      minHeight: 44,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
     },
@@ -371,6 +400,7 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
+      minHeight: 48,
       paddingVertical: Spacing.three,
       borderRadius: 12,
     },
@@ -381,6 +411,11 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 18,
       fontWeight: '700',
       color: colors.accentText,
+    },
+    submitHint: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      textAlign: 'center',
     },
   });
 }

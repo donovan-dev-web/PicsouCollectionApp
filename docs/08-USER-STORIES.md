@@ -17,7 +17,8 @@
 7. [Épique 5 — Export / Import](#7-épique-5--export--import)
 8. [Épique 6 — Qualité & publication](#8-épique-6--qualité--publication)
 9. [Épique 7 — Paramètres](#9-épique-7--paramètres)
-10. [Représentation graphique](#10-représentation-graphique)
+10. [Épique 8 — UI/UX M-10](#10-épique-8--uiux-m-10)
+11. [Représentation graphique](#11-représentation-graphique)
 
 ---
 
@@ -463,7 +464,116 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 ---
 
-## 10. Représentation graphique
+## 10. Épique 8 — UI/UX M-10 « Vault Lisible »
+
+### US-UX-01 — Texte contrasté WCAG AA
+> En tant que **Marc en plein soleil**, je veux **un texte contrasté (≥ 4.5:1)** afin de **lire compteur et N° sans plisser les yeux**.
+
+**Critères d'acceptation** :
+- *Given* thème clair, *When* j'affiche Accueil/carte/fiche, *Then* aucun texte jaune `#FDD835` sur fond clair ;
+- `accent` réservé aux fonds de boutons (avec `accentText`) et fonds sombres.
+
+**Priorité** : haute. → M10-01.
+
+### US-UX-02 — SafeZone (encoche + gesture bar)
+> En tant que **Marc avec un téléphone à encoche**, je veux **aucun bouton masqué** afin de **pouvoir agir à 1 main**.
+
+**Critères d'acceptation** :
+- *Given* encoche + gesture bar, *When* j'ouvre chaque écran, *Then* titres/boutons/pagination visibles (insets) ;
+- Caméra : aucun `top:48` en dur, réticule responsive.
+
+**Priorité** : haute. → M10-02.
+
+### US-UX-03 — Menu à icônes
+> En tant que **Marc**, je veux **reconnaître Accueil/Collection/Paramètres par icône** afin de **naviguer sans lire**.
+
+**Critères d'acceptation** :
+- *Given* la TabBar, *When* je regarde, *Then* icônes Feather 24px + labels, actif visible clair/sombre ;
+- Deep-link `/scan` → Annuler ne donne jamais écran vide.
+
+**Priorité** : haute. → M10-03.
+
+### US-UX-04 — Parcours brocante < 3s
+> En tant que **Marc en brocante**, je veux **scanner en < 3s avec feedback** afin de **ne pas rater une vente**.
+
+**Critères d'acceptation** :
+- *Given* caméra ouverte, *When* je scanne, *Then* spinner → résultat + toast, permission refusée → `Ouvrir réglages` en 1 tap ;
+- Possédé = vert positif, Absent = neutre (sémantique inversée validée).
+
+**Priorité** : haute. → M10-04..08.
+
+### US-UX-05 — Accessibilité lecteur d'écran
+> En tant que **Marc malvoyant (VoiceOver/TalkBack, texte 200 %)**, je veux **labels + cibles 44px** afin d'**utiliser l'app sans aide**.
+
+**Critères d'acceptation** :
+- *Given* lecteur d'écran, *When* je navigue, *Then* 0 emoji UI, rôles + hints, cibles ≥ 44px.
+
+**Priorité** : haute. → M10-10.
+
+### US-UX-06 — Jamais bloqué (vide/erreur)
+> En tant que **Marc**, je veux **un CTA clair face à vide/erreur** afin de **ne jamais être bloqué**.
+
+**Critères d'acceptation** :
+- *Given* base vide / erreur / chargement, *When* j'affiche l'écran, *Then* Empty/Error/Loading + CTA, chaque ajout → toast succès.
+
+**Priorité** : moyenne. → M10-11.
+
+### US-UX-07 — Importer un CSV depuis le stockage
+> En tant que **Marc**, je veux **sélectionner mon fichier `.csv` dans le sélecteur système** afin de **peupler/restaurer ma collection**.
+
+**Critères d'acceptation** :
+- *Given* un CSV v1 sur le téléphone, *When* j'importe en CSV, *Then* le fichier est sélectionnable et importé (remplacement + récap) ;
+- *Given* un fichier non conforme, *Then* rejet explicite sans toucher aux données.
+
+**Priorité** : haute. → M-10R / M10R-01 (retour test physique n°1).
+
+### US-UX-08 — CTA sans scroll
+> En tant que **Marc en brocante**, je veux **Scanner/Ajouter visibles sans scroller** afin de **répondre en < 3 s à 1 main**.
+
+**Critères d'acceptation** :
+- *Given* l'ouverture de l'Accueil (petit écran), *When* je regarde, *Then* Scanner est visible sans scroll.
+
+**Priorité** : haute. → M-10R / M10R-02 (retour n°2).
+
+### US-UX-09 — Navigation drawer + tabs
+> En tant que **Marc**, je veux **un menu latéral permanent et des onglets Accueil/Scan/Collection** afin de **rejoindre chaque fonction en 1-2 taps**.
+
+**Critères d'acceptation** :
+- *Given* n'importe quel écran principal, *When* j'ouvre le drawer, *Then* liens directs + sous-catégories Scan (OCR / code-barres / manuel) + éditions dynamiques repliables ;
+- *Given* une édition, *When* je la choisis, *Then* la collection s'ouvre pré-filtrée.
+
+**Priorité** : haute. → M-10R / M10R-03..05 (retour n°3).
+
+### US-UX-10 — Formulaire utilisable au clavier
+> En tant que **Marc**, je veux **choisir Mois/Année et relire Notes pendant la frappe** afin de **saisir sans lutte contre le clavier**.
+
+**Critères d'acceptation** :
+- *Given* le formulaire, *When* j'ouvre Année (40 options), *Then* la liste scrolle au pouce ;
+- *When* je tape dans Notes, *Then* le champ reste visible au-dessus du clavier.
+
+**Priorité** : haute. → M-10R / M10R-06/07 (retour n°4).
+
+### US-UX-11 — OCR en conditions réelles
+> En tant que **Marc (brocante sombre, couverture comics)**, je veux **une torche et un guidage vers les replis** afin d'**identifier malgré le texte stylisé**.
+
+**Critères d'acceptation** :
+- *Given* faible lumière, *When* je scanne, *Then* je peux allumer la torche ;
+- *Given* un lettrage illisible, *Then* un conseil + code-barres/manuel sont visibles en < 5 s.
+
+**Priorité** : haute. → M-10R / M10R-08/09 (retour n°5).
+
+### US-UX-12 — Accès scan permanent et sûr
+> En tant que **Marc**, je veux **un bouton scan flottant sur chaque page et des boutons hors gesture bar** afin de **scanner sans naviguer ni rater ma cible**.
+
+**Critères d'acceptation** :
+- *Given* Accueil/Collection/Fiche/Paramètres, *When* je veux scanner, *Then* 1 tap sur le FAB ;
+- *Given* la page OCR, *Then* « Scanner le code-barres » est au-dessus de la gesture bar.
+
+**Priorité** : haute. → M-10R / M10R-10/11 (retours n°6/7).
+
+---
+
+## 11. Représentation graphique
 
 ```
 ┌─────────────────── ÉPIQUES ───────────────────┐
@@ -494,4 +604,6 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Export / Import | US-BK-01 à 05 | 5 |
 | Paramètres | US-SET-01 | 1 |
 | Qualité & publication | US-QA-01 à 03 | 3 |
-| **Total** | | **38** |
+| UI/UX M-10 | US-UX-01 à 06 | 6 |
+| UI/UX M-10R (retours terrain) | US-UX-07 à 12 | 6 |
+| **Total** | | **50** |
