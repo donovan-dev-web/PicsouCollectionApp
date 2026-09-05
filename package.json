@@ -1,7 +1,7 @@
 {
   "name": "picsoucollection",
   "main": "expo-router/entry",
-  "version": "0.8.0",
+  "version": "0.9.1",
   "packageManager": "npm@10.9.4",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
