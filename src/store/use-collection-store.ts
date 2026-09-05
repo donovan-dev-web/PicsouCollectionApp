@@ -14,6 +14,8 @@ interface CollectionState {
   totalCopies: number;
   load: () => Promise<void>;
   loadRecent: () => Promise<void>;
+  /** Résumé léger (accueil) : compteur total + 5 derniers exemplaires, sans lister les éditions. */
+  loadSummary: () => Promise<void>;
   loadDetail: (id: string) => Promise<MagazineDetail | null>;
   addMagazine: (input: CreateMagazineInput) => Promise<MagazineListItem | null>;
   addExistingCopy: (magazineId: string) => Promise<void>;
@@ -51,6 +53,20 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       set({ recentCopies });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Erreur inconnue' });
+    }
+  },
+
+  loadSummary: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { collectionRepository } = getDeps();
+      const [recentCopies, totalCopies] = await Promise.all([
+        collectionRepository.listRecentCopies(5),
+        collectionRepository.countAllCopies(),
+      ]);
+      set({ recentCopies, totalCopies, loading: false, loaded: true });
+    } catch (err) {
+      set({ loading: false, error: err instanceof Error ? err.message : 'Erreur inconnue' });
     }
   },
 

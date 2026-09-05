@@ -53,6 +53,14 @@ export class CollectionRepository {
     return Number(row?.quantity ?? 0);
   }
 
+  async countAllCopies(): Promise<number> {
+    const row = await this.db.getFirstAsync<{ quantity: number }>(
+      'SELECT COUNT(*) AS quantity FROM collection_items',
+    );
+
+    return Number(row?.quantity ?? 0);
+  }
+
   async listByMagazine(magazineId: string): Promise<CollectionItem[]> {
     const rows = await this.db.getAllAsync<CollectionItemRow>(
       `SELECT id, magazine_id, notes, date_added
