@@ -4,6 +4,7 @@
   "version": "0.8.0",
   "packageManager": "npm@10.9.4",
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.20",
     "expo-build-properties": "~57.0.17",
     "expo-camera": "~57.0.4",
@@ -64,6 +65,9 @@
   "jest": {
     "preset": "jest-expo",
     "clearMocks": true,
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/"
     ],

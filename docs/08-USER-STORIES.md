@@ -17,7 +17,8 @@
 7. [Épique 5 — Export / Import](#7-épique-5--export--import)
 8. [Épique 6 — Qualité & publication](#8-épique-6--qualité--publication)
 9. [Épique 7 — Paramètres](#9-épique-7--paramètres)
-10. [Représentation graphique](#10-représentation-graphique)
+10. [Épique 8 — UI/UX M-10](#10-épique-8--uiux-m-10)
+11. [Représentation graphique](#11-représentation-graphique)
 
 ---
 
@@ -463,7 +464,63 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 ---
 
-## 10. Représentation graphique
+## 10. Épique 8 — UI/UX M-10 « Vault Lisible »
+
+### US-UX-01 — Texte contrasté WCAG AA
+> En tant que **Marc en plein soleil**, je veux **un texte contrasté (≥ 4.5:1)** afin de **lire compteur et N° sans plisser les yeux**.
+
+**Critères d'acceptation** :
+- *Given* thème clair, *When* j'affiche Accueil/carte/fiche, *Then* aucun texte jaune `#FDD835` sur fond clair ;
+- `accent` réservé aux fonds de boutons (avec `accentText`) et fonds sombres.
+
+**Priorité** : haute. → M10-01.
+
+### US-UX-02 — SafeZone (encoche + gesture bar)
+> En tant que **Marc avec un téléphone à encoche**, je veux **aucun bouton masqué** afin de **pouvoir agir à 1 main**.
+
+**Critères d'acceptation** :
+- *Given* encoche + gesture bar, *When* j'ouvre chaque écran, *Then* titres/boutons/pagination visibles (insets) ;
+- Caméra : aucun `top:48` en dur, réticule responsive.
+
+**Priorité** : haute. → M10-02.
+
+### US-UX-03 — Menu à icônes
+> En tant que **Marc**, je veux **reconnaître Accueil/Collection/Paramètres par icône** afin de **naviguer sans lire**.
+
+**Critères d'acceptation** :
+- *Given* la TabBar, *When* je regarde, *Then* icônes Feather 24px + labels, actif visible clair/sombre ;
+- Deep-link `/scan` → Annuler ne donne jamais écran vide.
+
+**Priorité** : haute. → M10-03.
+
+### US-UX-04 — Parcours brocante < 3s
+> En tant que **Marc en brocante**, je veux **scanner en < 3s avec feedback** afin de **ne pas rater une vente**.
+
+**Critères d'acceptation** :
+- *Given* caméra ouverte, *When* je scanne, *Then* spinner → résultat + toast, permission refusée → `Ouvrir réglages` en 1 tap ;
+- Possédé = vert positif, Absent = neutre (sémantique inversée validée).
+
+**Priorité** : haute. → M10-04..08.
+
+### US-UX-05 — Accessibilité lecteur d'écran
+> En tant que **Marc malvoyant (VoiceOver/TalkBack, texte 200 %)**, je veux **labels + cibles 44px** afin d'**utiliser l'app sans aide**.
+
+**Critères d'acceptation** :
+- *Given* lecteur d'écran, *When* je navigue, *Then* 0 emoji UI, rôles + hints, cibles ≥ 44px.
+
+**Priorité** : haute. → M10-10.
+
+### US-UX-06 — Jamais bloqué (vide/erreur)
+> En tant que **Marc**, je veux **un CTA clair face à vide/erreur** afin de **ne jamais être bloqué**.
+
+**Critères d'acceptation** :
+- *Given* base vide / erreur / chargement, *When* j'affiche l'écran, *Then* Empty/Error/Loading + CTA, chaque ajout → toast succès.
+
+**Priorité** : moyenne. → M10-11.
+
+---
+
+## 11. Représentation graphique
 
 ```
 ┌─────────────────── ÉPIQUES ───────────────────┐
@@ -494,4 +551,5 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Export / Import | US-BK-01 à 05 | 5 |
 | Paramètres | US-SET-01 | 1 |
 | Qualité & publication | US-QA-01 à 03 | 3 |
-| **Total** | | **38** |
+| UI/UX M-10 | US-UX-01 à 06 | 6 |
+| **Total** | | **44** |

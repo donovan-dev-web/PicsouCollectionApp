@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initialize } from '@/dependencies';
 import { useEffectiveColorScheme } from '@/hooks/use-theme';
@@ -19,15 +20,28 @@ export default function RootLayout() {
   }, [loadColorScheme, loadSummary]);
 
   return (
-    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="scan/index" />
-        <Stack.Screen name="scan/manual" />
-        <Stack.Screen name="collection/[id]/index" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="collection/[id]/edit" options={{ presentation: 'modal' }} />
-      </Stack>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="scan/index" options={{ title: 'Identifier' }} />
+          <Stack.Screen name="scan/barcode" options={{ title: 'Scanner code-barres' }} />
+          <Stack.Screen name="scan/camera" options={{ title: 'Caméra OCR' }} />
+          <Stack.Screen name="scan/manual" options={{ title: 'Saisie manuelle' }} />
+          <Stack.Screen name="scan/form-barcode" options={{ title: 'Scanner code-barres' }} />
+          <Stack.Screen name="scan/multiple" options={{ title: 'Choisir édition' }} />
+          <Stack.Screen name="scan/result" options={{ title: 'Résultat' }} />
+          <Stack.Screen
+            name="collection/[id]/index"
+            options={{ presentation: 'modal', title: 'Fiche magazine' }}
+          />
+          <Stack.Screen
+            name="collection/[id]/edit"
+            options={{ presentation: 'modal', title: 'Modifier' }}
+          />
+        </Stack>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

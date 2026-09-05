@@ -7,6 +7,30 @@
 
 ---
 
+## [Unreleased] — M-10 « Vault Lisible » (→ v0.9.0)
+
+> Refonte UI/UX avant publication : SafeZone, contraste WCAG AA, TabBar à icônes
+> (Expo Vector Icons Feather), sémantique Possédé=vert/positif, parcours brocante <3s.
+
+### Added
+- Milestone M-10 : 12 issues `docs/issues/M10-*.md` (#140-#151) + User Stories US-UX-01..06
+- Scripts `scripts/m10-create-milestone.sh`, `scripts/m10-create-issues.sh` (dry-run OK)
+- Tokens étendus : échelle Spacing/Typo, statuts vert positif, `accentText` lisible
+- Composant `Screen` SafeArea + TabBar à icônes + `StatusBadge` thématisé
+- Dépendance `@expo/vector-icons` (Feather) + `jest.setup.js` (mock SafeArea/icônes) ; 273 tests verts
+
+### Changed (sweep pro M10-04..11, non mergé — branche `develop`)
+- **Accueil** : CTA Scanner 56px + Ajouter outline, compteur live-region, récents 48px + chevron, dates `Intl fr-FR`, empty + CTA, erreur store affichée
+- **Collection** : pagination masquée à 1 page, boutons 44px + chevrons Feather, filtre avec effacement, pull-to-refresh, `EmptyState`/`LoadingView`
+- **Fiche** : ajout direct d'exemplaire + toast, Modifier secondaire, Supprimer avec Hint, SafeZone, testIDs sans accents
+- **Scan** : permission → « Ouvrir les réglages », fiches pending avec backdrop + croix, spinner de recherche, `NaN` OCR impossible, années dynamiques
+- **Formulaire** : validation chiffres du numéro, aide submit, 44px partout, chevrons Feather
+- **Paramètres** : spinners busy + `aria-busy`, icônes upload/download, check de sélection, `Annuler` aux Alertes
+- **404** : réécrite (typos, bouton primaire 48px, SafeZone)
+- Zéro emoji UI, zéro `top:48` en dur, `accent` texte uniquement sur fond sombre ; 280 tests verts, couverture 90,2 %
+
+---
+
 ## [0.8.0] — 2026-09-05
 
 > Dixième release : **optimisation & qualité (M-08)** — démarrage accéléré, accueil allégé et couverture de tests verrouillée à 80 %.

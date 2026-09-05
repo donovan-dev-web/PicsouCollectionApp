@@ -207,7 +207,8 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-07` | Export / Import | Sauvegarde et restauration JSON |
 | `M-07R` | Retours test physique (v0.7.0) | Corrections post-test v0.7.0 : OCR ciblé, validation, format CSV |
 | `M-08` | Optimisation & qualité | Performance, tests, couverture |
-| `M-09` | Tests terrain & publication | Validation réelle, build Play Store |
+| `M-10` | Refonte UI/UX « Vault Lisible » | SafeZone, contraste AA, TabBar icônes, parcours <3s → v0.9.0 |
+| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 |
 
 ### Règle d'attribution
 - Chaque milestone a une **date de fin cible** (indicative) et une **description** ;
@@ -419,6 +420,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-09 (+ `M-04R`, `M-07R`) (phases roadmap) |
+| Milestones | M-01 à M-09 (+ `M-04R`, `M-07R`, `M-10`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |

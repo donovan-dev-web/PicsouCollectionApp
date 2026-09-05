@@ -4,9 +4,16 @@ import ScanMethodScreen from '@/app/scan/index';
 
 const mockPush = jest.fn();
 const mockBack = jest.fn();
+const mockReplace = jest.fn();
+const mockCanGoBack = jest.fn(() => true);
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, back: mockBack }),
+  useRouter: () => ({
+    push: mockPush,
+    back: mockBack,
+    replace: mockReplace,
+    canGoBack: mockCanGoBack,
+  }),
 }));
 
 describe('ScanMethodScreen', () => {
@@ -46,5 +53,12 @@ describe('ScanMethodScreen', () => {
     render(<ScanMethodScreen />);
     fireEvent.press(screen.getByTestId('method-cancel'));
     expect(mockBack).toHaveBeenCalled();
+  });
+
+  it('redirige vers l accueil si aucune navigation arrière (deep-link)', () => {
+    mockCanGoBack.mockReturnValueOnce(false);
+    render(<ScanMethodScreen />);
+    fireEvent.press(screen.getByTestId('method-cancel'));
+    expect(mockReplace).toHaveBeenCalledWith('/');
   });
 });

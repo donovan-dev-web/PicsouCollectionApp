@@ -9,7 +9,7 @@ const mockUpdateMagazine = jest.fn();
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: 'mag-1' }),
   useFocusEffect: (callback: () => void) => callback(),
-  useRouter: () => ({ back: mockBack }),
+  useRouter: () => ({ back: mockBack, canGoBack: () => true, replace: jest.fn() }),
 }));
 
 const detail = {

@@ -97,6 +97,7 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 8,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
+      minHeight: 44,
       fontSize: 16,
       color: colors.text,
     },
@@ -107,6 +108,8 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: colors.backgroundElement,
     },
     suggestion: {
+      justifyContent: 'center',
+      minHeight: 44,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
       borderBottomWidth: 1,

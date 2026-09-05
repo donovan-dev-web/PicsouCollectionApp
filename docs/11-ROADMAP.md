@@ -49,7 +49,8 @@ Phase 5  ███████████████████████�
 Phase 6  ██████████████████████████████  Terminé ✓ (v0.6.0)
 Phase 7  ██████████████████████████████  Terminé ✓ (v0.7.0)
 Phase 8  ██████████████████████████████  Terminé ✓ (v0.8.0)
-Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 10 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-10 → v0.9.0)
+Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
 ```
 
 ### 2.1 Correspondance phase ↔ milestone ↔ issues
@@ -68,7 +69,8 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 6 — Parcours complet | `M-06 — Parcours complet` | `US-ID-04`, `US-ID-06`, `US-COL-06` | 3 |
 | 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
 | 7R — Retours test | `M-07R — Retours test physique (v0.7.0)` | `US-ID-08..09` *(1 bug)*, `US-BK-04..05` | 5 |
-| 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02`, #136 | 2 |
+| 8 — Optimisation | `M-08 — Optimisation & qualité` | `US-QA-02`, #136 | 2 |
+| 10 — Refonte UI/UX | `M-10 — Refonte UI/UX « Vault Lisible »` | `US-UX-01..06` (issues M10-01..12) | 12 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
 | **Total** | | | **70** |
 
@@ -308,7 +310,32 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 14. Phase 9 — Tests terrain & publication
+## 14. Phase 10 — Refonte UI/UX « Vault Lisible » (M-10 → v0.9.0)
+
+**Objectif** : véritable amélioration UI/UX avant publication — SafeZone, contraste
+WCAG AA, TabBar à icônes (Expo Vector Icons Feather), sémantique Possédé=vert,
+parcours brocante < 3s à 1 main.
+
+| Tâche | Story / Issue |
+|---|---|
+| Tokens + typo + contraste (fini `#FDD835` en texte clair) | US-UX-01 / M10-01 |
+| SafeZone globale + caméra responsive | US-UX-02 / M10-02 |
+| TabBar icônes + routes Stack + fallback nav | US-UX-03 / M10-03 |
+| Accueil cockpit, Collection, Fiche/Edit | US-UX-04 / M10-04..06 |
+| Scan barcode/result/multiple + OCR/manual | US-UX-04 / M10-07..08 |
+| Settings backup (Annuler, busy) | M10-09 |
+| Accessibilité + lisibilité (0 emoji UI, 44px) | US-UX-05 / M10-10 |
+| Empty/Loading/Error + Toast partagés | US-UX-06 / M10-11 |
+| Docs + scripts `gh` | M10-12 |
+
+**Livrables** : 12 issues M10-01..12, `docs/issues/M10-*.md`, `scripts/m10-*.sh`,
+`docs/design/M10-TOKENS.md`. Détail : [docs/issues/M10-MILESTONE.md](issues/M10-MILESTONE.md).
+
+**Statut : À venir** — prérequis de Phase 9.
+
+---
+
+## 15. Phase 9 — Tests terrain & publication
 
 **Objectif** : Validation réelle et publication Play Store.
 
@@ -325,7 +352,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 ---
 
-## 15. Critères de sortie de chaque phase
+## 16. Critères de sortie de chaque phase
 
 Pour chaque phase, les critères de sortie sont :
 

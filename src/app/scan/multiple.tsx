@@ -3,6 +3,10 @@ import { useCallback, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
+import { EmptyState } from '@/components/empty-state';
+import { ErrorView } from '@/components/error-view';
+import { LoadingView } from '@/components/loading-view';
+import { Screen } from '@/components/screen';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -52,60 +56,79 @@ export default function MultipleBarcodeScreen() {
   const count = magazines?.length ?? 0;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Plusieurs éditions pour ce code</Text>
+    <Screen>
+      <View style={styles.container}>
+        <Text style={styles.title}>Plusieurs éditions pour ce code</Text>
 
-      {loading ? (
-        <Text style={styles.message} testID="multiple-loading">
-          Recherche…
-        </Text>
-      ) : error ? (
-        <Text style={styles.error} testID="multiple-error">
-          Impossible de charger les éditions.
-        </Text>
-      ) : magazines && count === 0 ? (
-        <Text style={styles.message} testID="multiple-empty">
-          Aucune édition correspond à ce code-barres.
-        </Text>
-      ) : (
-        magazines && (
-          <>
-            <Text style={styles.count} testID="multiple-count">
-              {count} édition{count > 1 ? 's' : ''} trouvée{count > 1 ? 's' : ''}
-            </Text>
-            {barcode ? <Text style={styles.muted}>Code-barres : {barcode}</Text> : null}
-            <FlatList
-              data={magazines}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.list}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-                  onPress={() => router.push(`/collection/${item.id}`)}
-                  testID="multiple-item"
-                  accessibilityRole="button"
-                  accessibilityLabel={`${item.publication} numéro ${item.issueNumber}`}>
-                  <View style={styles.cardHeader}>
-                    <Text style={styles.publication}>{item.publication}</Text>
-                    <Text style={styles.issue}>n° {item.issueNumber}</Text>
-                  </View>
-                  <StatusBadge owned={item.quantity > 0} quantity={item.quantity} />
-                </Pressable>
-              )}
-            />
-          </>
-        )
-      )}
+        {loading ? (
+          <LoadingView testID="multiple-loading" message="Recherche des éditions…" />
+        ) : error ? (
+          <ErrorView
+            testID="multiple-error"
+            message="Impossible de charger les éditions."
+            onRetry={load}
+            retryTestID="multiple-retry"
+          />
+        ) : magazines && count === 0 ? (
+          <EmptyState
+            testID="multiple-empty"
+            icon="search"
+            title="Aucune édition pour ce code"
+            message="Ce code-barres ne correspond à aucune édition connue."
+            actionLabel="Saisir manuellement"
+            onAction={() => router.replace({ pathname: '/scan/manual', params: { barcode } })}
+            actionTestID="multiple-manual"
+          />
+        ) : (
+          magazines && (
+            <>
+              <Text style={styles.count} testID="multiple-count">
+                {count} édition{count > 1 ? 's' : ''} trouvée{count > 1 ? 's' : ''}
+              </Text>
+              {barcode ? <Text style={styles.muted}>Code-barres : {barcode}</Text> : null}
+              <FlatList
+                data={magazines}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.list}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+                    onPress={() => router.push(`/collection/${item.id}`)}
+                    testID="multiple-item"
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      item.issueNumber != null
+                        ? `${item.publication} numéro ${item.issueNumber}`
+                        : item.publication
+                    }
+                    accessibilityHint="Voir la fiche de l'édition"
+                    android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+                    <View style={styles.cardHeader}>
+                      <Text style={styles.publication} numberOfLines={1} ellipsizeMode="tail">
+                        {item.publication}
+                      </Text>
+                      {item.issueNumber != null ? (
+                        <Text style={styles.issue}>n° {item.issueNumber}</Text>
+                      ) : null}
+                    </View>
+                    <StatusBadge owned={item.quantity > 0} quantity={item.quantity} />
+                  </Pressable>
+                )}
+              />
+            </>
+          )
+        )}
 
-      <Pressable
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-        onPress={() => router.replace('/scan/barcode')}
-        testID="multiple-rescan"
-        accessibilityRole="button"
-        accessibilityLabel="Scanner à nouveau">
-        <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
-      </Pressable>
-    </View>
+        <Pressable
+          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+          onPress={() => router.replace('/scan/barcode')}
+          testID="multiple-rescan"
+          accessibilityRole="button"
+          accessibilityLabel="Scanner à nouveau">
+          <Text style={styles.secondaryButtonText}>Scanner à nouveau</Text>
+        </Pressable>
+      </View>
+    </Screen>
   );
 }
 
@@ -172,7 +195,7 @@ function makeStyles(colors: ThemeColors) {
     issue: {
       fontSize: 24,
       fontWeight: '800',
-      color: colors.accent,
+      color: colors.accentTextOnLight,
     },
     secondaryButton: {
       alignItems: 'center',

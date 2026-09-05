@@ -12,7 +12,7 @@ export const mockLocalSearchParams: { current: Record<string, string | undefined
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockLocalSearchParams.current,
   useFocusEffect: (callback: () => void) => callback(),
-  useRouter: () => ({ back: mockBack }),
+  useRouter: () => ({ back: mockBack, canGoBack: () => true, replace: jest.fn() }),
 }));
 
 describe('ManualEntryScreen', () => {

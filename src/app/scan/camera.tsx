@@ -1,7 +1,17 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CameraView as CameraViewType } from 'expo-camera';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
@@ -49,7 +59,8 @@ function hasAnyDetected(detected: DetectedInfo): boolean {
 export default function CameraOcrScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const styles = makeStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(colors, insets);
 
   const [permission, requestPermission] = useCameraPermissions();
   const [state, setState] = useState<OcrUiState>({
@@ -231,9 +242,19 @@ export default function CameraOcrScreen() {
             <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
           </Pressable>
         ) : (
-          <Text style={styles.errorText} testID="ocr-permission-denied">
-            Permission refusée. Autorisez la caméra dans les réglages.
-          </Text>
+          <>
+            <Text style={styles.errorText} testID="ocr-permission-denied">
+              Permission refusée. Autorisez la caméra dans les réglages.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={() => void Linking.openSettings()}
+              testID="ocr-permission-settings"
+              accessibilityRole="button"
+              accessibilityLabel="Ouvrir les réglages">
+              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
+            </Pressable>
+          </>
         )}
         <Pressable
           style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
@@ -336,7 +357,7 @@ export default function CameraOcrScreen() {
             testID="ocr-back"
             accessibilityRole="button"
             accessibilityLabel="Annuler">
-            <Text style={styles.backButtonText}>✕</Text>
+            <Feather name="x" size={22} color="#FFFFFF" />
           </Pressable>
         </>
       )}
@@ -367,11 +388,16 @@ export default function CameraOcrScreen() {
               <TextInput
                 style={styles.input}
                 value={draft.issueNumber?.toString() ?? ''}
-                onChangeText={(t) => setDraft((d) => ({ ...d, issueNumber: t ? Number(t) : null }))}
+                onChangeText={(t) => {
+                  const digits = t.replace(/[^0-9]/g, '');
+                  setDraft((d) => ({ ...d, issueNumber: digits ? Number(digits) : null }));
+                }}
                 placeholder="N° du magazine"
                 keyboardType="number-pad"
+                returnKeyType="done"
                 placeholderTextColor={colors.textSecondary}
                 testID="ocr-override-issue"
+                accessibilityLabel="Numéro du magazine (chiffres uniquement)"
               />
             </View>
 
@@ -505,7 +531,7 @@ function confidenceLabel(confidence: number): string {
   return 'faible';
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -580,16 +606,18 @@ function makeStyles(colors: ThemeColors) {
     },
     detectedValue: {
       fontSize: 14,
+      lineHeight: 20,
       fontWeight: '600',
       color: colors.accent,
     },
     detectedValueEmpty: {
-      color: 'rgba(255,255,255,0.45)',
+      color: 'rgba(255,255,255,0.75)',
       fontWeight: '400',
     },
     resultCard: {
       alignSelf: 'stretch',
       marginHorizontal: Spacing.four,
+      maxHeight: '85%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
       padding: Spacing.four,
@@ -705,7 +733,7 @@ function makeStyles(colors: ThemeColors) {
     },
     backButton: {
       position: 'absolute',
-      top: 48,
+      top: insets.top + 12,
       left: Spacing.three,
       width: 44,
       height: 44,
@@ -713,10 +741,6 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: 'rgba(0,0,0,0.55)',
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    backButtonText: {
-      fontSize: 20,
-      color: '#FFFFFF',
     },
   });
 }
