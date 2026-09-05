@@ -1,6 +1,9 @@
 export const BACKUP_FORMAT = 'picsou-collection';
 export const BACKUP_VERSION = 1;
 
+/** Format de fichier de sauvegarde choisi par l'utilisateur (US-BK-04/05). */
+export type BackupFormat = 'json' | 'csv';
+
 export type BackupCopy = {
   id: string;
   notes: string | null;

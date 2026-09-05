@@ -4,6 +4,7 @@ import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useSettingsStore, type ColorSchemeSetting } from '@/store/use-settings-store';
 import { useBackupStore } from '@/store/use-backup-store';
+import type { BackupFormat } from '@/backup/backup-types';
 
 const THEME_OPTIONS: { value: ColorSchemeSetting; label: string; description: string }[] = [
   { value: 'system', label: 'Système', description: 'Suivre le thème de l’appareil' },
@@ -31,11 +32,14 @@ export default function SettingsScreen() {
   const busy = exporting || importing;
 
   const handleExport = () => {
-    void exportCollection();
+    Alert.alert('Format d’export', 'Choisissez le format de votre sauvegarde :', [
+      { text: 'CSV', style: 'default', onPress: () => void exportCollection('csv') },
+      { text: 'JSON', style: 'default', onPress: () => void exportCollection('json') },
+    ]);
   };
 
-  const handleImport = () => {
-    void pickAndValidate().then((summary) => {
+  const handleImportChoice = (format: BackupFormat) => {
+    void pickAndValidate(format).then((summary) => {
       if (!summary) {
         return;
       }
@@ -54,6 +58,13 @@ export default function SettingsScreen() {
         ],
       );
     });
+  };
+
+  const handleImport = () => {
+    Alert.alert('Format d’import', 'Choisissez le format du fichier à importer :', [
+      { text: 'CSV', style: 'default', onPress: () => handleImportChoice('csv') },
+      { text: 'JSON', style: 'default', onPress: () => handleImportChoice('json') },
+    ]);
   };
 
   const handleReset = () => {

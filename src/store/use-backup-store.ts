@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { getDeps } from '@/dependencies';
 import { InvalidBackupError } from '@/backup/backup-service';
-import type { ImportSummary } from '@/backup/backup-types';
+import type { BackupFormat, ImportSummary } from '@/backup/backup-types';
 import type { PickedFile } from '@/backup/file-gateway';
 
 interface BackupState {
@@ -12,9 +12,10 @@ interface BackupState {
   message: string | null;
   error: string | null;
   pendingRaw: string | null;
-  exportCollection: () => Promise<boolean>;
-  /** Sélectionne + valide un fichier. Renvoie un récapitulatif, ou null si annulé/invalide. */
-  pickAndValidate: () => Promise<ImportSummary | null>;
+  pendingFormat: BackupFormat | null;
+  exportCollection: (format: BackupFormat) => Promise<boolean>;
+  /** Sélectionne + valide un fichier au format choisi. Renvoie un récapitulatif, ou null si annulé/invalide. */
+  pickAndValidate: (format: BackupFormat) => Promise<ImportSummary | null>;
   /** Applique l'import du fichier validé en attente (après confirmation utilisateur). */
   applyPendingImport: () => Promise<ImportSummary | null>;
   reset: () => void;
@@ -27,14 +28,15 @@ export const useBackupStore = create<BackupState>((set, get) => ({
   message: null,
   error: null,
   pendingRaw: null,
+  pendingFormat: null,
 
-  exportCollection: async () => {
+  exportCollection: async (format) => {
     set({ exporting: true, error: null, message: null });
     try {
       const { backupService, fileGateway } = getDeps();
       const file = await backupService.exportCollection();
-      const json = backupService.toJson(file);
-      const output = await fileGateway.writeExport(json);
+      const content = format === 'csv' ? backupService.toCsv(file) : backupService.toJson(file);
+      const output = await fileGateway.writeExport(content, format);
       set({
         exporting: false,
         lastExport: output,
@@ -52,12 +54,12 @@ export const useBackupStore = create<BackupState>((set, get) => ({
     }
   },
 
-  pickAndValidate: async () => {
-    set({ importing: true, error: null, message: null, pendingRaw: null });
+  pickAndValidate: async (format) => {
+    set({ importing: true, error: null, message: null, pendingRaw: null, pendingFormat: null });
     let picked: PickedFile | null = null;
     try {
       const { fileGateway } = getDeps();
-      picked = await fileGateway.pickAndReadJson();
+      picked = await fileGateway.pickFile(format);
     } catch {
       set({ importing: false, error: 'Impossible de lire le fichier sélectionné.' });
       return null;
@@ -69,8 +71,8 @@ export const useBackupStore = create<BackupState>((set, get) => ({
 
     try {
       const { backupService } = getDeps();
-      const summary = await backupService.validateCollection(picked.content);
-      set({ importing: false, pendingRaw: picked.content });
+      const summary = await backupService.validateCollection(picked.content, format);
+      set({ importing: false, pendingRaw: picked.content, pendingFormat: format });
       return summary;
     } catch (err) {
       const message =
@@ -83,24 +85,25 @@ export const useBackupStore = create<BackupState>((set, get) => ({
   },
 
   applyPendingImport: async () => {
-    const raw = get().pendingRaw;
-    if (!raw) {
+    const { pendingRaw, pendingFormat } = get();
+    if (!pendingRaw || !pendingFormat) {
       return null;
     }
     set({ importing: true, error: null, message: null });
     try {
       const { backupService } = getDeps();
-      const summary = await backupService.importCollection(raw);
+      const summary = await backupService.importCollection(pendingRaw, pendingFormat);
       set({
         importing: false,
         pendingRaw: null,
+        pendingFormat: null,
         message: `Collection importée : ${summary.magazines} édition(s), ${summary.copies} exemplaire(s).`,
       });
       return summary;
     } catch (err) {
       const message =
         err instanceof InvalidBackupError ? err.message : 'Impossible d’importer la collection.';
-      set({ importing: false, pendingRaw: null, error: message });
+      set({ importing: false, pendingRaw: null, pendingFormat: null, error: message });
       return null;
     }
   },
@@ -113,5 +116,6 @@ export const useBackupStore = create<BackupState>((set, get) => ({
       message: null,
       error: null,
       pendingRaw: null,
+      pendingFormat: null,
     }),
 }));

@@ -190,3 +190,102 @@ describe('BackupService.importCollection — fichier invalide (US-BK-03)', () =>
     expect(after.magazines).toEqual(before.magazines);
   });
 });
+
+describe('BackupService.exportCollection.toCsv', () => {
+  it('sérialise une ligne par exemplaire avec les en-têtes attendus', async () => {
+    await seedCollection();
+
+    const file = await service.exportCollection();
+    const csv = service.toCsv(file);
+
+    const lines = csv.trim().split('\n');
+    expect(lines[0]).toBe(
+      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded',
+    );
+    expect(lines).toHaveLength(3);
+    expect(lines[1]).toContain('Picsou Magazine,547,standard,FR,good,2023-03,3271234567890');
+    expect(lines[1]).toContain('Acheté 0,50 €');
+    expect(lines[2]).toContain('Doublon');
+  });
+
+  it('échappe les champs contenant virgule, guillemets ou saut de ligne', async () => {
+    await seedCollection();
+    const file = await service.exportCollection();
+    file.magazines[0].notes = 'Note "citée"';
+    file.magazines[0].copies[0].notes = 'a,b\nc';
+
+    const csv = service.toCsv(file);
+    expect(csv).toContain('"Note ""citée"""');
+    expect(csv).toContain('"a,b\nc"');
+  });
+
+  it('conserve les éditions sans exemplaire via une ligne aux champs vides', async () => {
+    await magazineRepo.create({ publication: 'Vacances', issueNumber: 12 });
+
+    const file = await service.exportCollection();
+    const csv = service.toCsv(file);
+    const lines = csv.trim().split('\n');
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('Vacances,12,');
+    expect(lines[1]).toContain(',,,,');
+  });
+});
+
+describe('BackupService CSV import (US-BK-05)', () => {
+  it('importe un CSV valide en remplaçant la collection', async () => {
+    await seedCollection();
+    const source = await service.exportCollection();
+    source.magazines[0].publication = 'Csv Magazine';
+
+    const summary = await service.importCollection(service.toCsv(source), 'csv');
+
+    expect(summary).toEqual({ magazines: 1, copies: 2 });
+
+    const after = await service.exportCollection();
+    expect(after.magazines).toHaveLength(1);
+    expect(after.magazines[0].publication).toBe('Csv Magazine');
+    expect(after.magazines[0].copies).toHaveLength(2);
+  });
+
+  it('valide un CSV via validateCollection et en produit le récapitulatif', async () => {
+    await seedCollection();
+    const source = await service.exportCollection();
+    const summary = await service.validateCollection(service.toCsv(source), 'csv');
+    expect(summary).toEqual({ magazines: 1, copies: 2 });
+  });
+
+  it('rejette un CSV sans les en-têtes attendus ou vide', async () => {
+    await expect(
+      service.validateCollection('publication,foo\nPicsou,1\n', 'csv'),
+    ).rejects.toBeInstanceOf(InvalidBackupError);
+    await expect(service.validateCollection('', 'csv')).rejects.toBeInstanceOf(
+      InvalidBackupError,
+    );
+  });
+
+  it('rejette un CSV sans publication ou à numéro non entier', async () => {
+    const headers =
+      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\n';
+    await expect(service.validateCollection(`${headers},1\n`, 'csv')).rejects.toBeInstanceOf(
+      InvalidBackupError,
+    );
+    await expect(
+      service.validateCollection(`${headers}Picsou,abc\n`, 'csv'),
+    ).rejects.toBeInstanceOf(InvalidBackupError);
+  });
+
+  it('gère les valeurs entre guillemets avec virgules et retours à la ligne', async () => {
+    const csv =
+      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\n' +
+      '"Picsou, le Tocard",5,limited,FR,good,2020-01,,"note, suite \n ligne 2",,"Acheté 0,50 €",2026-09-01T00:00:00Z\n';
+
+    const summary = await service.validateCollection(csv, 'csv');
+    expect(summary).toEqual({ magazines: 1, copies: 1 });
+
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines[0].publication).toBe('Picsou, le Tocard');
+    expect(after.magazines[0].notes).toBe('note, suite \n ligne 2');
+    expect(after.magazines[0].copies[0].notes).toBe('Acheté 0,50 €');
+  });
+});
