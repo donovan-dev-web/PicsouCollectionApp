@@ -423,7 +423,7 @@ Application
 
 ## 12. Export (JSON / CSV)
 
-**Statut : JSON livré (v0.7.0, US-BK-01) ; choix du format JSON/CSV à venir (M-07R, US-BK-04).**
+**Statut : JSON et CSV livrés (v0.7.1, US-BK-01 / US-BK-04)** — une popup demande le format **avant** l'export ; l'extension du fichier suit le format (`.json` / `.csv`).
 
 ### Comportement
 1. L'utilisateur clique sur **« Exporter »** ;
@@ -468,7 +468,7 @@ L'application vérifie, **selon le format choisi dans la popup** :
 - **CSV** : **en-têtes attendus** présents et données cohérentes avec le modèle ;
 - si le fichier ne correspond **pas au format choisi**, un **message d'erreur explicite** est affiché **sans modifier les données**.
 
-**Statut (v0.7.0, US-BK-02 / US-BK-03)** : livré et testé pour JSON — validations via `BackupService.validateCollection`/`importCollection` (rejet par `InvalidBackupError` sans modifier les données), double confirmation avant remplacement. **Choix du format + CSV à venir (M-07R, US-BK-05).**
+**Statut (v0.7.1, US-BK-02 / US-BK-03 / US-BK-05)** : livré et testé pour **JSON et CSV** — validation selon le format choisi via `BackupService.validateCollection`/`importCollection` (rejet par `InvalidBackupError` sans modifier les données), double confirmation avant remplacement.
 
 ### 13.3 Stratégie de conflit (décision retenue)
 **Remplacement complet** : après confirmation explicite, la collection existante est remplacée par celle du fichier importé.
@@ -503,15 +503,15 @@ L'application vérifie, **selon le format choisi dans la popup** :
 | Accueil | ✅ |
 | Scanner code-barres | ✅ |
 | Caméra / OCR | ✅ |
-| — Surcouche de scan ciblé | 🔜 (M-07R) |
-| — Validation / correction des infos détectées | 🔜 (M-07R) |
+| — Surcouche de scan ciblé | ✅ (v0.7.1, US-ID-08) |
+| — Validation / correction des infos détectées | ✅ (v0.7.1, US-ID-09) |
 | Saisie manuelle | ✅ |
 | Résultat Possédé / Absent | ✅ |
 | Gestion des doublons | ✅ |
 | Ma Collection (liste + recherche) | ✅ |
 | Fiche (modif / suppression) | ✅ |
 | Export JSON | ✅ |
-| Export CSV | 🔜 (M-07R) |
+| Export CSV | ✅ (v0.7.1, US-BK-04) |
 | Import JSON | ✅ |
-| Import CSV | 🔜 (M-07R) |
+| Import CSV | ✅ (v0.7.1, US-BK-05) |
 | Import JSON (remplacement) | ✅ |

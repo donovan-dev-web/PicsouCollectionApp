@@ -266,17 +266,17 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 
 **Objectif** : corriger les retours du **test physique sur la release `v0.7.0`** — améliorer l'OCR (surcouche de scan ciblé, validation manuelle) et enrichir l'export/import (choix du format JSON / CSV).
 
-**Statut : En cours** — issues créées dans le milestone `M-07R — Retours test physique (v0.7.0)`.
+**Statut : Terminé ✓ (release `v0.7.1`)** — issues livrées et clôturées (#125 → #129).
 
 | Tâche | Story | Statut |
 |---|---|---|
-| Surcouche caméra (nom / numéro / édition) + scan ciblé | US-ID-08 | À faire |
-| Recherche lancée après détection nom + numéro minimum | US-ID-08 | À faire |
-| Affichage des infos détectées en confiance insuffisante | US-ID-09 | À faire |
-| Correction / confirmation manuelle (outrepasser la confiance) | US-ID-09 | À faire |
-| Règle déterministe de confiance trop stricte (message récurrent) | (bug) | À faire |
-| Export avec choix du format (JSON / CSV) | US-BK-04 | À faire |
-| Import avec choix du format (JSON / CSV) + vérification | US-BK-05 | À faire |
+| Surcouche caméra (nom / numéro / édition) + scan ciblé | US-ID-08 | ✅ Livré |
+| Recherche lancée après détection nom + numéro minimum | US-ID-08 | ✅ Livré |
+| Affichage des infos détectées en confiance insuffisante | US-ID-09 | ✅ Livré |
+| Correction / confirmation manuelle (outrepasser la confiance) | US-ID-09 | ✅ Livré |
+| Règle déterministe de confiance trop stricte (message récurrent) | (bug) | ✅ Livré |
+| Export avec choix du format (JSON / CSV) | US-BK-04 | ✅ Livré |
+| Import avec choix du format (JSON / CSV) + vérification | US-BK-05 | ✅ Livré |
 
 **Livrables** : OCR plus fiable et exploitable en conditions réelles ; sauvegarde au choix JSON ou CSV.
 

@@ -1,10 +1,19 @@
+import type { BackupFormat } from './backup-types';
 import type { FileGateway } from './file-gateway';
 
 const DEFAULT_FILENAME_PREFIX = 'picsou-collection';
 
-function buildFileName(): string {
+function fileExtension(format: BackupFormat): 'json' | 'csv' {
+  return format;
+}
+
+function mimeTypeFor(format: BackupFormat): string {
+  return format === 'json' ? 'application/json' : 'text/csv';
+}
+
+function buildFileName(format: BackupFormat): string {
   const date = new Date().toISOString().slice(0, 10);
-  return `${DEFAULT_FILENAME_PREFIX}-${date}.json`;
+  return `${DEFAULT_FILENAME_PREFIX}-${date}.${fileExtension(format)}`;
 }
 
 /**
@@ -13,19 +22,22 @@ function buildFileName(): string {
  * (jest) ni le lancer sur des plateformes sans ces modules.
  */
 export class NativeFileGateway implements FileGateway {
-  async writeExport(json: string): Promise<{ uri: string; shared: boolean; name: string }> {
+  async writeExport(
+    content: string,
+    format: BackupFormat,
+  ): Promise<{ uri: string; shared: boolean; name: string }> {
     const { File, Paths } = await import('expo-file-system');
     const { isAvailableAsync, shareAsync } = await import('expo-sharing');
 
-    const name = buildFileName();
+    const name = buildFileName(format);
     const file = new File(Paths.document, name);
-    file.write(json);
+    file.write(content);
 
     let shared = false;
     try {
       if (await isAvailableAsync()) {
         await shareAsync(file.uri, {
-          mimeType: 'application/json',
+          mimeType: mimeTypeFor(format),
           dialogTitle: 'Exporter la collection',
         });
         shared = true;
@@ -38,12 +50,12 @@ export class NativeFileGateway implements FileGateway {
     return { uri: file.uri, shared, name };
   }
 
-  async pickAndReadJson(): Promise<{ name: string; content: string } | null> {
+  async pickFile(format: BackupFormat): Promise<{ name: string; content: string } | null> {
     const { getDocumentAsync } = await import('expo-document-picker');
     const { File } = await import('expo-file-system');
 
     const result = await getDocumentAsync({
-      type: 'application/json',
+      type: mimeTypeFor(format),
       copyToCacheDirectory: true,
       multiple: false,
     });

@@ -28,13 +28,46 @@ describe('parseOcrText', () => {
     expect(parseOcrText('Picsou Magazine issue 7')).toMatchObject({ issueNumber: 7 });
   });
 
-  it('calcule une confiance partielle (publication sans numéro)', () => {
+  it('reconnaît un numéro lu seul sur une ligne (bug #127)', () => {
+    expect(parseOcrText('Picsou Magazine\n547')).toMatchObject({ issueNumber: 547 });
+    expect(parseOcrText('Picsou Magazine\n12')).toMatchObject({ issueNumber: 12 });
+  });
+
+  it('ne confond pas une année avec un numéro (bug #127)', () => {
+    const result = parseOcrText('Picsou Magazine\n2023');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.issueNumber).toBeNull();
+      expect(result.date).toBe('2023');
+    }
+  });
+
+  it('ne retient pas un code-barres en clair comme numéro (bug #127)', () => {
+    const result = parseOcrText('Picsou Magazine\n3271234567890');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.issueNumber).toBeNull();
+    }
+  });
+
+  it('calcule une confiance avec les nouveaux poids M-07R (publication seule = 0.5)', () => {
     const result = parseOcrText('Picsou Magazine');
 
     expect(result.status).toBe('parsed');
     if (result.status === 'parsed') {
-      expect(result.confidence).toBeCloseTo(0.4);
+      expect(result.confidence).toBeCloseTo(0.5);
       expect(result.issueNumber).toBeNull();
+    }
+  });
+
+  it('retourne une confiance élevée quand publication + numéro sont lus', () => {
+    const result = parseOcrText('Picsou Magazine\n547');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.confidence).toBeCloseTo(0.9);
     }
   });
 
@@ -60,17 +93,27 @@ describe('parseOcrText', () => {
 });
 
 describe('isConfident', () => {
-  it('est vrai à partir du seuil MIN_CONFIDENCE', () => {
-    const weak = parseOcrText('Picsou Magazine');
-    const strong = parseOcrText('Picsou Magazine N° 1');
+  it('exige nom + numéro pour déclencher la recherche (US-ID-08)', () => {
+    const publicationOnly = parseOcrText('Picsou Magazine');
+    const numberOnly = parseOcrText('547');
+    const complete = parseOcrText('Picsou Magazine\nN° 547');
+    const unknown = parseOcrText('La Gazette n° 3');
 
+    if (publicationOnly.status === 'parsed') {
+      expect(isConfident(publicationOnly)).toBe(false);
+    }
+    if (numberOnly.status === 'parsed') {
+      expect(isConfident(numberOnly)).toBe(false);
+    }
+    if (unknown.status === 'parsed') {
+      expect(isConfident(unknown)).toBe(false);
+    }
+    if (complete.status === 'parsed') {
+      expect(isConfident(complete)).toBe(true);
+    }
+  });
+
+  it('le seuil MIN_CONFIDENCE reste disponible pour l’étiquette', () => {
     expect(MIN_CONFIDENCE).toBe(0.5);
-    if (weak.status === 'parsed') {
-      expect(weak.confidence).toBeLessThan(MIN_CONFIDENCE);
-      expect(isConfident(weak)).toBe(false);
-    }
-    if (strong.status === 'parsed') {
-      expect(isConfident(strong)).toBe(true);
-    }
   });
 });

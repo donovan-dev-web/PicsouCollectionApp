@@ -7,6 +7,25 @@
 
 ---
 
+## [0.7.1] — 2026-09-05
+
+> Neuvième release : **retours du test physique v0.7.0** — OCR ciblé (surcouche + validation manuelle), confiance assouplie et sauvegarde au choix JSON / CSV (M-07R).
+
+### Added
+- **Surcouche caméra live** (Nom / Numéro / Édition) avec scan ciblé : pointez successivement chaque zone pour affiner la lecture — `US-ID-08`
+- **Validation / correction manuelle** des informations détectées : panneau de vérification permettant de corriger un champ puis de **rechercher même hors confiance** — `US-ID-09`
+- **Export au choix JSON / CSV** : popup de sélection du format avant export ; CSV en une ligne par exemplaire (en-têtes standard, `csv` exploitable dans un tableur) — `US-BK-04`
+- **Import au choix JSON / CSV** : popup de sélection du format avant import ; l'import CSV est validé sur la présence des en-têtes attendus — `US-BK-05`
+- Versions patch alignées sur l'Expo SDK 57 (`expo-doctor` 21/21) + config plugin `expo-sharing`
+
+### Fixed
+- **Règle de confiance OCR trop stricte** : la lecture partielle est maintenue (fini le message « confiance insuffisante » bloquant) ; le repli « numéro seul » ignore les années et les suites longues (codes-barres) — *bug test physique v0.7.0*
+
+### Tests
+- 269 tests / 33 suites, couverture globale ~90 %
+
+---
+
 ## [0.7.0] — 2026-09-04
 
 > Huitième release : **export / import de la collection** — sauvegarde JSON `picsou-collection` v1, restauration sur un nouveau téléphone et gestion des fichiers invalides (M-07).
