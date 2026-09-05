@@ -35,7 +35,12 @@
         }
       ],
       "expo-sqlite",
-      ["expo-mlkit-ocr", { "iosEngine": "auto" }],
+      [
+        "expo-mlkit-ocr",
+        {
+          "iosEngine": "auto"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -43,7 +48,8 @@
             "deploymentTarget": "16.4"
           }
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,
