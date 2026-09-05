@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 
 import MagazineDetailScreen from '@/app/collection/[id]';
@@ -107,7 +107,7 @@ describe('MagazineDetailScreen', () => {
 
     render(<MagazineDetailScreen />);
 
-    expect(screen.getByText('Chargement…')).toBeTruthy();
+    expect(screen.getByText('Chargement de la fiche…')).toBeTruthy();
   });
 
   it('affiche un message quand l edition est introuvable', () => {
@@ -135,5 +135,19 @@ describe('MagazineDetailScreen', () => {
     expect(mockRemoveMagazine).toHaveBeenCalledWith('mag-1');
     expect(mockBack).toHaveBeenCalled();
     alertSpy.mockRestore();
+  });
+
+  it('ajoute un exemplaire directement depuis la fiche', async () => {
+    const mockAddExistingCopy = jest.fn().mockResolvedValue(undefined);
+    useCollectionStore.setState({
+      detail,
+      detailLoading: false,
+      addExistingCopy: mockAddExistingCopy,
+    });
+    render(<MagazineDetailScreen />);
+
+    fireEvent.press(screen.getByTestId('detail-add-copy'));
+
+    await waitFor(() => expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1'));
   });
 });

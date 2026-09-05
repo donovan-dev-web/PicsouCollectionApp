@@ -1,6 +1,16 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { AutocompleteInput } from '@/components/autocomplete-input';
 import { SelectField } from '@/components/select-field';
@@ -12,7 +22,8 @@ import type { CreateMagazineInput, Magazine } from '@/types';
 
 const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const;
 
-const YEARS = Array.from({ length: 40 }, (_, i) => String(2025 - i));
+/** Années dynamiques : année courante → -39 ans (M10-08, fini `2025` en dur). */
+const YEARS = Array.from({ length: 40 }, (_, i) => String(new Date().getFullYear() - i));
 
 type FormValues = {
   publication: string;
@@ -112,10 +123,15 @@ export function MagazineForm({
     if (!canSubmit) {
       return;
     }
+    const issueDigits = values.issueNumber.trim();
+    if (issueDigits && !/^\d+$/.test(issueDigits)) {
+      setFormError('Le numéro doit être composé uniquement de chiffres.');
+      return;
+    }
     setSubmitting(true);
     const input: CreateMagazineInput = {
       publication: values.publication.trim(),
-      issueNumber: values.issueNumber.trim() ? Number(values.issueNumber) : null,
+      issueNumber: issueDigits ? Number(issueDigits) : null,
       edition: values.edition.trim() || null,
       language: values.language.trim() || null,
       condition: values.condition.trim() || null,
@@ -133,159 +149,182 @@ export function MagazineForm({
   };
 
   return (
-    <ScrollView
-      style={styles.formScroll}
-      contentContainerStyle={styles.form}
-      keyboardShouldPersistTaps="handled">
-      {/* Section essentielle (toujours visible) */}
-      <AutocompleteInput
-        label="Publication *"
-        value={values.publication}
-        options={publications}
-        onChangeText={(v) => set('publication', v)}
-        placeholder="Ex : Picsou Magazine"
-        testID="field-publication"
-        accessibilityLabel="Publication"
-      />
+    <KeyboardAvoidingView
+      style={styles.formKeyboard}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        style={styles.formScroll}
+        contentContainerStyle={styles.form}
+        keyboardShouldPersistTaps="handled">
+        {/* Section essentielle (toujours visible) */}
+        <AutocompleteInput
+          label="Publication *"
+          value={values.publication}
+          options={publications}
+          onChangeText={(v) => set('publication', v)}
+          placeholder="Ex : Picsou Magazine"
+          testID="field-publication"
+          accessibilityLabel="Publication"
+        />
 
-      <Text style={styles.label}>Numéro</Text>
-      <TextInput
-        style={styles.input}
-        value={values.issueNumber}
-        onChangeText={(v) => set('issueNumber', v)}
-        placeholder="Ex : 547"
-        keyboardType="number-pad"
-        placeholderTextColor={colors.textSecondary}
-        testID="field-issue-number"
-        accessibilityLabel="Numéro"
-      />
+        <Text style={styles.label}>Numéro</Text>
+        <TextInput
+          style={styles.input}
+          value={values.issueNumber}
+          onChangeText={(v) => set('issueNumber', v)}
+          placeholder="Ex : 547"
+          keyboardType="number-pad"
+          placeholderTextColor={colors.textSecondary}
+          testID="field-issue-number"
+          accessibilityLabel="Numéro"
+        />
 
-      <AutocompleteInput
-        label="Édition"
-        value={values.edition}
-        options={editions}
-        onChangeText={(v) => set('edition', v)}
-        placeholder="Ex : édition française"
-        testID="field-edition"
-        accessibilityLabel="Édition"
-      />
+        <AutocompleteInput
+          label="Édition"
+          value={values.edition}
+          options={editions}
+          onChangeText={(v) => set('edition', v)}
+          placeholder="Ex : édition française"
+          testID="field-edition"
+          accessibilityLabel="Édition"
+        />
 
-      {/* Bouton « Plus de détails » */}
-      <Pressable
-        style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
-        onPress={() => setDetailsOpen((o) => !o)}
-        testID="details-toggle"
-        accessibilityRole="button">
-        <Text style={styles.detailsToggleText}>
-          {detailsOpen ? '▲ Masquer les détails' : '▼ Plus de détails'}
-        </Text>
-      </Pressable>
-
-      {detailsOpen && (
-        <View style={styles.details}>
-          <AutocompleteInput
-            label="Langue"
-            value={values.language}
-            options={languages}
-            onChangeText={(v) => set('language', v)}
-            placeholder="Ex : FR"
-            testID="field-language"
-            accessibilityLabel="Langue"
+        {/* Bouton « Plus de détails » */}
+        <Pressable
+          style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
+          onPress={() => setDetailsOpen((o) => !o)}
+          testID="details-toggle"
+          accessibilityRole="button"
+          accessibilityLabel={detailsOpen ? 'Masquer les détails' : 'Afficher plus de détails'}
+          accessibilityState={{ expanded: detailsOpen }}>
+          <Feather
+            name={detailsOpen ? 'chevron-up' : 'chevron-down'}
+            size={18}
+            color={colors.accentTextOnLight}
           />
+          <Text style={styles.detailsToggleText}>
+            {detailsOpen ? 'Masquer les détails' : 'Plus de détails'}
+          </Text>
+        </Pressable>
 
-          <Text style={styles.label}>État</Text>
-          <TextInput
-            style={styles.input}
-            value={values.condition}
-            onChangeText={(v) => set('condition', v)}
-            placeholder="Ex : Neuf, usé, abîmé…"
-            placeholderTextColor={colors.textSecondary}
-            testID="field-condition"
-            accessibilityLabel="État"
-          />
-
-          <Text style={styles.label}>Date de publication</Text>
-          <View style={styles.dateRow}>
-            <View style={styles.dateCol}>
-              <SelectField
-                label="Mois"
-                placeholder="—"
-                value={values.month}
-                options={MONTHS}
-                onSelect={(v) => set('month', v)}
-                testID="select-month"
-              />
-            </View>
-            <View style={styles.dateCol}>
-              <SelectField
-                label="Année"
-                placeholder="—"
-                value={values.year}
-                options={YEARS}
-                onSelect={(v) => set('year', v)}
-                testID="select-year"
-              />
-            </View>
-          </View>
-
-          <Text style={styles.label}>Code-barres</Text>
-          <View style={styles.barcodeRow}>
-            <TextInput
-              style={[styles.input, styles.barcodeInput]}
-              value={values.barcode}
-              onChangeText={(v) => set('barcode', v)}
-              placeholder="Ex : 3271234000011"
-              keyboardType="default"
-              autoCapitalize="characters"
-              placeholderTextColor={colors.textSecondary}
-              testID="field-barcode"
-              accessibilityLabel="Code-barres"
+        {detailsOpen && (
+          <View style={styles.details}>
+            <AutocompleteInput
+              label="Langue"
+              value={values.language}
+              options={languages}
+              onChangeText={(v) => set('language', v)}
+              placeholder="Ex : FR"
+              testID="field-language"
+              accessibilityLabel="Langue"
             />
-            <Pressable
-              style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
-              onPress={openBarcodeScanner}
-              testID="barcode-scan"
-              accessibilityRole="button"
-              accessibilityLabel="Scanner le code-barres">
-              <Text style={styles.scanButtonText}>▣ Scanner</Text>
-            </Pressable>
+
+            <Text style={styles.label}>État</Text>
+            <TextInput
+              style={styles.input}
+              value={values.condition}
+              onChangeText={(v) => set('condition', v)}
+              placeholder="Ex : Neuf, usé, abîmé…"
+              placeholderTextColor={colors.textSecondary}
+              testID="field-condition"
+              accessibilityLabel="État"
+            />
+
+            <Text style={styles.label}>Date de publication</Text>
+            <View style={styles.dateRow}>
+              <View style={styles.dateCol}>
+                <SelectField
+                  label="Mois"
+                  placeholder="—"
+                  value={values.month}
+                  options={MONTHS}
+                  onSelect={(v) => set('month', v)}
+                  testID="select-month"
+                />
+              </View>
+              <View style={styles.dateCol}>
+                <SelectField
+                  label="Année"
+                  placeholder="—"
+                  value={values.year}
+                  options={YEARS}
+                  onSelect={(v) => set('year', v)}
+                  testID="select-year"
+                />
+              </View>
+            </View>
+
+            <Text style={styles.label}>Code-barres</Text>
+            <View style={styles.barcodeRow}>
+              <TextInput
+                style={[styles.input, styles.barcodeInput]}
+                value={values.barcode}
+                onChangeText={(v) => set('barcode', v)}
+                placeholder="Ex : 3271234000011"
+                keyboardType="default"
+                autoCapitalize="characters"
+                placeholderTextColor={colors.textSecondary}
+                testID="field-barcode"
+                accessibilityLabel="Code-barres"
+              />
+              <Pressable
+                style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+                onPress={openBarcodeScanner}
+                testID="barcode-scan"
+                accessibilityRole="button"
+                accessibilityLabel="Scanner le code-barres">
+                <Feather name="crop" size={18} color={colors.text} />
+                <Text style={styles.scanButtonText}>Scanner</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.label}>Notes</Text>
+            <TextInput
+              style={[styles.input, styles.notesInput]}
+              value={values.notes}
+              onChangeText={(v) => set('notes', v)}
+              placeholder="Informations complémentaires…"
+              multiline
+              placeholderTextColor={colors.textSecondary}
+              testID="field-notes"
+              accessibilityLabel="Notes"
+            />
           </View>
+        )}
 
-          <Text style={styles.label}>Notes</Text>
-          <TextInput
-            style={[styles.input, styles.notesInput]}
-            value={values.notes}
-            onChangeText={(v) => set('notes', v)}
-            placeholder="Informations complémentaires…"
-            multiline
-            placeholderTextColor={colors.textSecondary}
-            testID="field-notes"
-            accessibilityLabel="Notes"
-          />
-        </View>
-      )}
+        {formError ? (
+          <Text style={styles.formError} testID="form-error">
+            {formError}
+          </Text>
+        ) : null}
 
-      {formError ? (
-        <Text style={styles.formError} testID="form-error">
-          {formError}
-        </Text>
-      ) : null}
+        <View style={styles.keyboardSpacer} />
 
-      <Pressable
-        style={[styles.submit, !canSubmit && styles.submitDisabled]}
-        onPress={handleSubmit}
-        disabled={!canSubmit}
-        testID="form-submit"
-        accessibilityRole="button">
-        <Text style={styles.submitText}>{submitting ? 'Enregistrement…' : submitLabel}</Text>
-      </Pressable>
-    </ScrollView>
+        <Pressable
+          style={[styles.submit, !canSubmit && styles.submitDisabled]}
+          onPress={handleSubmit}
+          disabled={!canSubmit}
+          testID="form-submit"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canSubmit }}>
+          <Text style={styles.submitText}>{submitting ? 'Enregistrement…' : submitLabel}</Text>
+        </Pressable>
+        {!canSubmit && !submitting ? (
+          <Text style={styles.submitHint} testID="form-submit-hint">
+            Renseignez la publication pour enregistrer.
+          </Text>
+        ) : null}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
     formScroll: {
+      flex: 1,
+    },
+    formKeyboard: {
       flex: 1,
     },
     form: {
@@ -303,6 +342,7 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 8,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
+      minHeight: 44,
       fontSize: 16,
       color: colors.text,
     },
@@ -318,8 +358,12 @@ function makeStyles(colors: ThemeColors) {
       textAlign: 'center',
     },
     detailsToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
       marginTop: Spacing.three,
       alignSelf: 'flex-start',
+      minHeight: 44,
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.three,
       borderRadius: 8,
@@ -328,7 +372,7 @@ function makeStyles(colors: ThemeColors) {
     detailsToggleText: {
       fontSize: 15,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.accentTextOnLight,
     },
     details: {
       gap: Spacing.two,
@@ -349,12 +393,15 @@ function makeStyles(colors: ThemeColors) {
       flex: 1,
     },
     scanButton: {
+      flexDirection: 'row',
       alignItems: 'center',
+      gap: 6,
       justifyContent: 'center',
       backgroundColor: colors.backgroundElement,
       borderWidth: 1,
       borderColor: colors.accent,
       borderRadius: 8,
+      minHeight: 44,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
     },
@@ -371,6 +418,7 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
+      minHeight: 48,
       paddingVertical: Spacing.three,
       borderRadius: 12,
     },
@@ -381,6 +429,14 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 18,
       fontWeight: '700',
       color: colors.accentText,
+    },
+    submitHint: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    keyboardSpacer: {
+      height: 200,
     },
   });
 }

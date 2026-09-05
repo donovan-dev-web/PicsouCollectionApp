@@ -1,7 +1,17 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CameraView as CameraViewType } from 'expo-camera';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
@@ -49,7 +59,8 @@ function hasAnyDetected(detected: DetectedInfo): boolean {
 export default function CameraOcrScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const styles = makeStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(colors, insets);
 
   const [permission, requestPermission] = useCameraPermissions();
   const [state, setState] = useState<OcrUiState>({
@@ -57,6 +68,8 @@ export default function CameraOcrScreen() {
     detected: EMPTY_DETECTED,
   });
   const [draft, setDraft] = useState<DetectedInfo>(EMPTY_DETECTED);
+  const [torchOn, setTorchOn] = useState(false);
+  const [weakCycles, setWeakCycles] = useState(0);
   const inFlight = useRef(false);
   const cameraRef = useRef<CameraViewType>(null);
 
@@ -92,6 +105,7 @@ export default function CameraOcrScreen() {
           // US-ID-08 : on ne conclut plus en échec dès la première lecture partielle.
           // On met en surcouche les champs détectés et on continue d'analyser
           // (le pointeur guide l'utilisateur vers le champ manquant).
+          setWeakCycles((c) => c + 1);
           setState((prev) =>
             prev.status === 'analyzing'
               ? {
@@ -136,6 +150,7 @@ export default function CameraOcrScreen() {
   }, [permission?.granted, state.status]);
 
   const stopAndRetry = () => {
+    setWeakCycles(0);
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
 
@@ -231,9 +246,19 @@ export default function CameraOcrScreen() {
             <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
           </Pressable>
         ) : (
-          <Text style={styles.errorText} testID="ocr-permission-denied">
-            Permission refusée. Autorisez la caméra dans les réglages.
-          </Text>
+          <>
+            <Text style={styles.errorText} testID="ocr-permission-denied">
+              Permission refusée. Autorisez la caméra dans les réglages.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={() => void Linking.openSettings()}
+              testID="ocr-permission-settings"
+              accessibilityRole="button"
+              accessibilityLabel="Ouvrir les réglages">
+              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
+            </Pressable>
+          </>
         )}
         <Pressable
           style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
@@ -260,7 +285,13 @@ export default function CameraOcrScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} facing="back" testID="ocr-camera-view" />
+      <CameraView
+        ref={cameraRef}
+        style={styles.camera}
+        facing="back"
+        enableTorch={torchOn}
+        testID="ocr-camera-view"
+      />
 
       {isAnalyzing && (
         <>
@@ -336,8 +367,42 @@ export default function CameraOcrScreen() {
             testID="ocr-back"
             accessibilityRole="button"
             accessibilityLabel="Annuler">
-            <Text style={styles.backButtonText}>✕</Text>
+            <Feather name="x" size={22} color="#FFFFFF" />
           </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
+            onPress={() => setTorchOn((t) => !t)}
+            testID="ocr-torch"
+            accessibilityRole="button"
+            accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
+            <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
+          </Pressable>
+
+          {weakCycles > 3 && detected?.publication && detected?.issueNumber === null && (
+            <View style={styles.guidanceCard} testID="ocr-guidance-card">
+              <Feather name="alert-circle" size={16} color={colors.accent} />
+              <Text style={styles.guidanceText}>
+                Le texte stylisé est difficile à lire automatiquement.
+              </Text>
+              <View style={styles.guidanceActions}>
+                <Pressable
+                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
+                  onPress={goBarcode}
+                  testID="ocr-guidance-barcode"
+                  accessibilityRole="button">
+                  <Text style={styles.guidanceButtonText}>Code-barres</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
+                  onPress={() => goManual(detected)}
+                  testID="ocr-guidance-manual"
+                  accessibilityRole="button">
+                  <Text style={styles.guidanceButtonText}>Saisie manuelle</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
         </>
       )}
 
@@ -367,11 +432,16 @@ export default function CameraOcrScreen() {
               <TextInput
                 style={styles.input}
                 value={draft.issueNumber?.toString() ?? ''}
-                onChangeText={(t) => setDraft((d) => ({ ...d, issueNumber: t ? Number(t) : null }))}
+                onChangeText={(t) => {
+                  const digits = t.replace(/[^0-9]/g, '');
+                  setDraft((d) => ({ ...d, issueNumber: digits ? Number(digits) : null }));
+                }}
                 placeholder="N° du magazine"
                 keyboardType="number-pad"
+                returnKeyType="done"
                 placeholderTextColor={colors.textSecondary}
                 testID="ocr-override-issue"
+                accessibilityLabel="Numéro du magazine (chiffres uniquement)"
               />
             </View>
 
@@ -505,7 +575,7 @@ function confidenceLabel(confidence: number): string {
   return 'faible';
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -580,16 +650,18 @@ function makeStyles(colors: ThemeColors) {
     },
     detectedValue: {
       fontSize: 14,
+      lineHeight: 20,
       fontWeight: '600',
       color: colors.accent,
     },
     detectedValueEmpty: {
-      color: 'rgba(255,255,255,0.45)',
+      color: 'rgba(255,255,255,0.75)',
       fontWeight: '400',
     },
     resultCard: {
       alignSelf: 'stretch',
       marginHorizontal: Spacing.four,
+      maxHeight: '85%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
       padding: Spacing.four,
@@ -671,6 +743,7 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 12,
       marginHorizontal: Spacing.four,
       marginTop: Spacing.two,
+      marginBottom: insets.bottom + Spacing.three,
     },
     secondaryButtonText: {
       fontSize: 16,
@@ -705,7 +778,7 @@ function makeStyles(colors: ThemeColors) {
     },
     backButton: {
       position: 'absolute',
-      top: 48,
+      top: insets.top + 12,
       left: Spacing.three,
       width: 44,
       height: 44,
@@ -714,9 +787,54 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    backButtonText: {
-      fontSize: 20,
+    torchButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      right: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    guidanceCard: {
+      position: 'absolute',
+      left: Spacing.four,
+      right: Spacing.four,
+      bottom: insets.bottom + Spacing.three,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: Spacing.two,
+      backgroundColor: 'rgba(0,0,0,0.75)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 12,
+    },
+    guidanceText: {
+      flex: 1,
+      fontSize: 13,
       color: '#FFFFFF',
+      lineHeight: 18,
+    },
+    guidanceActions: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+      width: '100%',
+    },
+    guidanceButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.two,
+      borderRadius: 8,
+    },
+    guidanceButtonText: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.accentText,
     },
   });
 }

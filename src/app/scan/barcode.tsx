@@ -1,7 +1,17 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
@@ -21,7 +31,8 @@ type Pending =
 export default function BarcodeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const styles = makeStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(colors, insets);
 
   const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
   const params = useLocalSearchParams<{ continuous?: string }>();
@@ -30,6 +41,7 @@ export default function BarcodeScreen() {
   const [state, setState] = useState<ScanState>({ status: 'idle' });
   const [scanning, setScanning] = useState(true);
   const [continuous, setContinuous] = useState(params.continuous === '1');
+  const [torchOn, setTorchOn] = useState(false);
   const [pending, setPending] = useState<Pending | null>(null);
   const stabilizer = useRef(new BarcodeStabilizer(3));
 
@@ -156,9 +168,19 @@ export default function BarcodeScreen() {
             <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
           </Pressable>
         ) : (
-          <Text style={styles.errorText} testID="permission-denied">
-            Permission refusée. Autorisez la caméra dans les réglages.
-          </Text>
+          <>
+            <Text style={styles.errorText} testID="permission-denied">
+              Permission refusée. Autorisez la caméra dans les réglages.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+              onPress={() => void Linking.openSettings()}
+              testID="permission-settings"
+              accessibilityRole="button"
+              accessibilityLabel="Ouvrir les réglages">
+              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
+            </Pressable>
+          </>
         )}
         <Pressable
           style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
@@ -176,6 +198,7 @@ export default function BarcodeScreen() {
       <CameraView
         style={styles.camera}
         facing="back"
+        enableTorch={torchOn}
         barcodeScannerSettings={{
           barcodeTypes: ['ean13', 'ean8', 'code128', 'code39', 'code93', 'itf14', 'upc_a', 'upc_e'],
         }}
@@ -202,9 +225,19 @@ export default function BarcodeScreen() {
 
       <View style={styles.overlay} pointerEvents="none">
         <View style={styles.reticle} />
-        <Text style={styles.scanHint}>
-          {state.status === 'searching' ? 'Recherche…' : 'Alignez le code-barres dans le cadre'}
-        </Text>
+        <View style={styles.hintRow}>
+          {state.status === 'searching' ? (
+            <ActivityIndicator
+              testID="scan-searching"
+              size="small"
+              color="#FFFFFF"
+              accessibilityLabel="Recherche en cours"
+            />
+          ) : null}
+          <Text style={styles.scanHint}>
+            {state.status === 'searching' ? 'Recherche…' : 'Alignez le code-barres dans le cadre'}
+          </Text>
+        </View>
         {state.status === 'invalid' && (
           <Text style={styles.invalidText} testID="invalid-reason">
             {state.reason}
@@ -230,7 +263,18 @@ export default function BarcodeScreen() {
           testID="scan-back"
           accessibilityRole="button"
           accessibilityLabel="Annuler">
-          <Text style={styles.backButtonText}>✕</Text>
+          <Feather name="x" size={22} color="#FFFFFF" />
+        </Pressable>
+      )}
+
+      {state.status === 'idle' && !pending && (
+        <Pressable
+          style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
+          onPress={() => setTorchOn((t) => !t)}
+          testID="scan-torch"
+          accessibilityRole="button"
+          accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
+          <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
         </Pressable>
       )}
 
@@ -247,79 +291,105 @@ export default function BarcodeScreen() {
       )}
 
       {confirm && (
-        <View style={styles.pendingCard} testID="pending-confirm">
-          <Text style={styles.pendingTitle}>Vous possédez déjà ce magazine</Text>
-          <Text style={styles.pendingMagazine}>
-            {confirm.magazine.publication}
-            {confirm.magazine.issueNumber != null ? ` n° ${confirm.magazine.issueNumber}` : ''}
-          </Text>
-          <Text style={styles.pendingMessage}>
-            Exemplaires actuels : {confirm.ownedCount}. Ajouter un exemplaire ?
-          </Text>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={confirmAdd}
-            testID="pending-confirm-add"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Ajouter un exemplaire</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
-            onPress={resume}
-            testID="pending-confirm-cancel"
-            accessibilityRole="button">
-            <Text style={styles.pendingCancelText}>Annuler</Text>
-          </Pressable>
+        <View style={styles.backdrop}>
+          <ScrollView
+            contentContainerStyle={styles.sheetScroll}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.pendingCard} testID="pending-confirm">
+              <Pressable
+                style={({ pressed }) => [styles.sheetClose, pressed && styles.buttonPressed]}
+                onPress={resume}
+                testID="pending-close"
+                accessibilityRole="button"
+                accessibilityLabel="Fermer">
+                <Feather name="x" size={20} color={colors.textSecondary} />
+              </Pressable>
+              <Text style={styles.pendingTitle}>Vous possédez déjà ce magazine</Text>
+              <Text style={styles.pendingMagazine}>
+                {confirm.magazine.publication}
+                {confirm.magazine.issueNumber != null ? ` n° ${confirm.magazine.issueNumber}` : ''}
+              </Text>
+              <Text style={styles.pendingMessage}>
+                Exemplaires actuels : {confirm.ownedCount}. Ajouter un exemplaire ?
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+                onPress={confirmAdd}
+                testID="pending-confirm-add"
+                accessibilityRole="button">
+                <Text style={styles.primaryButtonText}>Ajouter un exemplaire</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
+                onPress={resume}
+                testID="pending-confirm-cancel"
+                accessibilityRole="button">
+                <Text style={styles.pendingCancelText}>Annuler</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
       )}
 
       {success && (
-        <View style={styles.pendingCard} testID="pending-success">
-          <Text style={styles.pendingTitle}>Ajouté à la collection</Text>
-          <Text style={styles.pendingMagazine}>
-            {success.publication}
-            {success.issueNumber != null ? ` n° ${success.issueNumber}` : ''}
-          </Text>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={resume}
-            testID="pending-success-ok"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Scanner le suivant</Text>
-          </Pressable>
+        <View style={styles.backdrop}>
+          <ScrollView
+            contentContainerStyle={styles.sheetScroll}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.pendingCard} testID="pending-success">
+              <Text style={styles.pendingTitle}>Ajouté à la collection</Text>
+              <Text style={styles.pendingMagazine}>
+                {success.publication}
+                {success.issueNumber != null ? ` n° ${success.issueNumber}` : ''}
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+                onPress={resume}
+                testID="pending-success-ok"
+                accessibilityRole="button">
+                <Text style={styles.primaryButtonText}>Scanner le suivant</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
       )}
 
       {unknown && (
-        <View style={styles.pendingCard} testID="pending-unknown">
-          <Text style={styles.pendingTitle}>Code-barres inconnu</Text>
-          <Text style={styles.pendingMessage}>{unknown.barcode}</Text>
-          <Text style={styles.pendingMessage}>
-            Le scan seul ne crée pas l&apos;édition. Saisissez-la manuellement.
-          </Text>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={() =>
-              router.replace({ pathname: '/scan/manual', params: { barcode: unknown.barcode } })
-            }
-            testID="pending-unknown-manual"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Saisir manuellement</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
-            onPress={resume}
-            testID="pending-unknown-continue"
-            accessibilityRole="button">
-            <Text style={styles.pendingCancelText}>Continuer le scan</Text>
-          </Pressable>
+        <View style={styles.backdrop}>
+          <ScrollView
+            contentContainerStyle={styles.sheetScroll}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.pendingCard} testID="pending-unknown">
+              <Text style={styles.pendingTitle}>Code-barres inconnu</Text>
+              <Text style={styles.pendingMessage}>{unknown.barcode}</Text>
+              <Text style={styles.pendingMessage}>
+                Le scan seul ne crée pas l&apos;édition. Saisissez-la manuellement.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+                onPress={() =>
+                  router.replace({ pathname: '/scan/manual', params: { barcode: unknown.barcode } })
+                }
+                testID="pending-unknown-manual"
+                accessibilityRole="button">
+                <Text style={styles.primaryButtonText}>Saisir manuellement</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
+                onPress={resume}
+                testID="pending-unknown-continue"
+                accessibilityRole="button">
+                <Text style={styles.pendingCancelText}>Continuer le scan</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
       )}
     </View>
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -345,16 +415,21 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: 16,
       backgroundColor: 'transparent',
     },
-    scanHint: {
+    hintRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
       marginTop: Spacing.three,
-      fontSize: 14,
-      color: '#FFFFFF',
-      textAlign: 'center',
       backgroundColor: 'rgba(0,0,0,0.55)',
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.three,
       borderRadius: 8,
-      overflow: 'hidden',
+    },
+    scanHint: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: '#FFFFFF',
+      textAlign: 'center',
     },
     invalidText: {
       marginTop: Spacing.two,
@@ -371,11 +446,11 @@ function makeStyles(colors: ThemeColors) {
       position: 'absolute',
       left: Spacing.four,
       right: Spacing.four,
-      bottom: 60,
+      bottom: insets.bottom + 24,
     },
     continuousBar: {
       position: 'absolute',
-      top: Spacing.three,
+      top: insets.top + 12,
       left: Spacing.three,
       right: Spacing.three,
       flexDirection: 'row',
@@ -405,7 +480,7 @@ function makeStyles(colors: ThemeColors) {
       position: 'absolute',
       left: Spacing.four,
       right: Spacing.four,
-      bottom: 110,
+      bottom: insets.bottom + 80,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0,0,0,0.65)',
@@ -418,15 +493,34 @@ function makeStyles(colors: ThemeColors) {
       color: '#FFFFFF',
     },
     pendingCard: {
-      position: 'absolute',
-      left: Spacing.four,
-      right: Spacing.four,
-      top: '30%',
+      marginHorizontal: Spacing.four,
       backgroundColor: colors.backgroundElement,
       borderRadius: 14,
       padding: Spacing.four,
       gap: Spacing.two,
       alignItems: 'center',
+    },
+    sheetClose: {
+      alignSelf: 'flex-end',
+      minWidth: 44,
+      minHeight: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: -Spacing.three,
+      marginRight: -Spacing.three,
+    },
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    sheetScroll: {
+      flexGrow: 1,
+      justifyContent: 'center',
     },
     pendingTitle: {
       fontSize: 18,
@@ -437,7 +531,7 @@ function makeStyles(colors: ThemeColors) {
     pendingMagazine: {
       fontSize: 17,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.accentTextOnLight,
       textAlign: 'center',
     },
     pendingMessage: {
@@ -447,6 +541,8 @@ function makeStyles(colors: ThemeColors) {
       lineHeight: 20,
     },
     pendingCancel: {
+      minHeight: 44,
+      justifyContent: 'center',
       paddingVertical: Spacing.two,
       paddingHorizontal: Spacing.three,
     },
@@ -459,8 +555,11 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
-      paddingVertical: Spacing.three,
+      minHeight: 48,
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
       borderRadius: 12,
+      alignSelf: 'stretch',
     },
     primaryButtonText: {
       fontSize: 16,
@@ -501,7 +600,7 @@ function makeStyles(colors: ThemeColors) {
     },
     backButton: {
       position: 'absolute',
-      top: 48,
+      top: insets.top + 12,
       left: Spacing.three,
       width: 44,
       height: 44,
@@ -510,9 +609,16 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    backButtonText: {
-      fontSize: 20,
-      color: '#FFFFFF',
+    torchButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      right: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }
