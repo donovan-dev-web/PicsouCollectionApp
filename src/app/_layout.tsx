@@ -9,15 +9,14 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 export default function RootLayout() {
   const scheme = useEffectiveColorScheme();
-  const loadCollection = useCollectionStore((s) => s.load);
+  const loadSummary = useCollectionStore((s) => s.loadSummary);
   const loadColorScheme = useSettingsStore((s) => s.loadColorScheme);
 
   useEffect(() => {
     initialize().then(async () => {
-      await loadColorScheme();
-      await loadCollection();
+      await Promise.all([loadColorScheme(), loadSummary()]);
     });
-  }, [loadColorScheme, loadCollection]);
+  }, [loadColorScheme, loadSummary]);
 
   return (
     <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>

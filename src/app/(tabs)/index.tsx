@@ -14,14 +14,12 @@ export default function HomeScreen() {
   const recentCopies = useCollectionStore((s) => s.recentCopies);
   const loading = useCollectionStore((s) => s.loading);
   const loaded = useCollectionStore((s) => s.loaded);
-  const load = useCollectionStore((s) => s.load);
-  const loadRecent = useCollectionStore((s) => s.loadRecent);
+  const loadSummary = useCollectionStore((s) => s.loadSummary);
 
   useFocusEffect(
     useCallback(() => {
-      load();
-      loadRecent();
-    }, [load, loadRecent]),
+      loadSummary();
+    }, [loadSummary]),
   );
 
   return (

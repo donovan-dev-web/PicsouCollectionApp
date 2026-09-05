@@ -159,3 +159,19 @@ describe('collectionRepository.listRecentCopies', () => {
     expect(await repo.listRecentCopies(5)).toEqual([]);
   });
 });
+
+describe('collectionRepository.countAllCopies', () => {
+  it('compte tous les exemplaires de la collection', async () => {
+    expect(await repo.countAllCopies()).toBe(0);
+
+    await repo.addCopy(magazineId);
+    await repo.addCopy(magazineId);
+    const otherMagazine = await magazineRepo.create({
+      publication: 'Super Picsou Géant',
+      issueNumber: 30,
+    });
+    await repo.addCopy(otherMagazine.id);
+
+    expect(await repo.countAllCopies()).toBe(3);
+  });
+});
