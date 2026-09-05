@@ -5,7 +5,6 @@
   "packageManager": "npm@10.9.4",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "@react-navigation/drawer": "^7.13.10",
     "expo": "~57.0.20",
     "expo-build-properties": "~57.0.17",
     "expo-camera": "~57.0.4",
