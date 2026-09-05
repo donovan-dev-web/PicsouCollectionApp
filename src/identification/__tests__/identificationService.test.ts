@@ -198,7 +198,10 @@ describe('IdentificationService.searchByOcrFields (US-ID-09 — outrepasser la c
     const magazine = makeMagazine({ id: 'mag-547', issueNumber: 547 });
     const findByPublicationAndIssue = jest.fn(async () => magazine);
     const service = new IdentificationService(
-      makeRepository(jest.fn(async () => []), findByPublicationAndIssue),
+      makeRepository(
+        jest.fn(async () => []),
+        findByPublicationAndIssue,
+      ),
     );
 
     const result = await service.searchByOcrFields('Picsou Magazine', 547, '2023');

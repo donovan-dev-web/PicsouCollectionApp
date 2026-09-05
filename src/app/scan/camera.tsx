@@ -1,14 +1,7 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { CameraView as CameraViewType } from 'expo-camera';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
@@ -50,11 +43,7 @@ type OcrUiState =
     };
 
 function hasAnyDetected(detected: DetectedInfo): boolean {
-  return (
-    detected.publication !== null ||
-    detected.issueNumber !== null ||
-    detected.date !== null
-  );
+  return detected.publication !== null || detected.issueNumber !== null || detected.date !== null;
 }
 
 export default function CameraOcrScreen() {
@@ -152,9 +141,7 @@ export default function CameraOcrScreen() {
 
   const openConfirm = () => {
     const detected =
-      state.status === 'analyzing' || state.status === 'confirm'
-        ? state.detected
-        : EMPTY_DETECTED;
+      state.status === 'analyzing' || state.status === 'confirm' ? state.detected : EMPTY_DETECTED;
     setDraft(detected);
     setState({ status: 'confirm', detected });
   };
@@ -195,11 +182,7 @@ export default function CameraOcrScreen() {
     }
 
     const { identificationService } = getDeps();
-    const result = await identificationService.searchByOcrFields(
-      publication,
-      issueNumber,
-      date,
-    );
+    const result = await identificationService.searchByOcrFields(publication, issueNumber, date);
 
     if (result.status === 'weak' || result.status === 'no-text') {
       goManual({ publication, issueNumber, date });
@@ -265,7 +248,8 @@ export default function CameraOcrScreen() {
 
   const isAnalyzing = state.status === 'analyzing';
   const isConfirming = state.status === 'confirm';
-  const detected = state.status === 'analyzing' || state.status === 'confirm' ? state.detected : null;
+  const detected =
+    state.status === 'analyzing' || state.status === 'confirm' ? state.detected : null;
 
   const hint =
     detected?.publication && detected?.issueNumber === null
@@ -362,8 +346,8 @@ export default function CameraOcrScreen() {
           <View style={styles.resultCard} testID="ocr-override-panel">
             <Text style={styles.mutedTitle}>Vérifier les informations</Text>
             <Text style={styles.message}>
-              Corrigez les informations détectées puis validez la recherche, même si la
-              confiance était insuffisante.
+              Corrigez les informations détectées puis validez la recherche, même si la confiance
+              était insuffisante.
             </Text>
 
             <View style={styles.fieldWrap}>
@@ -383,9 +367,7 @@ export default function CameraOcrScreen() {
               <TextInput
                 style={styles.input}
                 value={draft.issueNumber?.toString() ?? ''}
-                onChangeText={(t) =>
-                  setDraft((d) => ({ ...d, issueNumber: t ? Number(t) : null }))
-                }
+                onChangeText={(t) => setDraft((d) => ({ ...d, issueNumber: t ? Number(t) : null }))}
                 placeholder="N° du magazine"
                 keyboardType="number-pad"
                 placeholderTextColor={colors.textSecondary}
@@ -440,9 +422,7 @@ export default function CameraOcrScreen() {
             <Text style={styles.magazine} testID="ocr-publication">
               {state.publication}
             </Text>
-            {state.issueNumber != null && (
-              <Text style={styles.issue}>N° {state.issueNumber}</Text>
-            )}
+            {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
             {state.date && <Text style={styles.date}>{state.date}</Text>}
             <Text style={styles.confidence} testID="ocr-confidence">
               Confiance : {confidenceLabel(state.confidence)}
@@ -463,7 +443,13 @@ export default function CameraOcrScreen() {
             </Pressable>
             <Pressable
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={() => goManual({ publication: state.publication, issueNumber: state.issueNumber, date: state.date })}
+              onPress={() =>
+                goManual({
+                  publication: state.publication,
+                  issueNumber: state.issueNumber,
+                  date: state.date,
+                })
+              }
               testID="ocr-manual"
               accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>Saisie manuelle</Text>
@@ -477,16 +463,20 @@ export default function CameraOcrScreen() {
           <View style={styles.resultCard} testID="ocr-unknown">
             <Text style={styles.mutedTitle}>Non trouvé en collection</Text>
             <Text style={styles.magazine}>{state.publication}</Text>
-            {state.issueNumber != null && (
-              <Text style={styles.issue}>N° {state.issueNumber}</Text>
-            )}
+            {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
             <Text style={styles.message}>
               {state.publication} n&apos;est pas encore référencé. Vous pouvez le saisir
               manuellement pour le créer.
             </Text>
             <Pressable
               style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={() => goManual({ publication: state.publication, issueNumber: state.issueNumber, date: state.date })}
+              onPress={() =>
+                goManual({
+                  publication: state.publication,
+                  issueNumber: state.issueNumber,
+                  date: state.date,
+                })
+              }
               testID="ocr-manual"
               accessibilityRole="button">
               <Text style={styles.primaryButtonText}>Saisir manuellement</Text>
