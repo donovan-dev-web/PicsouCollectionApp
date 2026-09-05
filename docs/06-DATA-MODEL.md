@@ -280,7 +280,7 @@ JSON v1  →  migration  →  SQLite actuelle
 
 Toute modification de structure incrémente `version` et documente la migration.
 
-### 6.1 Export CSV v1 (à venir, M-07R)
+### 6.1 Export CSV v1 (livré M-07R, v0.7.1)
 
 Un **export tabulaire** `CSV` est proposé en complément du JSON (fichier exploitable dans un tableur). Il reprend une ligne par **exemplaire** (une édition à plusieurs exemplaires apparaît sur plusieurs lignes).
 
@@ -295,7 +295,7 @@ Picsou Magazine,547,standard,FR,good,2023-03,3271234567890,,,Acheté 0,50 € en
 **Règles** :
 - **séparateur** : virgule (`,`), valeurs entre guillemets si besoin ;
 - caractère d'échappement : `"` (doublé à l'intérieur d'une valeur) ;
-- une ligne = un exemplaire (dénormalisation des `copies[]` JSON) ;
+- **une ligne = un exemplaire** (dénormalisation des `copies[]` JSON) ; les éditions **sans exemplaire** sont conservées via une ligne aux champs exemplaire vides ;
 - **l'import CSV est validé sur la présence des en-têtes attendus** (§13.2 FONCTIONNAL-SPEC) ;
 - les champs vides sont exportés vides (pas de `null`).
 
@@ -332,6 +332,6 @@ Pour une collection de quelques milliers de magazines, SQLite reste très perfor
 | `magazine_barcodes` | Simplifiée en colonne `barcode` (non unique) |
 | Code-barres | EAN-13 / ISBN, index non unique (doublons permis) |
 | Export JSON | Format `picsou-collection` v1 |
-| Export CSV | v1 (à venir M-07R) — un ligne = un exemplaire |
+| Export CSV | v1 (livré M-07R) — une ligne = un exemplaire |
 | TypeScript | camelCase, mapping explicit dans les repositories |
 | Index | barcode (non unique), (publication, issue_number), collection_items.magazine_id |
