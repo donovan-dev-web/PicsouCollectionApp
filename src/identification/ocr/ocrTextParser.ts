@@ -21,7 +21,12 @@ export type OcrParseResult =
 /** Nombre minimum de caractères pour considérer qu'un texte est exploitable. */
 const MIN_READABLE_LENGTH = 3;
 
-/** Seuil de confiance sous lequel une identification n'est pas fiable. */
+/**
+ * Seuil de confiance sous lequel une identification n'est pas présentable comme
+ * fiable. Au-delà des M-07R (retour test v0.7.0), la « recherche déclenchable »
+ * ne dépend plus de ce seuil mais de la règle `nom + numéro détectés`
+ * (US-ID-08) : le seuil sert uniquement à l'étiquette (faible / moyenne / élevée).
+ */
 export const MIN_CONFIDENCE = 0.5;
 
 /** Jargon de numérotation reconnu sur les couvertures (français & anglais). */
@@ -72,6 +77,25 @@ function extractIssueNumber(raw: string): number | null {
       }
     }
   }
+
+  // Repli M-07R (bug #127) : sur une vraie couverture, le numéro est souvent lu
+  // seul (sans préfixe « n° »). Une ligne composée uniquement de 1 à 4 chiffres
+  // est alors retenue comme numéro. Les années (19xx/20xx) et les textes longs
+  // (codes-barres en clair) sont exclus pour éviter les faux positifs.
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim();
+    if (!/^\d{1,4}$/.test(trimmed)) {
+      continue;
+    }
+    if (/^(19|20)\d{2}$/.test(trimmed)) {
+      continue;
+    }
+    const n = Number(trimmed);
+    if (Number.isFinite(n)) {
+      return n;
+    }
+  }
+
   return null;
 }
 
@@ -101,9 +125,12 @@ function extractDate(raw: string): string | null {
 /**
  * Extrait publication, numéro et date du texte OCR d'une couverture, puis calcule
  * la confiance (0..1):
- *   - publication trouvée       → +0.4
+ *   - publication reconnue      → +0.5
  *   - numéro trouvé             → +0.4
- *   - date trouvée              → +0.2
+ *   - date trouvée              → +0.1
+ * Poids ajustés en M-07R (retour test physique v0.7.0) : publication seule est
+ * « moyenne » (0.5) et la lecture du numéro bascule la confiance vers « élevée »,
+ * réduisant les faux messages de confiance insuffisante.
  * Le texte doit être lisible (> MIN_READABLE_LENGTH) pour être exploité.
  */
 export function parseOcrText(raw: string): OcrParseResult {
@@ -117,18 +144,18 @@ export function parseOcrText(raw: string): OcrParseResult {
   }
 
   const publication = closestPublication(text);
-  const issueNumber = extractIssueNumber(text);
+  const issueNumber = extractIssueNumber(raw);
   const date = extractDate(text);
 
   let confidence = 0;
   if (publication) {
-    confidence += 0.4;
+    confidence += 0.5;
   }
   if (issueNumber !== null) {
     confidence += 0.4;
   }
   if (date) {
-    confidence += 0.2;
+    confidence += 0.1;
   }
 
   return {
@@ -141,9 +168,13 @@ export function parseOcrText(raw: string): OcrParseResult {
 }
 
 /**
- * Détermine si un résultat parsé est assez fiable pour être présenté comme
- * une identification potentielle (sans jamais être certain, cf. R8).
+ * Détermine si un résultat parsé déclenche la recherche (US-ID-08 / bug #127).
+ *
+ * Règle M-07R : la recherche n'est lancée que lorsque **nom + numéro** minimum
+ * sont détectés. Le niveau de confiance affiché reste un indicateur (l'application
+ * ne présente jamais une identification OCR comme certaine, cf. R8) mais n'est
+ * plus le seul arbitre du message « confiance insuffisante ».
  */
 export function isConfident(parse: Extract<OcrParseResult, { status: 'parsed' }>): boolean {
-  return parse.confidence >= MIN_CONFIDENCE;
+  return parse.publication !== 'Publication inconnue' && parse.issueNumber !== null;
 }

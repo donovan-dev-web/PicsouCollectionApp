@@ -121,4 +121,37 @@ export class IdentificationService {
 
     return { status: 'unknown', publication, issueNumber, date, confidence };
   }
+
+  /**
+   * Recherche une édition à partir de champs fournis par l'utilisateur (US-ID-09),
+   * en **outrepassant la règle de confiance** : l'utilisateur a vu les informations
+   * détectées et les a confirmées ou corrigées.
+   *
+   * La recherche n'est effectuée que si **nom + numéro** sont présents ; sinon le
+   * résultat est `weak` (l'UI propose alors la saisie manuelle pré-remplie).
+   */
+  async searchByOcrFields(
+    publication: string,
+    issueNumber: number | null,
+    date: string | null,
+  ): Promise<OcrLookupResult> {
+    if (!publication || publication === 'Publication inconnue' || issueNumber === null) {
+      return { status: 'weak', publication, issueNumber, date, confidence: 0 };
+    }
+
+    const magazine = await this.repository.findByPublicationAndIssue(publication, issueNumber);
+
+    if (magazine) {
+      return {
+        status: 'found',
+        magazine,
+        publication,
+        issueNumber,
+        date,
+        confidence: 1,
+      };
+    }
+
+    return { status: 'unknown', publication, issueNumber, date, confidence: 1 };
+  }
 }
