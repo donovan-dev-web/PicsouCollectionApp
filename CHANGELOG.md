@@ -7,10 +7,23 @@
 
 ---
 
-## [Unreleased] — M-10 « Vault Lisible » (→ v0.9.0)
+## [Unreleased]
 
+> ### M-10R « Retours test physique » (→ v0.9.1, planifié)
+>
+> Milestone correctif après test physique du build preview M-10 : import CSV
+> sélectionnable, CTA sans scroll, tabs Accueil/Scan/Collection + drawer latéral
+> (liens directs, éditions dynamiques), formulaire au clavier, torche caméra,
+> guidage OCR texte stylisé, FAB scan global, safezone OCR.
+>
+> ### M-10 « Vault Lisible » (→ v0.9.0, PR #152)
+>
 > Refonte UI/UX avant publication : SafeZone, contraste WCAG AA, TabBar à icônes
 > (Expo Vector Icons Feather), sémantique Possédé=vert/positif, parcours brocante <3s.
+
+### Planned (M-10R)
+- 11 issues `docs/issues/M10R-*.md` + User Stories US-UX-07..12
+- Scripts `scripts/m10r-create-milestone.sh`, `scripts/m10r-create-issues.sh`
 
 ### Added
 - Milestone M-10 : 12 issues `docs/issues/M10-*.md` (#140-#151) + User Stories US-UX-01..06
