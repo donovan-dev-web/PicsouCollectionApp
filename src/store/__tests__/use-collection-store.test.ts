@@ -17,9 +17,11 @@ const mockMagazineRepo = {
 };
 
 const mockListRecentCopies = jest.fn();
+const mockCountAllCopies = jest.fn();
 const mockAddCopy = jest.fn();
 const mockCollectionRepo = {
   listRecentCopies: mockListRecentCopies,
+  countAllCopies: mockCountAllCopies,
   addCopy: mockAddCopy,
   countByMagazine: jest.fn(),
   listByMagazine: jest.fn(),
@@ -132,6 +134,43 @@ describe('useCollectionStore', () => {
 
     expect(useCollectionStore.getState().recentCopies).toHaveLength(1);
     expect(mockListRecentCopies).toHaveBeenCalledWith(5);
+  });
+
+  it('charge un resume leger (compteur + recents) sans lister les editions', async () => {
+    mockCountAllCopies.mockResolvedValue(7);
+    mockListRecentCopies.mockResolvedValue([
+      {
+        copy: {
+          id: 'c1',
+          magazineId: 'mag-1',
+          notes: null,
+          dateAdded: '2026-09-01T10:00:00Z',
+        },
+        magazine: { id: 'mag-1', publication: 'Picsou Magazine', issueNumber: 547 },
+      },
+    ]);
+
+    await useCollectionStore.getState().loadSummary();
+
+    const state = useCollectionStore.getState();
+    expect(state.totalCopies).toBe(7);
+    expect(state.recentCopies).toHaveLength(1);
+    expect(state.loaded).toBe(true);
+    expect(state.loading).toBe(false);
+    expect(mockList).not.toHaveBeenCalled();
+    expect(mockListRecentCopies).toHaveBeenCalledWith(5);
+    expect(mockCountAllCopies).toHaveBeenCalledTimes(1);
+  });
+
+  it('signale un echec de chargement du resume', async () => {
+    mockCountAllCopies.mockRejectedValue(new Error('base indisponible'));
+
+    await useCollectionStore.getState().loadSummary();
+
+    const state = useCollectionStore.getState();
+    expect(state.error).toBe('base indisponible');
+    expect(state.loading).toBe(false);
+    expect(state.loaded).toBe(false);
   });
 
   it('charge le detail d une edition avec ses copies', async () => {

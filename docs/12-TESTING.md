@@ -165,21 +165,21 @@ Alternativement, les tests peuvent être co-localisés `collectionService.test.t
 ```json
 "coverageThreshold": {
   "global": {
-    "branches": 70,
-    "functions": 70,
-    "lines": 70,
-    "statements": 70
+    "branches": 80,
+    "functions": 80,
+    "lines": 80,
+    "statements": 80
   }
 }
 ```
 
 | Zone | Couverture actuelle | Couverture cible |
 |---|---|---|
-| Global | **100 %** (seuil CI ≥ 70 %) | ≥ 80 % |
+| Global | **90,24 %** (seuil CI ≥ 80 %, M-08) | ≥ 80 % |
 | Services / repositories | consolidée (M-02) | ≥ 85 % |
-| Composants critiques | à consolider (M-03) | ≥ 70 % |
+| Composants critiques | consolidée (M-03) | ≥ 70 % |
 
-> État M-02 : 29 tests / 7 suites, **100 % de couverture** sur `src/`, branches 93,93 %, seuils globaux 70 %.
+> État M-08 : 270 tests / 33 suites, couverture globale 90,24 % (statements), branches 85,86 %, seuils globaux 80 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
