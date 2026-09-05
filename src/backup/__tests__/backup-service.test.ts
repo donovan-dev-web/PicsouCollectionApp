@@ -258,9 +258,7 @@ describe('BackupService CSV import (US-BK-05)', () => {
     await expect(
       service.validateCollection('publication,foo\nPicsou,1\n', 'csv'),
     ).rejects.toBeInstanceOf(InvalidBackupError);
-    await expect(service.validateCollection('', 'csv')).rejects.toBeInstanceOf(
-      InvalidBackupError,
-    );
+    await expect(service.validateCollection('', 'csv')).rejects.toBeInstanceOf(InvalidBackupError);
   });
 
   it('rejette un CSV sans publication ou à numéro non entier', async () => {

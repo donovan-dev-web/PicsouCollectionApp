@@ -235,7 +235,7 @@ function parseCsv(raw: string): string[][] {
 
 function asCsvString(value: string | undefined): string | null {
   const trimmed = (value ?? '').trim();
-  return trimmed.length > 0 ? value ?? '' : null;
+  return trimmed.length > 0 ? (value ?? '') : null;
 }
 
 /**
@@ -402,11 +402,7 @@ export class BackupService {
           : [{ id: magazine.id, notes: null, dateAdded: '' }];
       for (const copy of copies) {
         lines.push(
-          [
-            ...base,
-            escapeCsvField(copy.notes ?? ''),
-            escapeCsvField(copy.dateAdded),
-          ].join(','),
+          [...base, escapeCsvField(copy.notes ?? ''), escapeCsvField(copy.dateAdded)].join(','),
         );
       }
     }

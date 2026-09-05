@@ -107,7 +107,9 @@ describe('useBackupStore.exportCollection', () => {
     expect(ok).toBe(true);
     const [csv, format] = writeExport.mock.calls[0];
     expect(format).toBe('csv');
-    expect(csv).toMatch(/^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\n/);
+    expect(csv).toMatch(
+      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\n/,
+    );
     expect(useBackupStore.getState().lastExport?.name).toBe('picsou-collection-2026-09-01.csv');
   });
 
