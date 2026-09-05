@@ -9,30 +9,51 @@
 
 ## [Unreleased]
 
-> ### M-10R « Retours test physique » (→ v0.9.1, planifié)
->
-> Milestone correctif après test physique du build preview M-10 : import CSV
-> sélectionnable, CTA sans scroll, tabs Accueil/Scan/Collection + drawer latéral
-> (liens directs, éditions dynamiques), formulaire au clavier, torche caméra,
-> guidage OCR texte stylisé, FAB scan global, safezone OCR.
->
-> ### M-10 « Vault Lisible » (→ v0.9.0, PR #152)
->
-> Refonte UI/UX avant publication : SafeZone, contraste WCAG AA, TabBar à icônes
-> (Expo Vector Icons Feather), sémantique Possédé=vert/positif, parcours brocante <3s.
+> Travail en cours pour la prochaine release.
 
-### Planned (M-10R)
-- 11 issues `docs/issues/M10R-*.md` + User Stories US-UX-07..12
-- Scripts `scripts/m10r-create-milestone.sh`, `scripts/m10r-create-issues.sh`
+---
+
+## [0.9.1] — 2026-09-05
+
+> Onzième release : **retours test physique (M-10R)** — correctifs UI/UX post-test terrain
+> du build preview M-10 : import CSV, CTA brocante, navigation drawer, torche caméra,
+> guidance OCR, FAB scan, safezone gestuelle.
+
+### Added
+- Drawer latéral permanent (`@react-navigation/drawer`) avec liens directs + section éditions dynamiques repliables (M10R-04/05, #156/#157)
+- ScanFAB global 56px (Accueil/Collection/Fiche/Settings) — 1 tap pour scanner (M10R-10, #162)
+- Torche caméra toggle sur écrans OCR et code-barres (`enableTorch`) (M10R-08, #160)
+- Guidance OCR « texte stylisé » : card persistant après 3 cycles weak avec raccourcis code-barres/manuel (M10R-09, #161)
+- Hamburger menu Accueil → drawer latéral
+- Dépendance `@react-navigation/drawer` (gesture-handler + reanimated déjà présentes)
+
+### Changed
+- **Accueil** : CTA Scanner/Ajouter déplacé au-dessus des récents (visible sans scroll, M10R-02, #154)
+- **Formulaire** : `KeyboardAvoidingView` + spacer 200px pour Notes visible au-dessus du clavier (M10R-07, #159)
+- **SelectField** : `FlatList` remplacée par `ScrollView` + `.map()` (fix scroll Android, M10R-06, #158)
+
+### Fixed
+- Import CSV : le sélecteur Android accepte maintenant les fichiers `.csv` (MIME types élargis + repli `*/*`) (M10R-01, #153)
+- OCR : bouton « Scanner le code-barres » repositionné au-dessus de la gesture bar (`marginBottom: insets.bottom`) (M10R-11, #163)
+
+### Validation
+- 280/280 tests verts, tsc OK, lint 0 error, prettier OK, expo-doctor 21/21
+
+---
+
+## [0.9.0] — 2026-09-05
+
+> Dixième release : **refonte UI/UX « Vault Lisible » (M-10)** — SafeZone, contraste
+> WCAG AA, TabBar icônes, sémantique Possédé=vert, parcours brocante <3s.
 
 ### Added
 - Milestone M-10 : 12 issues `docs/issues/M10-*.md` (#140-#151) + User Stories US-UX-01..06
 - Scripts `scripts/m10-create-milestone.sh`, `scripts/m10-create-issues.sh` (dry-run OK)
 - Tokens étendus : échelle Spacing/Typo, statuts vert positif, `accentText` lisible
 - Composant `Screen` SafeArea + TabBar à icônes + `StatusBadge` thématisé
-- Dépendance `@expo/vector-icons` (Feather) + `jest.setup.js` (mock SafeArea/icônes) ; 273 tests verts
+- Dépendance `@expo/vector-icons` (Feather) + `jest.setup.js` (mock SafeArea/icônes)
 
-### Changed (sweep pro M10-04..11, non mergé — branche `develop`)
+### Changed
 - **Accueil** : CTA Scanner 56px + Ajouter outline, compteur live-region, récents 48px + chevron, dates `Intl fr-FR`, empty + CTA, erreur store affichée
 - **Collection** : pagination masquée à 1 page, boutons 44px + chevrons Feather, filtre avec effacement, pull-to-refresh, `EmptyState`/`LoadingView`
 - **Fiche** : ajout direct d'exemplaire + toast, Modifier secondaire, Supprimer avec Hint, SafeZone, testIDs sans accents
@@ -40,24 +61,11 @@
 - **Formulaire** : validation chiffres du numéro, aide submit, 44px partout, chevrons Feather
 - **Paramètres** : spinners busy + `aria-busy`, icônes upload/download, check de sélection, `Annuler` aux Alertes
 - **404** : réécrite (typos, bouton primaire 48px, SafeZone)
-- Zéro emoji UI, zéro `top:48` en dur, `accent` texte uniquement sur fond sombre ; 280 tests verts, couverture 90,2 %
+- Zéro emoji UI, zéro `top:48` en dur, `accent` texte uniquement sur fond sombre
 
----
-
-## [0.8.0] — 2026-09-05
-
-> Dixième release : **optimisation & qualité (M-08)** — démarrage accéléré, accueil allégé et couverture de tests verrouillée à 80 %.
-
-### Changed
-- **Accueil allégé** : le compteur et les ajouts récents se chargent via un résumé léger (`COUNT(*)` + 5 derniers exemplaires) au lieu de matérialiser toute la collection à chaque focus — la liste complète n'est chargée que sur l'écran « Ma Collection »
-- **Démarrage accéléré** : chargement initial **en parallèle** (thème + résumé de collection) au lieu de séquentiel
-- **Seuil de couverture CI monté à 80 % global** (Jest `coverageThreshold` : branches, fonctions, lignes, statements) — `US-QA-02` ; état mesuré : statements 90,2 % / branches 85,4 % / fonctions 90,9 % / lignes 90,5 %
-
-### Added
-- `CollectionRepository.countAllCopies()` : comptage SQLite dédié du total d'exemplaires
-
-### Tests
-- 272 tests / 33 suites, couverture globale ~90 %
+### Validation
+- 280/280 tests verts, tsc OK, lint OK, prettier OK, 90,2 % couverture
+- PR #152 mergée dans develop, milestone #13 (M-10) fermée
 
 ---
 
