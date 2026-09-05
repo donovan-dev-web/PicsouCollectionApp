@@ -2,10 +2,12 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
 
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { Screen } from '@/components/screen';
+import { ScanFAB } from '@/components/scan-fab';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
@@ -31,6 +33,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
+  const navigation = useNavigation();
   const totalCopies = useCollectionStore((s) => s.totalCopies);
   const recentCopies = useCollectionStore((s) => s.recentCopies);
   const loading = useCollectionStore((s) => s.loading);
@@ -47,9 +50,20 @@ export default function HomeScreen() {
   return (
     <Screen noBottom>
       <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
-        <Text style={styles.title} accessibilityLabel="Picsou Collection">
-          Picsou Collection
-        </Text>
+        <View style={styles.headerRow}>
+          <Pressable
+            style={({ pressed }) => [styles.menuButton, pressed && styles.buttonPressed]}
+            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+            testID="menu-button"
+            accessibilityRole="button"
+            accessibilityLabel="Ouvrir le menu">
+            <Feather name="menu" size={22} color={colors.text} />
+          </Pressable>
+          <Text style={styles.title} accessibilityLabel="Picsou Collection">
+            Picsou Collection
+          </Text>
+          <View style={styles.menuSpacer} />
+        </View>
         <Text style={styles.subtitle}>
           Collectionnez vos magazines Disney, sans doublons, sans internet.
         </Text>
@@ -71,6 +85,30 @@ export default function HomeScreen() {
               <Text style={styles.counterLabel}>exemplaires possédés</Text>
             </>
           )}
+        </View>
+
+        <View style={styles.ctaRow}>
+          <Pressable
+            style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+            onPress={() => router.push('/scan')}
+            testID="scan-button"
+            accessibilityRole="button"
+            accessibilityLabel="Scanner un magazine"
+            android_ripple={{ color: 'rgba(0,0,0,0.12)' }}>
+            <Feather name="camera" size={22} color={colors.accentText} />
+            <Text style={styles.scanButtonText}>Scanner</Text>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
+            onPress={() => router.push('/scan/manual')}
+            testID="add-button"
+            accessibilityRole="button"
+            accessibilityLabel="Ajouter une édition"
+            android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+            <Feather name="plus" size={20} color={colors.text} />
+            <Text style={styles.addButtonText}>Ajouter</Text>
+          </Pressable>
         </View>
 
         <View style={styles.recentSection}>
@@ -113,29 +151,8 @@ export default function HomeScreen() {
             ))
           )}
         </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
-          onPress={() => router.push('/scan')}
-          testID="scan-button"
-          accessibilityRole="button"
-          accessibilityLabel="Scanner un magazine"
-          android_ripple={{ color: 'rgba(0,0,0,0.12)' }}>
-          <Feather name="camera" size={22} color={colors.accentText} />
-          <Text style={styles.scanButtonText}>Scanner</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
-          onPress={() => router.push('/scan/manual')}
-          testID="add-button"
-          accessibilityRole="button"
-          accessibilityLabel="Ajouter une édition"
-          android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
-          <Feather name="plus" size={20} color={colors.text} />
-          <Text style={styles.addButtonText}>Ajouter</Text>
-        </Pressable>
       </ScrollView>
+      <ScanFAB />
     </Screen>
   );
 }
@@ -151,6 +168,20 @@ function makeStyles(colors: ThemeColors) {
       padding: Spacing.four,
       gap: Spacing.three,
       flexGrow: 1,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    menuButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    menuSpacer: {
+      width: 44,
     },
     title: {
       fontSize: 28,
@@ -250,6 +281,9 @@ function makeStyles(colors: ThemeColors) {
       lineHeight: 18,
       color: colors.textSecondary,
     },
+    ctaRow: {
+      gap: Spacing.two,
+    },
     scanButton: {
       flexDirection: 'row',
       alignSelf: 'stretch',
@@ -260,7 +294,6 @@ function makeStyles(colors: ThemeColors) {
       minHeight: 56,
       paddingVertical: Spacing.three,
       borderRadius: 12,
-      marginTop: 'auto',
     },
     buttonPressed: {
       opacity: 0.8,

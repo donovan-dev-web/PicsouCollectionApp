@@ -16,3 +16,24 @@ jest.mock('@expo/vector-icons', () => {
     React.createElement(Text, { ...props, testID: `icon-${name}` }, name);
   return { Feather };
 });
+
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useNavigation: () => ({
+    dispatch: jest.fn(),
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+  }),
+  DrawerActions: {
+    openDrawer: jest.fn(),
+    closeDrawer: jest.fn(),
+    toggleDrawer: jest.fn(),
+  },
+}));
+
+jest.mock('@react-navigation/drawer', () => ({
+  createDrawerNavigator: jest.fn(() => ({
+    Navigator: ({ children }) => children,
+    Screen: () => null,
+  })),
+}));

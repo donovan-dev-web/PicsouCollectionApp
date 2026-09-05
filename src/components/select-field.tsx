@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
@@ -59,16 +59,16 @@ export function SelectField<T extends string>({
 
       {open && (
         <View style={styles.listContainer}>
-          <FlatList
-            data={(noneLabel ? [noneLabel, ...options] : options) as readonly string[]}
-            keyExtractor={(item) => item}
+          <ScrollView
+            nestedScrollEnabled
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => {
+            contentContainerStyle={styles.listContent}>
+            {(noneLabel ? [noneLabel, ...options] : options).map((item) => {
               const isNone = noneLabel != null && item === noneLabel;
               const selected = value === null ? isNone : item === value;
               return (
                 <Pressable
+                  key={item}
                   style={({ pressed }) => [
                     styles.option,
                     selected && styles.optionSelected,
@@ -82,8 +82,8 @@ export function SelectField<T extends string>({
                   </Text>
                 </Pressable>
               );
-            }}
-          />
+            })}
+          </ScrollView>
         </View>
       )}
     </View>

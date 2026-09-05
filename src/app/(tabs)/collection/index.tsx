@@ -16,6 +16,7 @@ import { LoadingView } from '@/components/loading-view';
 import { MagazineCard } from '@/components/magazine-card';
 import { SelectField } from '@/components/select-field';
 import { Screen } from '@/components/screen';
+import { ScanFAB } from '@/components/scan-fab';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
@@ -97,6 +98,7 @@ export default function CollectionScreen() {
   return (
     <Screen noBottom>
       <View style={styles.screen}>
+        <ScanFAB testID="collection-scan-fab" />
         <Text style={styles.title}>Ma Collection</Text>
 
         <View style={styles.filters}>

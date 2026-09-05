@@ -55,7 +55,10 @@ export class NativeFileGateway implements FileGateway {
     const { File } = await import('expo-file-system');
 
     const result = await getDocumentAsync({
-      type: mimeTypeFor(format),
+      type:
+        format === 'json'
+          ? 'application/json'
+          : ['text/csv', 'text/comma-separated-values', 'text/*', '*/*'],
       copyToCacheDirectory: true,
       multiple: false,
     });

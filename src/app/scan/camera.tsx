@@ -68,6 +68,8 @@ export default function CameraOcrScreen() {
     detected: EMPTY_DETECTED,
   });
   const [draft, setDraft] = useState<DetectedInfo>(EMPTY_DETECTED);
+  const [torchOn, setTorchOn] = useState(false);
+  const [weakCycles, setWeakCycles] = useState(0);
   const inFlight = useRef(false);
   const cameraRef = useRef<CameraViewType>(null);
 
@@ -103,6 +105,7 @@ export default function CameraOcrScreen() {
           // US-ID-08 : on ne conclut plus en échec dès la première lecture partielle.
           // On met en surcouche les champs détectés et on continue d'analyser
           // (le pointeur guide l'utilisateur vers le champ manquant).
+          setWeakCycles((c) => c + 1);
           setState((prev) =>
             prev.status === 'analyzing'
               ? {
@@ -147,6 +150,7 @@ export default function CameraOcrScreen() {
   }, [permission?.granted, state.status]);
 
   const stopAndRetry = () => {
+    setWeakCycles(0);
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
 
@@ -281,7 +285,13 @@ export default function CameraOcrScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} facing="back" testID="ocr-camera-view" />
+      <CameraView
+        ref={cameraRef}
+        style={styles.camera}
+        facing="back"
+        enableTorch={torchOn}
+        testID="ocr-camera-view"
+      />
 
       {isAnalyzing && (
         <>
@@ -359,6 +369,40 @@ export default function CameraOcrScreen() {
             accessibilityLabel="Annuler">
             <Feather name="x" size={22} color="#FFFFFF" />
           </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
+            onPress={() => setTorchOn((t) => !t)}
+            testID="ocr-torch"
+            accessibilityRole="button"
+            accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
+            <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
+          </Pressable>
+
+          {weakCycles > 3 && detected?.publication && detected?.issueNumber === null && (
+            <View style={styles.guidanceCard} testID="ocr-guidance-card">
+              <Feather name="alert-circle" size={16} color={colors.accent} />
+              <Text style={styles.guidanceText}>
+                Le texte stylisé est difficile à lire automatiquement.
+              </Text>
+              <View style={styles.guidanceActions}>
+                <Pressable
+                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
+                  onPress={goBarcode}
+                  testID="ocr-guidance-barcode"
+                  accessibilityRole="button">
+                  <Text style={styles.guidanceButtonText}>Code-barres</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
+                  onPress={() => goManual(detected)}
+                  testID="ocr-guidance-manual"
+                  accessibilityRole="button">
+                  <Text style={styles.guidanceButtonText}>Saisie manuelle</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
         </>
       )}
 
@@ -699,6 +743,7 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       borderRadius: 12,
       marginHorizontal: Spacing.four,
       marginTop: Spacing.two,
+      marginBottom: insets.bottom + Spacing.three,
     },
     secondaryButtonText: {
       fontSize: 16,
@@ -741,6 +786,55 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       backgroundColor: 'rgba(0,0,0,0.55)',
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    torchButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      right: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    guidanceCard: {
+      position: 'absolute',
+      left: Spacing.four,
+      right: Spacing.four,
+      bottom: insets.bottom + Spacing.three,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: Spacing.two,
+      backgroundColor: 'rgba(0,0,0,0.75)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 12,
+    },
+    guidanceText: {
+      flex: 1,
+      fontSize: 13,
+      color: '#FFFFFF',
+      lineHeight: 18,
+    },
+    guidanceActions: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+      width: '100%',
+    },
+    guidanceButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.two,
+      borderRadius: 8,
+    },
+    guidanceButtonText: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.accentText,
     },
   });
 }
