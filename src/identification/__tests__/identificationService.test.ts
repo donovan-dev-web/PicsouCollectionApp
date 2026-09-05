@@ -96,7 +96,7 @@ describe('IdentificationService.identifyByOCR', () => {
     expect(await service.identifyByOCR('  x  ')).toEqual({ status: 'no-text' });
   });
 
-  it('retourne weak si la confiance est insuffisante (publication seule)', async () => {
+  it('retourne weak si seuls publication est détectée (règle nom + numéro)', async () => {
     const findByPublicationAndIssue = jest.fn(async () => null as unknown as Magazine | null);
     const service = new IdentificationService(
       makeRepository(
@@ -110,7 +110,7 @@ describe('IdentificationService.identifyByOCR', () => {
     expect(result.status).toBe('weak');
     expect(findByPublicationAndIssue).not.toHaveBeenCalled();
     if (result.status === 'weak') {
-      expect(result.confidence).toBe(0.4);
+      expect(result.confidence).toBe(0.5);
       expect(result.publication).toBe('Picsou Magazine');
       expect(result.issueNumber).toBeNull();
     }
@@ -175,5 +175,69 @@ describe('IdentificationService.identifyByOCR', () => {
     });
 
     expect(result.status).toBe('found');
+  });
+
+  it('ne recherche pas si le numéro seul est détecté (règle nom + numéro)', async () => {
+    const findByPublicationAndIssue = jest.fn(async () => null as unknown as Magazine | null);
+    const service = new IdentificationService(
+      makeRepository(
+        jest.fn(async () => []),
+        findByPublicationAndIssue,
+      ),
+    );
+
+    const result = await service.identifyByOCR('547');
+
+    expect(result.status).toBe('weak');
+    expect(findByPublicationAndIssue).not.toHaveBeenCalled();
+  });
+});
+
+describe('IdentificationService.searchByOcrFields (US-ID-09 — outrepasser la confiance)', () => {
+  it('retourne found quand nom + numéro corresponden à une édition', async () => {
+    const magazine = makeMagazine({ id: 'mag-547', issueNumber: 547 });
+    const findByPublicationAndIssue = jest.fn(async () => magazine);
+    const service = new IdentificationService(
+      makeRepository(jest.fn(async () => []), findByPublicationAndIssue),
+    );
+
+    const result = await service.searchByOcrFields('Picsou Magazine', 547, '2023');
+
+    expect(result.status).toBe('found');
+    if (result.status === 'found') {
+      expect(result.magazine).toEqual(magazine);
+      expect(result.confidence).toBe(1);
+    }
+    expect(findByPublicationAndIssue).toHaveBeenCalledWith('Picsou Magazine', 547);
+  });
+
+  it('retourne unknown quand aucune édition ne correspond', async () => {
+    const service = new IdentificationService(
+      makeRepository(
+        jest.fn(async () => []),
+        jest.fn(async () => null as unknown as Magazine | null),
+      ),
+    );
+
+    const result = await service.searchByOcrFields('Picsou Magazine', 900, null);
+
+    expect(result.status).toBe('unknown');
+  });
+
+  it('retourne weak si nom ou numéro manquent (complétion manuelle nécessaire)', async () => {
+    const findByPublicationAndIssue = jest.fn(async () => null as unknown as Magazine | null);
+    const service = new IdentificationService(
+      makeRepository(
+        jest.fn(async () => []),
+        findByPublicationAndIssue,
+      ),
+    );
+
+    const noNumber = await service.searchByOcrFields('Picsou Magazine', null, null);
+    const noName = await service.searchByOcrFields('Publication inconnue', 5, null);
+
+    expect(noNumber.status).toBe('weak');
+    expect(noName.status).toBe('weak');
+    expect(findByPublicationAndIssue).not.toHaveBeenCalled();
   });
 });

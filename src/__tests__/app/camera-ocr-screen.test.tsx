@@ -53,7 +53,10 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: jest.fn().mockResolvedValue(undefined),
     } as unknown as Dependencies['settingsRepository'],
-    identificationService: {} as Dependencies['identificationService'],
+    identificationService: {
+      identifyByOCR: jest.fn().mockResolvedValue({ status: 'no-text' }),
+      searchByOcrFields: jest.fn().mockResolvedValue({ status: 'no-text' }),
+    } as unknown as Dependencies['identificationService'],
     ocrEngine: {
       recognize: jest.fn().mockResolvedValue({ text: 'Picsou Magazine N° 547' }),
     } as unknown as OcrEngine,
@@ -162,7 +165,7 @@ describe('CameraOcrScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-547');
   });
 
-  it('affiche la confiance insuffisante avec réessayer, code-barres et manuel', async () => {
+  it('maintient l’analyse en lecture partielle et affiche les champs détectés en surcouche (US-ID-08)', async () => {
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -171,7 +174,7 @@ describe('CameraOcrScreen', () => {
             publication: 'Picsou Magazine',
             issueNumber: null,
             date: null,
-            confidence: 0.4,
+            confidence: 0.5,
           }),
         } as unknown as Dependencies['identificationService'],
       }),
@@ -180,37 +183,17 @@ describe('CameraOcrScreen', () => {
     render(<CameraOcrScreen />);
     await tick();
 
-    expect(screen.getByTestId('ocr-weak')).toBeTruthy();
-    expect(screen.getByText('Confiance insuffisante')).toBeTruthy();
-    expect(screen.queryByTestId('ocr-confirm')).toBeNull();
-    expect(screen.getByTestId('ocr-retry')).toBeTruthy();
+    expect(screen.getByTestId('ocr-detected-board')).toBeTruthy();
+    expect(screen.getByTestId('ocr-field-publication')).toHaveTextContent('Picsou Magazine');
+    expect(screen.getByTestId('ocr-field-issue')).toHaveTextContent('…');
+    expect(screen.getByText(/Pointez maintenant le numéro/)).toBeTruthy();
+    expect(screen.queryByTestId('ocr-found')).toBeNull();
+    expect(screen.getByTestId('ocr-confirm-detected')).toBeTruthy();
     expect(screen.getByTestId('ocr-barcode')).toBeTruthy();
-    expect(screen.getByTestId('ocr-manual')).toBeTruthy();
   });
 
-  it('Scanner le code-barres (confiance insuffisante) mène au scan de code-barres', async () => {
-    setDepsForTest(
-      stubDeps({
-        identificationService: {
-          identifyByOCR: jest.fn().mockResolvedValue({
-            status: 'weak',
-            publication: 'Picsou Magazine',
-            issueNumber: null,
-            date: null,
-            confidence: 0.4,
-          }),
-        } as unknown as Dependencies['identificationService'],
-      }),
-    );
-
-    render(<CameraOcrScreen />);
-    await tick();
-
-    fireEvent.press(screen.getByTestId('ocr-barcode'));
-    expect(mockReplace).toHaveBeenCalledWith('/scan/barcode');
-  });
-
-  it('Réessayer relance l’analyse', async () => {
+  it('relance la recherche dès que nom + numéro sont détectés à la frame suivante', async () => {
+    const magazine = makeMagazine();
     const identity = jest
       .fn()
       .mockResolvedValueOnce({
@@ -218,9 +201,16 @@ describe('CameraOcrScreen', () => {
         publication: 'Picsou Magazine',
         issueNumber: null,
         date: null,
-        confidence: 0.4,
+        confidence: 0.5,
       })
-      .mockResolvedValue({ status: 'no-text' });
+      .mockResolvedValue({
+        status: 'found',
+        magazine,
+        publication: 'Picsou Magazine',
+        issueNumber: 547,
+        date: null,
+        confidence: 0.9,
+      });
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -231,10 +221,18 @@ describe('CameraOcrScreen', () => {
 
     render(<CameraOcrScreen />);
     await tick();
-    expect(screen.getByTestId('ocr-weak')).toBeTruthy();
+    expect(screen.getByTestId('ocr-confirm-detected')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('ocr-retry'));
-    expect(screen.getByText(/Pointez la couverture/)).toBeTruthy();
+    await tick();
+    expect(screen.getByTestId('ocr-found')).toBeTruthy();
+    expect(identity).toHaveBeenCalledTimes(2);
+  });
+
+  it('Scanner le code-barres mène au scan de code-barres', async () => {
+    render(<CameraOcrScreen />);
+    await tick();
+    fireEvent.press(screen.getByTestId('ocr-barcode'));
+    expect(mockReplace).toHaveBeenCalledWith('/scan/barcode');
   });
 
   it('affiche "Non trouvé" quand un texte confiant ne correspond à rien en base', async () => {
@@ -284,6 +282,104 @@ describe('CameraOcrScreen', () => {
         issueNumber: '900',
         year: '2023',
       },
+    });
+  });
+});
+
+describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockReplace.mockClear();
+    mockBack.mockClear();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const weakDeps = (searchByOcrFields?: jest.Mock) =>
+    stubDeps({
+      identificationService: {
+        identifyByOCR: jest.fn().mockResolvedValue({
+          status: 'weak',
+          publication: 'Picsou Magazine',
+          issueNumber: null,
+          date: '2023',
+          confidence: 0.5,
+        }),
+        searchByOcrFields:
+          searchByOcrFields ??
+          jest.fn().mockResolvedValue({
+            status: 'unknown',
+            publication: 'Picsou Magazine',
+            issueNumber: 547,
+            date: null,
+            confidence: 1,
+          }),
+      } as unknown as Dependencies['identificationService'],
+    });
+
+  it('ouvre le panneau de vérification pré-rempli depuis la surcouche', async () => {
+    setDepsForTest(weakDeps());
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
+
+    expect(screen.getByTestId('ocr-override-panel')).toBeTruthy();
+    expect(screen.getByTestId('ocr-override-publication').props.value).toBe('Picsou Magazine');
+    expect(screen.getByTestId('ocr-override-date').props.value).toBe('2023');
+  });
+
+  it('retour à la caméra depuis le panneau relance l’analyse', async () => {
+    setDepsForTest(weakDeps());
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
+    fireEvent.press(screen.getByTestId('ocr-override-back'));
+
+    expect(screen.getByText(/Pointez/)).toBeTruthy();
+    expect(screen.getByTestId('ocr-detected-board')).toBeTruthy();
+  });
+
+  it('recherche hors confiance avec les champs corrigés (outrepasser la confiance)', async () => {
+    const search = jest.fn().mockResolvedValue({
+      status: 'found',
+      magazine: makeMagazine(),
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+      date: '2023',
+      confidence: 1,
+    });
+    setDepsForTest(weakDeps(search));
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
+    fireEvent.changeText(screen.getByTestId('ocr-override-publication'), 'Picsou Magazine');
+    fireEvent.changeText(screen.getByTestId('ocr-override-issue'), '547');
+    fireEvent.press(screen.getByTestId('ocr-override-search'));
+
+    await act(async () => {});
+
+    expect(search).toHaveBeenCalledWith('Picsou Magazine', 547, '2023');
+    expect(screen.getByTestId('ocr-found')).toBeTruthy();
+  });
+
+  it('oriente vers la saisie manuelle si nom ou numéro restent manquants', async () => {
+    setDepsForTest(weakDeps());
+    render(<CameraOcrScreen />);
+    await tick();
+
+    fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
+    fireEvent.press(screen.getByTestId('ocr-override-search'));
+
+    await act(async () => {});
+
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: '/scan/manual',
+      params: { publication: 'Picsou Magazine', year: '2023' },
     });
   });
 });
