@@ -7,6 +7,7 @@ import { ErrorView } from '@/components/error-view';
 import { LoadingView } from '@/components/loading-view';
 import { Screen } from '@/components/screen';
 import { StatusBadge } from '@/components/status-badge';
+import { ScanFAB } from '@/components/scan-fab';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { toast } from '@/lib/toast';
@@ -105,6 +106,7 @@ export default function MagazineDetailScreen() {
 
   return (
     <Screen>
+      <ScanFAB testID="detail-scan-fab" />
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <Text style={styles.publication}>{detail.publication}</Text>
         <Text style={styles.issue} testID="detail-issue">

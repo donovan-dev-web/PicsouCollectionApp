@@ -12,6 +12,7 @@ import { Feather } from '@expo/vector-icons';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { Screen } from '@/components/screen';
+import { ScanFAB } from '@/components/scan-fab';
 import { useSettingsStore, type ColorSchemeSetting } from '@/store/use-settings-store';
 import { useBackupStore } from '@/store/use-backup-store';
 import type { BackupFormat } from '@/backup/backup-types';
@@ -85,6 +86,7 @@ export default function SettingsScreen() {
 
   return (
     <Screen noBottom>
+      <ScanFAB testID="settings-scan-fab" />
       <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
         <Text style={styles.title}>Paramètres</Text>
 

@@ -41,6 +41,7 @@ export default function BarcodeScreen() {
   const [state, setState] = useState<ScanState>({ status: 'idle' });
   const [scanning, setScanning] = useState(true);
   const [continuous, setContinuous] = useState(params.continuous === '1');
+  const [torchOn, setTorchOn] = useState(false);
   const [pending, setPending] = useState<Pending | null>(null);
   const stabilizer = useRef(new BarcodeStabilizer(3));
 
@@ -197,6 +198,7 @@ export default function BarcodeScreen() {
       <CameraView
         style={styles.camera}
         facing="back"
+        enableTorch={torchOn}
         barcodeScannerSettings={{
           barcodeTypes: ['ean13', 'ean8', 'code128', 'code39', 'code93', 'itf14', 'upc_a', 'upc_e'],
         }}
@@ -262,6 +264,17 @@ export default function BarcodeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Annuler">
           <Feather name="x" size={22} color="#FFFFFF" />
+        </Pressable>
+      )}
+
+      {state.status === 'idle' && !pending && (
+        <Pressable
+          style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
+          onPress={() => setTorchOn((t) => !t)}
+          testID="scan-torch"
+          accessibilityRole="button"
+          accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
+          <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
         </Pressable>
       )}
 
@@ -589,6 +602,17 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       position: 'absolute',
       top: insets.top + 12,
       left: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    torchButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      right: Spacing.three,
       width: 44,
       height: 44,
       borderRadius: 22,
