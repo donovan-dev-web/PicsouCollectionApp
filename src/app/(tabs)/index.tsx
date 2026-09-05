@@ -2,13 +2,13 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
 
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { Screen } from '@/components/screen';
 import { ScanFAB } from '@/components/scan-fab';
 import { useCollectionStore } from '@/store/use-collection-store';
+import { useDrawer } from '@/lib/drawer-context';
 
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
@@ -33,7 +33,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
-  const navigation = useNavigation();
+  const { open: openDrawer } = useDrawer();
   const totalCopies = useCollectionStore((s) => s.totalCopies);
   const recentCopies = useCollectionStore((s) => s.recentCopies);
   const loading = useCollectionStore((s) => s.loading);
@@ -53,7 +53,7 @@ export default function HomeScreen() {
         <View style={styles.headerRow}>
           <Pressable
             style={({ pressed }) => [styles.menuButton, pressed && styles.buttonPressed]}
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+            onPress={openDrawer}
             testID="menu-button"
             accessibilityRole="button"
             accessibilityLabel="Ouvrir le menu">
