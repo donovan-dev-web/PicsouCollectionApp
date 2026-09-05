@@ -7,6 +7,23 @@
 
 ---
 
+## [0.8.0] — 2026-09-05
+
+> Dixième release : **optimisation & qualité (M-08)** — démarrage accéléré, accueil allégé et couverture de tests verrouillée à 80 %.
+
+### Changed
+- **Accueil allégé** : le compteur et les ajouts récents se chargent via un résumé léger (`COUNT(*)` + 5 derniers exemplaires) au lieu de matérialiser toute la collection à chaque focus — la liste complète n'est chargée que sur l'écran « Ma Collection »
+- **Démarrage accéléré** : chargement initial **en parallèle** (thème + résumé de collection) au lieu de séquentiel
+- **Seuil de couverture CI monté à 80 % global** (Jest `coverageThreshold` : branches, fonctions, lignes, statements) — `US-QA-02` ; état mesuré : statements 90,2 % / branches 85,4 % / fonctions 90,9 % / lignes 90,5 %
+
+### Added
+- `CollectionRepository.countAllCopies()` : comptage SQLite dédié du total d'exemplaires
+
+### Tests
+- 272 tests / 33 suites, couverture globale ~90 %
+
+---
+
 ## [0.7.1] — 2026-09-05
 
 > Neuvième release : **retours du test physique v0.7.0** — OCR ciblé (surcouche + validation manuelle), confiance assouplie et sauvegarde au choix JSON / CSV (M-07R).
