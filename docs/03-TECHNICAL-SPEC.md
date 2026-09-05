@@ -214,6 +214,8 @@ Priorités :
 - les requêtes de liste/scan ne chargent jamais `notes` et `ocr_text` inutilement ;
 - l'OCR n'analyse qu'une fraction des frames.
 
+> **État (v0.8.0, M-08)** : conforme et verrouillé — accueil via résumé léger `COUNT(*)` + 5 ajouts récents (`loadSummary`, `countAllCopies`) ; la liste complète n'est chargée que sur l'écran « Ma Collection » ; chargement initial parallèle ; OCR borné à 1 analyse / 500 ms (`ANALYSIS_INTERVAL_MS`) ; seuil de couverture CI ≥ 80 % global.
+
 ---
 
 ## 9. Liste des dépendances

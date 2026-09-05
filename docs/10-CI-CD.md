@@ -232,7 +232,7 @@ Pour un suivi continu de la santé du projet (objectif *qualité pro*), un **rap
 | Couverture services/repositories | ≥ 85 % |
 | Couverture composants critiques | ≥ 70 % |
 
-> Les seuils pourront faire échouer la CI si non atteints, via `coverageThreshold` dans Jest (voir `12-TESTING.md`). Seuil actuel : 70 % global.
+> Les seuils font échouer la CI si non atteints, via `coverageThreshold` dans Jest (voir `12-TESTING.md`). Seuil actuel : **80 % global** (M-08).
 
 ---
 
@@ -268,5 +268,5 @@ Pour garantir la qualité, toute **pull request** vers `develop` ou `main` doit 
 | CI | GitHub Actions (typecheck + lint + format + doctor + tests + coverage) |
 | Déclencheurs | PR / push sur develop et main |
 | Build EAS | manuel pour l'instant (`eas build`) ; workflow auto à venir |
-| Couverture cible | 70 % global (actuel), ≥ 80 % (objectif) |
+| Couverture cible | 80 % global (seuil CI, M-08) |
 | Fusion | CI verte + revue obligatoires |

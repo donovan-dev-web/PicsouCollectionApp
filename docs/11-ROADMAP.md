@@ -48,7 +48,7 @@ Phase 4R ███████████████████████�
 Phase 5  ██████████████████████████████  Terminé ✓ (v0.5.0)
 Phase 6  ██████████████████████████████  Terminé ✓ (v0.6.0)
 Phase 7  ██████████████████████████████  Terminé ✓ (v0.7.0)
-Phase 8  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
+Phase 8  ██████████████████████████████  Terminé ✓ (v0.8.0)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir
 ```
 
@@ -68,9 +68,9 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 6 — Parcours complet | `M-06 — Parcours complet` | `US-ID-04`, `US-ID-06`, `US-COL-06` | 3 |
 | 7 — Export / Import | `M-07 — Export / Import` | `US-BK-01..03` | 3 |
 | 7R — Retours test | `M-07R — Retours test physique (v0.7.0)` | `US-ID-08..09` *(1 bug)*, `US-BK-04..05` | 5 |
-| 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02` | 1 |
+| 8 — Optimisation & qualité | `M-08 — Optimisation & qualité` | `US-QA-02`, #136 | 2 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **69** |
+| **Total** | | | **70** |
 
 ---
 
@@ -297,6 +297,14 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | Vérifier consommation mémoire / stockage | — |
 
 **Livrables** : application optimisée, couverture ≥ 80 %.
+
+**Statut : Terminé ✓ (release `v0.8.0`)** — livraison `perf(collection)` (#137) :
+- démarrage **parallèle** (thème + résumé de collection) ;
+- **accueil léger** : `loadSummary()` (`COUNT(*)` + 5 ajouts récents) au lieu de la liste complète à chaque focus ; liste complète uniquement sur l'écran « Ma Collection » ;
+- OCR **déjà borné** (1 analyse / 500 ms avec garde anti-chevauchenent, `ANALYSIS_INTERVAL_MS` dans `camera.tsx`) — conforme ;
+- **seuil de couverture CI fixé à 80 % global** (`US-QA-02`, #27), état mesuré ~90 % (statements 90,2 %, branches 85,4 %).
+
+> ⏳ Tâches terrain restantes (mémoire / stockage, téléphone peu performant, collection volumineuse) : reportées en **Phase 9** — validations sur appareil réel.
 
 ---
 
