@@ -20,12 +20,12 @@
 > guidance OCR, FAB scan, safezone gestuelle.
 
 ### Added
-- Drawer latéral permanent (`@react-navigation/drawer`) avec liens directs + section éditions dynamiques repliables (M10R-04/05, #156/#157)
+- Drawer latéral custom (`Animated` + `PanResponder` + `Modal`) avec liens directs + section éditions dynamiques repliables (M10R-04/05, #156/#157)
+- `DrawerProvider` context pour contrôle drawer depuis n'importe quel écran (`useDrawer()`)
 - ScanFAB global 56px (Accueil/Collection/Fiche/Settings) — 1 tap pour scanner (M10R-10, #162)
 - Torche caméra toggle sur écrans OCR et code-barres (`enableTorch`) (M10R-08, #160)
 - Guidance OCR « texte stylisé » : card persistant après 3 cycles weak avec raccourcis code-barres/manuel (M10R-09, #161)
 - Hamburger menu Accueil → drawer latéral
-- Dépendance `@react-navigation/drawer` (gesture-handler + reanimated déjà présentes)
 
 ### Changed
 - **Accueil** : CTA Scanner/Ajouter déplacé au-dessus des récents (visible sans scroll, M10R-02, #154)
@@ -35,6 +35,10 @@
 ### Fixed
 - Import CSV : le sélecteur Android accepte maintenant les fichiers `.csv` (MIME types élargis + repli `*/*`) (M10R-01, #153)
 - OCR : bouton « Scanner le code-barres » repositionné au-dessus de la gesture bar (`marginBottom: insets.bottom`) (M10R-11, #163)
+- **CRASH startup** : `@react-navigation/drawer` incompatible avec expo-router SDK 57 → remplacé par DrawerMenu custom (Animated + PanResponder). Suppression complète de la dépendance.
+
+### Removed
+- `@react-navigation/drawer` (incompatible expo-router SDK 57, crash au démarrage)
 
 ### Validation
 - 280/280 tests verts, tsc OK, lint 0 error, prettier OK, expo-doctor 21/21

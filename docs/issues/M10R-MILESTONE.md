@@ -27,7 +27,7 @@
 
 1. `native-file-gateway.ts:57` : `getDocumentAsync({ type: 'text/csv' })` — MIME non reconnu par les gestionnaires Android → fichiers grisés.
 2. `(tabs)/index.tsx` : CTA après `recentSection` (+ `marginTop:auto` fragile).
-3. `(tabs)/_layout.tsx` : onglets Accueil/Collection/Paramètres, zéro `Drawer` (dép. absente).
+3. `(tabs)/_layout.tsx` : onglets Accueil/Collection/Paramètres, zéro `Drawer` (dép. absente). → DrawerMenu custom (Animated + PanResponder) avec DrawerProvider context.
 4. `select-field.tsx` : `FlatList` imbriquée dans le `ScrollView` du formulaire (conflit de scroll) ; pas de spacer bas clavier.
 5. ML Kit texte standard faible sur typographies display ; pas de `enableTorch`, pas de guidage.
 6. Aucun FAB dans `src/` (grep Ø).
