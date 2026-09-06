@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -116,6 +117,7 @@ export function DrawerMenu({
   const colors = useThemeColors();
   const styles = makeStyles(colors);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
   const [scanExpanded, setScanExpanded] = React.useState(false);
   const [editionsExpanded, setEditionsExpanded] = React.useState(!editions || editions.length <= 5);
@@ -189,14 +191,17 @@ export function DrawerMenu({
     <Modal transparent visible={visible} onShow={open} onRequestClose={close} animationType="none">
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Fermer le menu" />
-        <Animated.View
-          style={[styles.drawerPanel, { transform: [{ translateX }] }]}
-          {...panResponder.panHandlers}>
-          <View style={styles.drawer}>
-            <View style={styles.drawerHeader}>
-              <Feather name="book-open" size={24} color={colors.accent} />
-              <Text style={styles.drawerTitle}>Picsou Collection</Text>
-            </View>
+<Animated.View
+            style={[styles.drawerPanel, { transform: [{ translateX }] }]}
+            testID="drawer-panel"
+            {...panResponder.panHandlers}>
+            <View style={[styles.drawer, { paddingBottom: insets.bottom }]}>
+              <View
+                style={[styles.drawerHeader, { paddingTop: insets.top + 16 }]}
+                testID="drawer-header">
+                <Feather name="book-open" size={24} color={colors.accent} />
+                <Text style={styles.drawerTitle}>Picsou Collection</Text>
+              </View>
 
             <View style={styles.drawerSection}>
               <DrawerItem
