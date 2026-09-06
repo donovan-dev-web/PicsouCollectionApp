@@ -53,11 +53,11 @@ change de cible.
 
 # Critères de fin (DoD)
 
-- [ ] `/scan` (bouton Saisir manuellement) ouvre **l'écran de recherche**
-- [ ] Drawer « Saisie manuelle » ouvre **l'écran de recherche**
-- [ ] Recherche non trouvée → repli vers le **formulaire d'ajout pré-rempli**
-- [ ] Recherche trouvée → résultat et actions du flux identification
-- [ ] Bouton « Ajouter » de l'accueil **inchangé** (formulaire) + tests à jour,
+- [x] `/scan` (bouton Saisir manuellement) ouvre **l'écran de recherche**
+- [x] Drawer « Saisie manuelle » ouvre **l'écran de recherche**
+- [x] Recherche non trouvée → repli vers le **formulaire d'ajout pré-rempli**
+- [x] Recherche trouvée → résultat et actions du flux identification
+- [x] Bouton « Ajouter » de l'accueil **inchangé** (formulaire) + tests à jour,
       `lint` + `typecheck` verts
 
 # Tests

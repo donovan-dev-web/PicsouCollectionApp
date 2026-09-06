@@ -29,10 +29,10 @@ d'espacement entre les boutons.
 
 # Critères de fin (DoD)
 
-- [ ] Boutons du popup bien espacés (≥ 16px) et hiérarchisés
-- [ ] Pas de clipping petit écran (scroll si nécessaire)
-- [ ] SafeZone encoche + gesture bar respectée
-- [ ] `lint` + `typecheck` verts, tests (rendu overlay found/unknown)
+- [x] Boutons du popup bien espacés (≥ 16px) et hiérarchisés
+- [x] Pas de clipping petit écran (scroll si nécessaire)
+- [x] SafeZone encoche + gesture bar respectée
+- [x] `lint` + `typecheck` verts, tests (rendu overlay found/unknown)
 
 # Tests
 

@@ -6,8 +6,11 @@
 > la collection.
 >
 > GitHub : milestone **M-10R2 — 2ᵉ passe retours test physique (v0.9.2)** —
-> issues **M10R2-01 à M10R2-08**
+> issues **M10R2-01 à M10R2-10**
 > (voir `scripts/m10r2-create-*.sh`).
+>
+> **Statut : Terminé ✓** — issues #166-#175 fermées, livrées par **PR #176**
+> (mergée sur `develop`).
 
 ## Retours terrain → Issues
 
@@ -90,4 +93,4 @@ manuelle flux identification, M10R2-10).
 
 Toutes issues Done, CI verte, test physique de validation (drawer SafeZone,
 onboarding + permission, formulaire valider header, paramètres sous-menus +
-lien GitHub, fiche header, tri collection), tag `v0.9.3`.
+lien GitHub, fiche header, tri collection), tag `v0.9.2`.

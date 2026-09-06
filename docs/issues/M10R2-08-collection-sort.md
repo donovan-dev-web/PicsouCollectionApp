@@ -28,10 +28,10 @@ La page `src/app/(tabs)/collection/index.tsx` a déjà des filtres (numéro,
 
 # Critères de fin (DoD)
 
-- [ ] Tri numéro croissant/décroissant fonctionnel (filtres combinés OK)
-- [ ] Tri visible/accessible (≥ 44px, label a11y)
-- [ ] Pagination repart de la page 1 au changement de tri
-- [ ] `lint` + `typecheck` verts, tests (tri, combinaison filtres+tri)
+- [x] Tri numéro croissant/décroissant fonctionnel (filtres combinés OK)
+- [x] Tri visible/accessible (≥ 44px, label a11y)
+- [x] Pagination repart de la page 1 au changement de tri
+- [x] `lint` + `typecheck` verts, tests (tri, combinaison filtres+tri)
 
 # Tests
 

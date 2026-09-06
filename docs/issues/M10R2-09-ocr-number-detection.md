@@ -61,11 +61,11 @@ les faux positifs. Par ailleurs, la reconnaissance échoue sur certains textes
 
 # Critères de fin (DoD)
 
-- [ ] Année, nombre de pages, prix ne sont **jamais** retenus comme numéro
-- [ ] « N° 547 » (couverture lue) retenu correctement sur 10v10 tests parser
-- [ ] Textes stylisés du test physique : taux de lecture significativement
+- [x] Année, nombre de pages, prix ne sont **jamais** retenus comme numéro
+- [x] « N° 547 » (couverture lue) retenu correctement sur 10v10 tests parser
+- [x] Textes stylisés du test physique : taux de lecture significativement
       amélioré (ou repli documenté et mesuré)
-- [ ] Aucune régression : tests OCR existants passent + nouveaux cas
+- [x] Aucune régression : tests OCR existants passent + nouveaux cas
       (année/page/prix/N°), `lint` + `typecheck` OK
 
 # Tests

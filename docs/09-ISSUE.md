@@ -209,7 +209,7 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-08` | Optimisation & qualité | Performance, tests, couverture |
 | `M-10` | Refonte UI/UX « Vault Lisible » | SafeZone, contraste AA, TabBar icônes, parcours <3s → v0.9.0 |
 | `M-10R` | Retours test physique (M-10) | Import CSV, drawer + tabs, form clavier, torche/FAB/safezone → v0.9.1 |
-| `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection → v0.9.3 |
+| `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection, OCR numéro, écran Recherche → v0.9.2 (livrée, PR #176) |
 | `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 |
 
 ### Règle d'attribution

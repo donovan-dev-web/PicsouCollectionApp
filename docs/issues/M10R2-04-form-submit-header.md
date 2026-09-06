@@ -27,10 +27,10 @@ en pied de formulaire est conservé (accessibilité / découverte).
 
 # Critères de fin (DoD)
 
-- [ ] Enregistrer déclenchable en 1 tap depuis le header (top) sur ajout + edit
-- [ ] État désactivé → hint conservé ; spinner pendant le submit
-- [ ] Bouton bas plein largeur toujours présent
-- [ ] `lint` + `typecheck` verts, tests (submit via header, disabled)
+- [x] Enregistrer déclenchable en 1 tap depuis le header (top) sur ajout + edit
+- [x] État désactivé → hint conservé ; spinner pendant le submit
+- [x] Bouton bas plein largeur toujours présent
+- [x] `lint` + `typecheck` verts, tests (submit via header, disabled)
 
 # Tests
 

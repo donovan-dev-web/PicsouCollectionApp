@@ -54,7 +54,7 @@ Phase 7  ███████████████████████�
 Phase 8  ██████████████████████████████  Terminé ✓ (v0.8.0)
 Phase 10 ██████████████████████████████  Terminé ✓ (v0.9.0, PR #152)
 Phase 10R ██████████████████████████████  Terminé ✓ (v0.9.1)
-Phase 10R2 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-10R2 → v0.9.3)
+Phase 10R2 ██████████████████████████████  Terminé ✓ (v0.9.2)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
 ```
 
@@ -372,32 +372,34 @@ preview.
 
 ---
 
-## 16. Phase 10R2 — 2ᵉ passe retours test physique (M-10R2 → v0.9.3)
+## 16. Phase 10R2 — 2ᵉ passe retours test physique (M-10R2 → v0.9.2)
 
-**Objectif** : intégrer les **8 retours du test physique sur le build v0.9.2**
+**Objectif** : intégrer les **10 retours** du test physique sur le build v0.9.2
 — SafeZone du drawer, permission caméra au 1er lancement + écran partagé,
 popup « Couverture reconnue », formulaire Valider dans le header, onboarding
 premier lancement, paramètres en sous-menus + retour GitHub, header fiche
-magazine, tri de la collection.
+magazine, tri de la collection, OCR numéro affiné, écran Recherche.
 
 | Tâche | Story / Issue | Statut |
 |---|---|---|
-| Drawer latéral : SafeZone (encoche + gesture bar) | US-UX-13 / M10R2-01 | À faire |
-| Permission caméra 1er lancement + écran partagé SafeZone | US-UX-14 / M10R2-02 | À faire |
-| Popup « Couverture reconnue » : espacement boutons | US-UX-15 / M10R2-03 | À faire |
-| Formulaire : icône Valider dans le header (pas de scroll) | US-UX-16 / M10R2-04 | À faire |
-| Premier lancement : écran de présentation + permission | US-UX-17 / M10R2-05 | À faire |
-| Paramètres : sous-menus + lien Discussions GitHub | US-UX-18 / M10R2-06 | À faire |
-| Fiche magazine : header menu/titre/scan | US-UX-19 / M10R2-07 | À faire |
-| Collection : tri numéros croissant/décroissant | US-UX-20 / M10R2-08 | À faire |
-| OCR : numéro affiné (préfixe « N° ») + textes stylisés | US-UX-21 / M10R2-09 | À faire |
-| Saisie manuelle flux identification → écran Recherche | US-UX-22 / M10R2-10 | À faire |
+| Drawer latéral : SafeZone (encoche + gesture bar) | US-UX-13 / M10R2-01 | Done |
+| Permission caméra 1er lancement + écran partagé SafeZone | US-UX-14 / M10R2-02 | Done |
+| Popup « Couverture reconnue » : espacement boutons | US-UX-15 / M10R2-03 | Done |
+| Formulaire : icône Valider dans le header (pas de scroll) | US-UX-16 / M10R2-04 | Done |
+| Premier lancement : écran de présentation + permission | US-UX-17 / M10R2-05 | Done |
+| Paramètres : sous-menus + lien Discussions GitHub | US-UX-18 / M10R2-06 | Done |
+| Fiche magazine : header menu/titre/scan | US-UX-19 / M10R2-07 | Done |
+| Collection : tri numéros croissant/décroissant | US-UX-20 / M10R2-08 | Done |
+| OCR : numéro affiné (préfixe « N° ») + textes stylisés | US-UX-21 / M10R2-09 | Done |
+| Saisie manuelle flux identification → écran Recherche | US-UX-22 / M10R2-10 | Done |
 
 **Livrables** : 10 issues M10R2-01..10, `docs/issues/M10R2-*.md`,
 `scripts/m10r2-*.sh`. Détail :
 [docs/issues/M10R2-MILESTONE.md](issues/M10R2-MILESTONE.md).
 
-**Statut : À venir** — test physique de validation v0.9.3.
+**Statut : Done (v0.9.2)** — issues #166-#175 fermées, **PR #176** mergée sur
+`develop` (CI Quality verte, 337 tests). Le build de validation / tag sont à
+poser au moment de la publication (phase M-09).
 
 ---
 

@@ -36,7 +36,7 @@ sous la barre de statut.
 - [x] Plus de duplication loading/denied entre les écrans
 - [x] Refus définitif → « Ouvrir les réglages » (1 tap, `Linking.openSettings()`)
 - [x] `lint` + `typecheck` verts, tests (permission ask/denied à jour + composant partagé)
-- [ ] Permission proposée au premier lancement (via onboarding M10R2-05)
+- [x] Permission proposée au premier lancement (via onboarding M10R2-05, #170)
 
 # Tests
 

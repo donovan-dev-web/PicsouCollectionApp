@@ -28,10 +28,10 @@ toujours visibles, à 1 main.
 
 # Critères de fin (DoD)
 
-- [ ] Titre + premier item du drawer visibles sous l'encoche (téléphone notched)
-- [ ] Dernier item (Paramètres) accessible au-dessus de la gesture bar
-- [ ] Pas de régression du rendu sans encoche
-- [ ] `lint` + `typecheck` verts, tests drawer (insets + testID)
+- [x] Titre + premier item du drawer visibles sous l'encoche (téléphone notched)
+- [x] Dernier item (Paramètres) accessible au-dessus de la gesture bar
+- [x] Pas de régression du rendu sans encoche
+- [x] `lint` + `typecheck` verts, tests drawer (insets + testID)
 
 # Tests
 

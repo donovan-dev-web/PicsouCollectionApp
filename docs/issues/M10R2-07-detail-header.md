@@ -25,10 +25,10 @@ Navigation peu fluide depuis une fiche.
 
 # Critères de fin (DoD)
 
-- [ ] Header fiche : burger → drawer, titre, scan → `/scan`
-- [ ] Fermeture du modal explicite (back visible)
-- [ ] Pas de régression des écrans tabs (AppHeader réutilisé)
-- [ ] `lint` + `typecheck` verts, tests (rendu header fiche)
+- [x] Header fiche : burger → drawer, titre, scan → `/scan`
+- [x] Fermeture du modal explicite (back visible)
+- [x] Pas de régression des écrans tabs (AppHeader réutilisé)
+- [x] `lint` + `typecheck` verts, tests (rendu header fiche)
 
 # Tests
 
