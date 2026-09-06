@@ -56,4 +56,6 @@ US-UX-11 (OCR réel) → M10R-08/09 · US-UX-12 (scan permanent) → M10R-10/11.
 ## Critères de sortie (cf. 11-ROADMAP §critères)
 
 Toutes issues Done, CI verte, test physique de validation (import CSV réel,
-drawer, formulaire au clavier, torche, header/scan, gesture bar), tag `v0.9.1`.
+drawer, formulaire au clavier, torche, header/scan, gesture bar), tags
+`v0.9.1` (crash fix + M10R) puis **`v0.9.2`** (reprise M-10R : drawer conforme
+#156/#157, lien scan header, revue de code — persistance état).

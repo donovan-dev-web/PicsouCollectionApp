@@ -13,23 +13,52 @@
 
 ---
 
+## [0.9.2] — 2026-09-06
+
+> Douzième release : **reprise M-10R** — drawer conforme aux issues #156/#157,
+> accès scan discret depuis le header (retire le FAB lourd), corrections de la
+> revue de code (persistance d'état).
+
+### Added
+- `AppHeader` commun sur les écrans tabs : burger (menu) à gauche, titre centré, **lien scan discret à droite** (icône `crop`) — accès scan en 1 tap sans CTA lourd (M10R-10, #162)
+- `DrawerProvider` context pour contrôle drawer depuis n'importe quel écran (`useDrawer()`)
+- Pré-filtre collection par édition : `/collection?edition=X` lu via `useLocalSearchParams` (CollectionScreen adaptée, M10R-05, #157)
+- Tests drawer (`drawer-content.test.tsx` : liens directs, sous-catégories, persistance d'état) + tests header (`app-header.test.tsx`)
+
+### Changed
+- **Drawer restructuré** conforme M10R-04/05 (#156/#157) : liens directs (Accueil / Scan sous-catégories / Collection / Paramètres), section « Par édition » repliable et dynamique (bouton « Toute la collection », repliée par défaut si > 5 éditions, `null` → « Sans édition »)
+- **Header** : remplace le headerRow local de l'Accueil par `AppHeader` commun (burger + title + scan) sur Accueil/Collection/Paramètres
+- `ColorScheme`/pagination du drawer : état plié/déplié conservé en session
+
+### Fixed
+- **Persistance « Par édition »** : le `Modal` reste toujours monté (`visible` piloté par le context), plus de `return null` qui démontait l'état du Collapsible à chaque fermeture — Collapsible désormais contrôlé (`expanded` + `onToggle`) (revue de code v0.9.1)
+- **Navigation drawer** : navigation déclenchée au callback de fin d'animation (guard `finished`) au lieu d'un `setTimeout` aventureux
+- **Clear filters** : `clearFilters` purge aussi le param `?edition=` de l'URL (filtres et params désynchronisés)
+
+### Removed
+- `ScanFAB` 56px bas-droit (Accueil/Collection/Fiche/Paramètres) — remplacé par le lien scan discret du header (M10R-10)
+
+### Validation
+- 290/290 tests verts (35 suites), tsc OK, lint 0 error, prettier OK, expo export OK
+
+---
+
 ## [0.9.1] — 2026-09-05
 
 > Onzième release : **retours test physique (M-10R)** — correctifs UI/UX post-test terrain
-> du build preview M-10 : import CSV, CTA brocante, navigation drawer, accès scan header,
-> torche caméra, guidance OCR, safezone gestuelle.
+> du build preview M-10 : import CSV, CTA brocante, navigation drawer, accès scan, torche
+> caméra, guidance OCR, safezone gestuelle.
 
 ### Added
-- Drawer latéral custom (`Animated` + `PanResponder` + `Modal`) avec liens directs (Accueil / Scan sous-catégories / Collection / Paramètres) + section « Par édition » repliable et dynamique (bouton « Toute la collection » en tête, repliée par défaut si > 5, `null` → « Sans édition ») (M10R-04/05, #156/#157)
+- Drawer latéral custom (`Animated` + `PanResponder` + `Modal`) — `@react-navigation/drawer` incompatible avec expo-router SDK 57 (crash startup) (M10R-04, #156)
 - `DrawerProvider` context pour contrôle drawer depuis n'importe quel écran (`useDrawer()`)
-- `AppHeader` commun sur les écrans tabs : burger (menu) à gauche, titre centré, **lien scan discret à droite** (icône `crop`) — accès scan en 1 tap sans CTA lourd (M10R-10, #162)
-- Pré-filtre collection par édition : `/collection?edition=X` lu via `useLocalSearchParams` (CollectionScreen adaptée, M10R-05, #157)
+- ScanFAB global 56px (Accueil/Collection/Fiche/Paramètres) — 1 tap pour scanner (M10R-10, #162)
 - Torche caméra toggle sur écrans OCR et code-barres (`enableTorch`) (M10R-08, #160)
 - Guidance OCR « texte stylisé » : card persistant après 3 cycles weak avec raccourcis code-barres/manuel (M10R-09, #161)
 
 ### Changed
 - **Accueil** : CTA Scanner/Ajouter déplacé au-dessus des récents (visible sans scroll, M10R-02, #154)
-- **Header** : remplace le headerRow local de l'Accueil par `AppHeader` commun (burger + title + scan) sur Accueil/Collection/Paramètres
+- **Tabs** : onglet Scan retiré, remplacé par le drawer latéral (M10R-03, #155)
 - **Formulaire** : `KeyboardAvoidingView` + spacer 200px pour Notes visible au-dessus du clavier (M10R-07, #159)
 - **SelectField** : `FlatList` remplacée par `ScrollView` + `.map()` (fix scroll Android, M10R-06, #158)
 
@@ -40,10 +69,9 @@
 
 ### Removed
 - `@react-navigation/drawer` (incompatible expo-router SDK 57, crash au démarrage)
-- `ScanFAB` 56px bas-droit (Accueil/Collection/Fiche/Paramètres) — remplacé par le lien scan discret du header (M10R-10)
 
 ### Validation
-- 285/290 tests verts (34 suites), tsc OK, lint 0 error, prettier OK, expo-doctor 21/21
+- 285/285 tests verts (34 suites), tsc OK, lint 0 error, prettier OK, expo-doctor 21/21
 
 ---
 

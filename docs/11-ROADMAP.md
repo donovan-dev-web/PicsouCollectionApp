@@ -362,7 +362,10 @@ clavier, OCR en conditions réelles, FAB scan, safezone OCR.
 **Livrables** : 11 issues M10R-01..11, `docs/issues/M10R-*.md`.
 Détail : [docs/issues/M10R-MILESTONE.md](issues/M10R-MILESTONE.md).
 
-**Statut : Done (v0.9.1)** — issues #153-#163 fermées, tag `v0.9.1`, build EAS preview.
+**Statut : Done (v0.9.1 + v0.9.2)** — issues #153-#163 fermées. Tag `v0.9.1`
+crash fix + M10R initial, tag `v0.9.2` reprise M-10R (drawer conforme
+#156/#157, lien scan header au lieu du FAB, persistance d'état), builds EAS
+preview.
 
 ---
 
