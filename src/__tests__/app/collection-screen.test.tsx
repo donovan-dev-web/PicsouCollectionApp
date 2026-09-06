@@ -163,6 +163,33 @@ describe('CollectionScreen', () => {
     expect(screen.getAllByText(/Absent/).length).toBe(1);
     expect(screen.getAllByText(/Possédé/).length).toBeGreaterThanOrEqual(2);
   });
+
+  it('trie par numero decroissant', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
+
+    const data = screen.getByTestId('collection-list').props.data;
+    expect(data.map((m: MagazineListItem) => m.publication)).toEqual([
+      'Picsou Magazine',
+      'Mickey Parade',
+      'Super Picsou Géant',
+    ]);
+  });
+
+  it('combine tri decroissant et filtre edition', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.press(screen.getByTestId('filter-edition'));
+    fireEvent.press(screen.getByTestId('filter-edition-option-collection'));
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
+
+    const data = screen.getByTestId('collection-list').props.data;
+    expect(data).toHaveLength(1);
+    expect(data[0].publication).toBe('Mickey Parade');
+  });
 });
 
 describe('CollectionScreen (pagination)', () => {
@@ -245,5 +272,17 @@ describe('CollectionScreen (pagination)', () => {
     fireEvent.press(screen.getByTestId('filter-clear'));
 
     expect(screen.getByTestId('pagination-page-1')).toBeTruthy();
+  });
+
+  it('revient a la page 1 au changement de tri', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.press(screen.getByTestId('pagination-page-3'));
+    expect(screen.getByTestId('pagination-page-3').props.accessibilityState?.selected).toBe(true);
+
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Ajout récent'));
+
+    expect(screen.getByTestId('pagination-page-1').props.accessibilityState?.selected).toBe(true);
   });
 });
