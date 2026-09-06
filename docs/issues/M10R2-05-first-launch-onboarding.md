@@ -31,10 +31,10 @@ onboarding) :
 
 # Critères de fin (DoD)
 
-- [ ] 1er lancement → présentation → permission caméra (si demandée) → accueil
-- [ ] Lancements suivants → accueil directement (flag persistant en base)
-- [ ] Bouton « Commencer » + permission caméra SafeZone (M10R2-02)
-- [ ] `lint` + `typecheck` verts, tests (onboarding flag, flow, skip)
+- [x] 1er lancement → présentation → permission caméra (si demandée) → accueil
+- [x] Lancements suivants → accueil directement (flag persistant en base, table `settings`)
+- [x] Bouton « Commencer » + permission caméra SafeZone (M10R2-02)
+- [x] `lint` + `typecheck` verts, tests (onboarding flag, flow, skip)
 
 # Tests
 

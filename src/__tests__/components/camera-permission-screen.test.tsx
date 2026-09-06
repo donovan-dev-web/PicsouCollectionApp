@@ -42,7 +42,7 @@ describe('CameraPermissionScreen', () => {
   });
 
   it('ouvre les réglages quand la permission est définitivement refusée', () => {
-    const spy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(true);
+    const spy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined);
     render(
       <CameraPermissionScreen
         loading={false}
