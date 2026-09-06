@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initialize } from '@/dependencies';
@@ -12,24 +12,24 @@ import { DrawerProvider, useDrawer } from '@/lib/drawer-context';
 
 function RootLayoutInner() {
   const scheme = useEffectiveColorScheme();
-  const { open, close } = useDrawer();
-  const [drawerVisible, setDrawerVisible] = useState(false);
+  const { visible, close } = useDrawer();
   const loadSummary = useCollectionStore((s) => s.loadSummary);
   const loadColorScheme = useSettingsStore((s) => s.loadColorScheme);
   const magazines = useCollectionStore((s) => s.magazines);
 
-  const editions = [
-    ...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e)),
-  ].sort();
+  const editions = useMemo(
+    () =>
+      [
+        ...new Set(magazines.map((m) => (m.edition?.trim() ? m.edition.trim() : 'Sans édition'))),
+      ].sort((a, b) => (a === 'Sans édition' ? 1 : b === 'Sans édition' ? -1 : a.localeCompare(b))),
+    [magazines],
+  );
 
   useEffect(() => {
     initialize().then(async () => {
       await Promise.all([loadColorScheme(), loadSummary()]);
     });
   }, [loadColorScheme, loadSummary]);
-
-  const handleOpen = () => setDrawerVisible(true);
-  const handleClose = () => setDrawerVisible(false);
 
   return (
     <SafeAreaProvider>
@@ -52,7 +52,7 @@ function RootLayoutInner() {
             options={{ presentation: 'modal', title: 'Modifier' }}
           />
         </Stack>
-        <DrawerMenu visible={drawerVisible} onClose={handleClose} editions={editions} />
+        <DrawerMenu visible={visible} onClose={close} editions={editions} />
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       </ThemeProvider>
     </SafeAreaProvider>

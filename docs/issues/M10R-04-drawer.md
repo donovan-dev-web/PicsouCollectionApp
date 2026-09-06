@@ -13,19 +13,32 @@ Collection | Paramètres.
 
 État actuel : zéro `Drawer` dans `src/` (grep Ø), pas de dépendance drawer.
 
+> **Contrainte runtime (appliquée)** : `@react-navigation/drawer` est
+> **incompatible avec expo-router SDK 57** (crash au démarrage). Le drawer est
+> donc un composant **custom** `DrawerMenu` (Animated + PanResponder + Modal),
+> piloté par un `DrawerProvider` context (`useDrawer()`).
+
+> **Persistance de session** : le `Modal` reste **toujours monté**
+> (`visible={visible}`, sans `return null`), ce qui préserve l'état plié/déplié
+> « Par édition » entre deux ouvertures (revue de code v0.9.1). La section est
+> pilotée par l'état parent `editionsExpanded` (Collapsible contrôlé :
+> `expanded` + `onToggle`).
+
 # Tâche
 
-- Installer `@react-navigation/drawer` (+ `react-native-gesture-handler` déjà présent,
-  vérifier `react-native-reanimated` — déjà en dépendances) via `npx expo install` ;
-  utiliser `Drawer` d'`expo-router/drawer` dans la hiérarchie navigation ;
+- `src/components/drawer-content.tsx` : panneau latéral animated custom
+  (Modal transparent + Animated.spring + PanResponder glisser-ouvrir depuis le
+  bord gauche) — zéro dépendance nav ;
 - Contenu : Accueil `/`, Scan `/scan` + 3 sous-liens (`/scan/camera` OCR,
-  `/scan/barcode`, `/scan/manual`), Collection `/(tabs)/collection`, Paramètres ;
-- Header minimal avec burger (Feather `menu`, 44px) sur écrans tabs ; thème
-  Vault (fond `background`, actif `navActive`, icônes Feather 22px) ;
+  `/scan/barcode`, `/scan/manual`), Collection `/(tabs)/collection` (via
+  « Toute la collection »), Paramètres ;
+- Header commun `src/components/app-header.tsx` avec burger (Feather `menu`,
+  44px) sur écrans tabs ; thème Vault (fond `background`, icônes Feather
+  20-22px) ;
 - Drawer + tabs cohabitent : drawer = accès direct, tabs = geste premier.
 
 # Critères de fin (DoD)
 
-- [ ] Drawer ouvrable (burger + geste) depuis Accueil/Collection/Scan, items ≥ 44px
-- [ ] Sous-catégories Scan naviguent direct (OCR / code-barres / manuel)
-- [ ] `expo-doctor` 21/21 (nouvelles déps natives), `lint` + `typecheck` verts, tests nav
+- [x] Drawer ouvrable (burger header + geste bord gauche) depuis écrans tabs, items ≥ 44px
+- [x] Sous-catégories Scan naviguent direct (OCR / code-barres / manuel)
+- [x] `lint` + `typecheck` verts, tests nav

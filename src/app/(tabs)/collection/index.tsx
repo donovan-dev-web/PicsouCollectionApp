@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -11,12 +11,12 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
+import { AppHeader } from '@/components/app-header';
 import { EmptyState } from '@/components/empty-state';
 import { LoadingView } from '@/components/loading-view';
 import { MagazineCard } from '@/components/magazine-card';
 import { SelectField } from '@/components/select-field';
 import { Screen } from '@/components/screen';
-import { ScanFAB } from '@/components/scan-fab';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
@@ -33,12 +33,23 @@ export default function CollectionScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
+  const params = useLocalSearchParams<{ edition?: string }>();
   const magazines = useCollectionStore((s) => s.magazines);
   const loading = useCollectionStore((s) => s.loading);
   const load = useCollectionStore((s) => s.load);
   const [issueQuery, setIssueQuery] = useState('');
   const [editionFilter, setEditionFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [lastParamEdition, setLastParamEdition] = useState<string | undefined>(undefined);
+
+  const paramEdition = typeof params.edition === 'string' ? params.edition : undefined;
+  if (paramEdition !== lastParamEdition) {
+    setLastParamEdition(paramEdition);
+    if (paramEdition) {
+      setEditionFilter(paramEdition);
+      setPage(1);
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -47,15 +58,21 @@ export default function CollectionScreen() {
   );
 
   const editions = useMemo(
-    () => [...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e))].sort(),
+    () =>
+      [
+        ...new Set(magazines.map((m) => (m.edition?.trim() ? m.edition.trim() : 'Sans édition'))),
+      ].sort((a, b) => (a === 'Sans édition' ? 1 : b === 'Sans édition' ? -1 : a.localeCompare(b))),
     [magazines],
   );
 
   const filtered = useMemo(() => {
     const issue = issueQuery.trim();
     return magazines.filter((m) => {
-      if (editionFilter && m.edition !== editionFilter) {
-        return false;
+      if (editionFilter) {
+        const edition = m.edition?.trim() ? m.edition.trim() : 'Sans édition';
+        if (edition !== editionFilter) {
+          return false;
+        }
       }
       if (issue) {
         const parsed = Number(issue);
@@ -93,14 +110,13 @@ export default function CollectionScreen() {
     setIssueQuery('');
     setEditionFilter(null);
     setPage(1);
+    router.setParams({ edition: undefined });
   };
 
   return (
     <Screen noBottom>
+      <AppHeader title="Ma Collection" />
       <View style={styles.screen}>
-        <ScanFAB testID="collection-scan-fab" />
-        <Text style={styles.title}>Ma Collection</Text>
-
         <View style={styles.filters}>
           <Text style={styles.filterLabel}>Numéro</Text>
           <TextInput
@@ -235,11 +251,6 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: colors.background,
       padding: Spacing.four,
       gap: Spacing.three,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: colors.text,
     },
     filters: {
       gap: Spacing.two,
