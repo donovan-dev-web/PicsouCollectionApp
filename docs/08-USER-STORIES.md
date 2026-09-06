@@ -571,6 +571,77 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : haute. → M-10R / M10R-10/11 (retours n°6/7).
 
+### US-UX-13 — Drawer SafeZone
+> En tant que **Marc avec un téléphone à encoche**, je veux **un menu latéral qui respecte la barre de statut** afin de **lire le titre et le premier lien sans que rien soit masqué**.
+
+**Critères d'acceptation** :
+- *Given* téléphone à encoche + gesture bar, *When* j'ouvre le drawer, *Then* titre/items visibles (insets top) et dernier item au-dessus de la gesture bar.
+
+**Priorité** : haute. → M-10R2 / M10R2-01 (retour n°1).
+
+### US-UX-14 — Permission caméra expliquée et SafeZone
+> En tant que **Marc**, je veux **qu'on me demande la caméra au démarrage avec un écran propre** afin de **ne pas être bloqué au moment de scanner**.
+
+**Critères d'acceptation** :
+- *Given* le premier lancement, *When* je complète l'onboarding, *Then* la permission caméra est demandée avant l'accueil ;
+- *Given* un écran caméra (OCR/code-barres/formulaire), *When* la permission manque, *Then* écran dédié SafeZone avec « Autoriser la caméra » / « Ouvrir les réglages ».
+
+**Priorité** : haute. → M-10R2 / M10R2-02 (retour n°2).
+
+### US-UX-15 — Popup « Couverture reconnue » lisible
+> En tant que **Marc**, je veux **des boutons bien espacés quand la couverture est reconnue** afin de **confirmer ou réessayer sans erreur de tap**.
+
+**Critères d'acceptation** :
+- *Given* OCR couverture reconnue, *When* le popup s'affiche, *Then* actions espacées (≥ 16px), scrollable si besoin, SafeZone respectée ;
+- *Given* petit écran, *When* le contenu est long, *Then* le card reste utilisable.
+
+**Priorité** : haute. → M-10R2 / M10R2-03 (retour n°3).
+
+### US-UX-16 — Formulaire : valider sans scroller
+> En tant que **Marc**, je veux **enregistrer un magazine depuis le haut de l'écran** afin de **terminer la saisie sans scroller jusqu'en bas**.
+
+**Critères d'acceptation** :
+- *Given* le formulaire d'ajout/édition, *When* je suis en haut de l'écran, *Then* une icône `Valider` est dans le header ;
+- *Given* publication vide, *When* je regarde le bouton, *Then* il est désactivé avec la raison affichée.
+
+**Priorité** : haute. → M-10R2 / M10R2-04 (retour n°4).
+
+### US-UX-17 — Premier lancement guidé
+> En tant que **nouvel utilisateur**, je veux **une présentation courte de l'app au premier lancement** afin de **comprendre les fonctionnalités et commencer sereinement**.
+
+**Critères d'acceptation** :
+- *Given* 1er lancement, *When* j'ouvre l'app, *Then* écran(s) de présentation (fonctionnalités / utilisation) avec bouton « Commencer » ;
+- *Then* demande de permission caméra (M10R2-02) si applicable → accueil ;
+- *Given* lancement suivant, *When* j'ouvre l'app, *Then* accueil direct (flag persisté).
+
+**Priorité** : haute. → M-10R2 / M10R2-05 (retour n°5).
+
+### US-UX-18 — Paramètres organisés + retour utilisateur
+> En tant que **Marc**, je veux **des paramètres clairs par catégorie et un moyen de signaler un problème ou une idée** afin de **configurer l'app et faire remonter des retours**.
+
+**Critères d'acceptation** :
+- *Given* l'écran Paramètres, *When* je le consulte, *Then* sous-menus (Apparence, Sauvegarde, Accessibilité, Aide & retours) ;
+- *Given* « Signaler un bug / idée / suggestion », *When* je tape, *Then* les Discussions GitHub s'ouvrent dans le navigateur.
+
+**Priorité** : moyenne. → M-10R2 / M10R2-06 (retour n°6).
+
+### US-UX-19 — Fiche magazine : header navigation + scan
+> En tant que **Marc**, je veux **naviguer depuis une fiche sans revenir à la liste** afin de **consulter une fiche puis scanner sans étapes superflues**.
+
+**Critères d'acceptation** :
+- *Given* une fiche magazine, *When* je regarde le haut, *Then* header burger/titre/scan + retour explicite du modal.
+
+**Priorité** : haute. → M-10R2 / M10R2-07 (retour n°7).
+
+### US-UX-20 — Trier la collection
+> En tant que **Marc**, je veux **trier ma collection (numéros croissant/décroissant, etc.)** afin de **retrouver vite une série chez moi ou en brocante**.
+
+**Critères d'acceptation** :
+- *Given* la page Collection, *When* je choisis un tri, *Then* la liste change d'ordre (numéro ↑/↓…) en combinant les filtres ;
+- *Given* filtres actifs, *When* je change le tri, *Then* la pagination repart de la page 1.
+
+**Priorité** : moyenne. → M-10R2 / M10R2-08 (retour n°8).
+
 ---
 
 ## 11. Représentation graphique
@@ -606,4 +677,5 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Qualité & publication | US-QA-01 à 03 | 3 |
 | UI/UX M-10 | US-UX-01 à 06 | 6 |
 | UI/UX M-10R (retours terrain) | US-UX-07 à 12 | 6 |
-| **Total** | | **50** |
+| UI/UX M-10R2 (2ᵉ passe retours) | US-UX-13 à 20 | 8 |
+| **Total** | | **58** |
