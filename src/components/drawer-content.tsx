@@ -249,7 +249,7 @@ export function DrawerMenu({
                   <SubItem
                     icon="edit-3"
                     label="Saisie manuelle"
-                    route="/scan/manual"
+                    route="/scan/search"
                     colors={colors}
                     onPress={navigate}
                   />
