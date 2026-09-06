@@ -32,10 +32,10 @@ section) avec titre + retour, ou une section accordéon repliable si plus léger
 
 # Critères de fin (DoD)
 
-- [ ] Paramètres = sous-menus (Apparence, Sauvegarde, Accessibilité, Aide & retours)
-- [ ] Bug / idée / suggestion → ouvre les Discussions GitHub dans le navigateur
-- [ ] Options d'accessibilité identifiées et implémentées (au moins 1 pertinente)
-- [ ] `lint` + `typecheck` verts, tests (sous-menus, lien GitHub, options)
+- [x] Paramètres = sous-menus (Apparence, Sauvegarde, Accessibilité, Aide & retours)
+- [x] Bug / idée / suggestion → ouvre les Discussions GitHub dans le navigateur
+- [x] Options d'accessibilité identifiées et implémentées (« Réduire les animations »)
+- [x] `lint` + `typecheck` verts, tests (sous-menus, lien GitHub, options)
 
 # Tests
 

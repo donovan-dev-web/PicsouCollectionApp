@@ -79,7 +79,10 @@ function isRejectedContextNumber(normalized: string, candidate: string): boolean
 function findIssueCandidates(raw: string): { num: number; index: number }[] {
   const candidates: { num: number; index: number }[] = [];
   for (const regex of ISSUE_PATTERNS) {
-    const global = new RegExp(regex.source, `${regex.flags.includes('g') ? regex.flags : `${regex.flags}g`}`);
+    const global = new RegExp(
+      regex.source,
+      `${regex.flags.includes('g') ? regex.flags : `${regex.flags}g`}`,
+    );
     for (const m of raw.matchAll(global)) {
       const num = Number(m[1]);
       const index = m.index ?? -1;
@@ -123,7 +126,11 @@ function extractIssueNumber(raw: string): number | null {
     const publication = closestPublication(raw);
     if (publication) {
       const publicationLower = publication.toLowerCase();
-      const positions = [...raw.toLowerCase().matchAll(new RegExp(publicationLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'))].map((m) => m.index ?? -1);
+      const positions = [
+        ...raw
+          .toLowerCase()
+          .matchAll(new RegExp(publicationLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')),
+      ].map((m) => m.index ?? -1);
       if (positions.length > 0) {
         candidates.sort(
           (a, b) =>

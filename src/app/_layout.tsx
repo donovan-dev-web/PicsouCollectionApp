@@ -32,7 +32,12 @@ function RootLayoutInner() {
 
   useEffect(() => {
     initialize().then(async () => {
-      await Promise.all([loadColorScheme(), loadSummary(), loadOnboardingDone(), loadReducedMotion()]);
+      await Promise.all([
+        loadColorScheme(),
+        loadSummary(),
+        loadOnboardingDone(),
+        loadReducedMotion(),
+      ]);
     });
   }, [loadColorScheme, loadSummary, loadOnboardingDone, loadReducedMotion]);
 

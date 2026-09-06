@@ -10,10 +10,26 @@ import { useThemeColors } from '@/hooks/use-theme';
 import { useSettingsStore } from '@/store/use-settings-store';
 
 const FEATURES = [
-  { icon: 'crop' as const, label: 'Scanner le code-barres', detail: 'Identifiez vos magazines en un instant.' },
-  { icon: 'camera' as const, label: 'Reconnaissance par la caméra', detail: 'La couverture est lue automatiquement.' },
-  { icon: 'book-open' as const, label: 'Collection complète', detail: 'Suivez vos éditions et vos doubles.' },
-  { icon: 'download' as const, label: 'Sauvegarde & réglages', detail: 'Exportez et personnalisez l’apparence.' },
+  {
+    icon: 'crop' as const,
+    label: 'Scanner le code-barres',
+    detail: 'Identifiez vos magazines en un instant.',
+  },
+  {
+    icon: 'camera' as const,
+    label: 'Reconnaissance par la caméra',
+    detail: 'La couverture est lue automatiquement.',
+  },
+  {
+    icon: 'book-open' as const,
+    label: 'Collection complète',
+    detail: 'Suivez vos éditions et vos doubles.',
+  },
+  {
+    icon: 'download' as const,
+    label: 'Sauvegarde & réglages',
+    detail: 'Exportez et personnalisez l’apparence.',
+  },
 ];
 
 export default function OnboardingScreen() {

@@ -35,9 +35,10 @@ export default function ScanSearchScreen() {
   const [publication, setPublication] = useState('');
   const [issueNumber, setIssueNumber] = useState(EMPTY_ISSUE);
   const [searching, setSearching] = useState(false);
-  const [result, setResult] = useState<Extract<OcrLookupResult, { status: 'found' | 'unknown' }> | null>(
-    null,
-  );
+  const [result, setResult] = useState<Extract<
+    OcrLookupResult,
+    { status: 'found' | 'unknown' }
+  > | null>(null);
 
   const publications = [...new Set(magazines.map((m) => m.publication))];
 
@@ -118,9 +119,7 @@ export default function ScanSearchScreen() {
     router.replace({
       pathname: '/scan/manual',
       params:
-        publication.trim() || issue
-          ? { publication: publication.trim(), issueNumber: issue }
-          : {},
+        publication.trim() || issue ? { publication: publication.trim(), issueNumber: issue } : {},
     });
   };
 
@@ -192,7 +191,9 @@ export default function ScanSearchScreen() {
               <Text style={styles.magazine} testID="search-magazine">
                 {result.publication}
               </Text>
-              {result.issueNumber != null ? <Text style={styles.issue}>N° {result.issueNumber}</Text> : null}
+              {result.issueNumber != null ? (
+                <Text style={styles.issue}>N° {result.issueNumber}</Text>
+              ) : null}
               {resolved ? (
                 <Text
                   style={owned ? styles.ownedText : styles.absentText}
@@ -242,7 +243,9 @@ export default function ScanSearchScreen() {
               <Text style={styles.message}>
                 « {result.publication} » n&apos;est pas encore dans votre collection.
               </Text>
-              {result.issueNumber != null ? <Text style={styles.issue}>N° {result.issueNumber}</Text> : null}
+              {result.issueNumber != null ? (
+                <Text style={styles.issue}>N° {result.issueNumber}</Text>
+              ) : null}
             </View>
 
             <Pressable

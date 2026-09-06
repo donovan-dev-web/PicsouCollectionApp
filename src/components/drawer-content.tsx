@@ -203,17 +203,17 @@ export function DrawerMenu({
     <Modal transparent visible={visible} onShow={open} onRequestClose={close} animationType="none">
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Fermer le menu" />
-<Animated.View
-            style={[styles.drawerPanel, { transform: [{ translateX }] }]}
-            testID="drawer-panel"
-            {...panResponder.panHandlers}>
-            <View style={[styles.drawer, { paddingBottom: insets.bottom }]}>
-              <View
-                style={[styles.drawerHeader, { paddingTop: insets.top + 16 }]}
-                testID="drawer-header">
-                <Feather name="book-open" size={24} color={colors.accent} />
-                <Text style={styles.drawerTitle}>Picsou Collection</Text>
-              </View>
+        <Animated.View
+          style={[styles.drawerPanel, { transform: [{ translateX }] }]}
+          testID="drawer-panel"
+          {...panResponder.panHandlers}>
+          <View style={[styles.drawer, { paddingBottom: insets.bottom }]}>
+            <View
+              style={[styles.drawerHeader, { paddingTop: insets.top + 16 }]}
+              testID="drawer-header">
+              <Feather name="book-open" size={24} color={colors.accent} />
+              <Text style={styles.drawerTitle}>Picsou Collection</Text>
+            </View>
 
             <View style={styles.drawerSection}>
               <DrawerItem

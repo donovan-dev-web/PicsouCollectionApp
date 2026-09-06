@@ -91,9 +91,9 @@ describe('AccessibilityScreen', () => {
     fireEvent.press(toggle);
 
     expect(useSettingsStore.getState().reducedMotion).toBe(true);
-    expect(screen.getByTestId('accessibility-reduced-motion').props.accessibilityState?.checked).toBe(
-      true,
-    );
+    expect(
+      screen.getByTestId('accessibility-reduced-motion').props.accessibilityState?.checked,
+    ).toBe(true);
   });
 });
 

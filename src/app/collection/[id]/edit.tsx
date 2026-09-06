@@ -73,7 +73,12 @@ export default function EditMagazineScreen() {
             <Feather name="check" size={24} color={colors.accent} />
           </Pressable>
         </View>
-        <MagazineForm ref={formRef} initial={detail} submitLabel="Enregistrer" onSubmit={handleSubmit} />
+        <MagazineForm
+          ref={formRef}
+          initial={detail}
+          submitLabel="Enregistrer"
+          onSubmit={handleSubmit}
+        />
       </View>
     </Screen>
   );

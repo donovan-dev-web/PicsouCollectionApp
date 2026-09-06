@@ -44,7 +44,9 @@ export default function AccessibilityScreen() {
               Limite les transitions (menu, panneaux) pour un confort de lecture.
             </Text>
           </View>
-          <View style={[styles.switch, reducedMotion && styles.switchActive]} testID="accessibility-switch">
+          <View
+            style={[styles.switch, reducedMotion && styles.switchActive]}
+            testID="accessibility-switch">
             <View style={[styles.switchKnob, reducedMotion && styles.switchKnobActive]} />
           </View>
         </Pressable>
