@@ -32,11 +32,11 @@ sous la barre de statut.
 
 # Critères de fin (DoD)
 
+- [x] Écran de permission SafeZone sur les 3 écrans caméra (encoche + gesture bar)
+- [x] Plus de duplication loading/denied entre les écrans
+- [x] Refus définitif → « Ouvrir les réglages » (1 tap, `Linking.openSettings()`)
+- [x] `lint` + `typecheck` verts, tests (permission ask/denied à jour + composant partagé)
 - [ ] Permission proposée au premier lancement (via onboarding M10R2-05)
-- [ ] Écran de permission SafeZone sur les 3 écrans caméra (encoche + gesture bar)
-- [ ] Plus de duplication loading/denied entre les écrans
-- [ ] Refus définitif → « Ouvrir les réglages » (1 tap)
-- [ ] `lint` + `typecheck` verts, tests (permission ask/denied à jour)
 
 # Tests
 
