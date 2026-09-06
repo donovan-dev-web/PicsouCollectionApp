@@ -18,9 +18,17 @@ import type { CameraView as CameraViewType } from 'expo-camera';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
+import { OcrTextStabilizer } from '@/identification/ocr/ocrTextStabilizer';
 
 /** Intervalle d'analyse OCR : quelques frames / seconde max (pas toutes). */
 const ANALYSIS_INTERVAL_MS = 500;
+
+/**
+ * Lectures OCR identiques requises avant de conclure une identification
+ * (M10R2-09 — vote multi-frames conservateur, une lecture isolée pouvant être
+ * erronée sur des textes stylisés / à encres faibles).
+ */
+const OCR_STABLE_READS = 2;
 
 /**
  * Informations détectées par l'OCR, affichées en surcouche caméra (US-ID-08)
@@ -73,6 +81,7 @@ export default function CameraOcrScreen() {
   const [weakCycles, setWeakCycles] = useState(0);
   const inFlight = useRef(false);
   const cameraRef = useRef<CameraViewType>(null);
+  const ocrStabilizer = useRef(new OcrTextStabilizer(OCR_STABLE_READS));
 
   useEffect(() => {
     if (!permission?.granted) {
@@ -90,7 +99,11 @@ export default function CameraOcrScreen() {
       inFlight.current = true;
       try {
         // Capture éphémère d'une photo (aucune image persistée) → URI.
-        const photo = await cameraRef.current?.takePictureAsync?.();
+        // Haute résolution (M10R2-09) : préserve les petites encres des textes stylisés.
+        const photo = await cameraRef.current?.takePictureAsync?.({
+          quality: 1,
+          skipProcessing: false,
+        });
         const uri = photo?.uri ?? null;
         const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
         if (!frame) {
@@ -123,6 +136,18 @@ export default function CameraOcrScreen() {
           return;
         }
 
+        // Vote multi-frames (M10R2-09) : on ne conclut pas sur une lecture
+        // isolée, une frame suivante identique est requise (textes stylisés).
+        const key = [
+          result.publication ?? '',
+          result.issueNumber != null ? String(result.issueNumber) : '',
+          result.date ?? '',
+        ].join('|');
+        if (!ocrStabilizer.current.push(key)) {
+          return;
+        }
+        ocrStabilizer.current.reset();
+
         if (result.status === 'unknown') {
           setState({
             status: 'unknown',
@@ -151,6 +176,7 @@ export default function CameraOcrScreen() {
   }, [permission?.granted, state.status]);
 
   const stopAndRetry = () => {
+    ocrStabilizer.current.reset();
     setWeakCycles(0);
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
