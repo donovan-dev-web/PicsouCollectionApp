@@ -642,6 +642,29 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : moyenne. → M-10R2 / M10R2-08 (retour n°8).
 
+### US-UX-21 — OCR : numéro d'exemplaire fiable
+> En tant que **Marc**, je veux **que l'OCR ne retienne que le vrai numéro d'exemplaire (précédé de « N° »)** afin de **ne pas lancer une recherche sur une année ou un nombre de pages**, et **que les textes stylisés soient mieux reconnus**.
+
+**Critères d'acceptation** :
+- *Given* une couverture avec année, nb de pages et « N° 547 », *When* l'OCR
+  traite le texte, *Then* `issueNumber = 547` (ni 2024, ni 52) ;
+- *Given* un titre stylisé, *When* je le scanne, *Then* la publication est lue
+  sans atteindre le repli code-barres ;
+- *Then* la recherche reste déclenchée sur **nom + numéro** (US-ID-08).
+
+**Priorité** : haute. → M-10R2 / M10R2-09 (retour n°9).
+
+### US-UX-22 — Recherche manuelle dans le flux identification
+> En tant que **Marc**, je veux **que « Saisir manuellement » (écran de choix / drawer) mène à une recherche** afin de **savoir si je possède déjà un magazine avant d'en ajouter un**.
+
+**Critères d'acceptation** :
+- *Given* l'écran de choix de scan ou le drawer, *When* je choisis « Saisir manuellement », *Then* un **écran de recherche** s'ouvre (publication + numéro) ;
+- *Given* le magazine existe, *When* je recherche, *Then* résultat Possédé/Absent (Voir la fiche / Ajouter exemplaire) ;
+- *Given* le magazine n'existe pas, *When* je recherche, *Then* proposition « Saisir manuellement » menant au **formulaire pré-rempli** ;
+- *Given* l'accueil, *When* je tape « Ajouter », *Then* le formulaire d'ajout reste ouvert (inchangé).
+
+**Priorité** : haute. → M-10R2 / M10R2-10 (retour n°10).
+
 ---
 
 ## 11. Représentation graphique
@@ -677,5 +700,5 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | Qualité & publication | US-QA-01 à 03 | 3 |
 | UI/UX M-10 | US-UX-01 à 06 | 6 |
 | UI/UX M-10R (retours terrain) | US-UX-07 à 12 | 6 |
-| UI/UX M-10R2 (2ᵉ passe retours) | US-UX-13 à 20 | 8 |
-| **Total** | | **58** |
+| UI/UX M-10R2 (2ᵉ passe retours) | US-UX-13 à 22 | 10 |
+| **Total** | | **60** |

@@ -21,6 +21,8 @@
 | 6 | Paramètres : pas de sous-menus, aucun retour GitHub | M10R2-06 (#173) | `enhancement, priority-medium` | L | Paramètres |
 | 7 | Fiche magazine : pas de header menu/scan | M10R2-07 (#166) | `enhancement, priority-high` | S | Nav |
 | 8 | Collection : pas de tri (numéro ↑/↓) | M10R2-08 (#172) | `enhancement, priority-medium` | M | Collection |
+| 9 | OCR : faux numéros (années/pages) + textes stylisés non lus | M10R2-09 (#174) | `bug, priority-high` | M | Identification |
+| 10 | « Saisir manuellement » du flux identification → écran Recherche | M10R2-10 (#175) | `enhancement, priority-high` | M | Identification |
 
 ## Décisions de conception (post-test physique v0.9.2)
 
@@ -57,9 +59,23 @@
   GitHub dans le navigateur, `expo-linking`) + inventaire des options
   pertinentes par catégorie (ex. échelle de texte, animations).
 - **M10R2-07 Fiche** : `collection/[id]/index.tsx` est un modal Stack sans
-  header visible (`headerShown:false` global, `_layout.tsx`). Ajouter le même
+  header visible (`headerShown:false` global, `_layout.tsx:37`). Ajouter le même
   `AppHeader` (burger / titre / scan) que les écrans tabs pour une navigation
   fluide + accès scan depuis la fiche.
+- **M10R2-09 OCR** : le repli `extractIssueNumber` de `ocrTextParser.ts:81-97`
+  accepte tout nombre isolé (hors années) ; or le numéro d'exemplaire est
+  **toujours précédé de « N° »** sur les couvertures. → prioriser strictement les
+  préfixes (`N°`, `No`, `numéro`, `issue`), renforcer les exclusions (dates
+  complètes, « 52 pages », prix). Volet reconnaissance : textes stylisés non
+  lus par `expo-mlkit-ocr` (capture brute dans `mlKitOcrEngine.ts`) → zoom/
+  recadrage, capture haute résolution, vote multi-frames (pattern code-barres).
+- **M10R2-10 Saisie manuelle** : `/scan` (`method-manual` → `/scan/manual`) et
+  drawer (« Saisie manuelle » → `/scan/manual`) se comportent comme un **ajout**
+  alors qu'on est dans le **flux identification**. → nouvel écran de recherche
+  `/scan/search` (champs publication + numéro, réutilise
+  `findByPublicationAndIssue`) ; **trouvé** → résultat (Possédé/Absent) ;
+  **non trouvé** → repli `/scan/manual` pré-rempli (publication/numéro). Le
+  bouton « Ajouter » de l'accueil reste un ajout (inchangé).
 
 ## User Stories associées (voir `docs/08-USER-STORIES.md` §10)
 
@@ -67,7 +83,8 @@ US-UX-13 (SafeZone drawer, M10R2-01) · US-UX-14 (permission caméra, M10R2-02) 
 US-UX-15 (popup résultat, M10R2-03) · US-UX-16 (formulaire valider, M10R2-04) ·
 US-UX-17 (onboarding 1er lancement, M10R2-05) · US-UX-18 (paramètres + retour,
 M10R2-06) · US-UX-19 (header fiche, M10R2-07) · US-UX-20 (tri collection,
-M10R2-08).
+M10R2-08) · US-UX-21 (OCR numéro affiné, M10R2-09) · US-UX-22 (recherche
+manuelle flux identification, M10R2-10).
 
 ## Critères de sortie (cf. 11-ROADMAP §critères)
 

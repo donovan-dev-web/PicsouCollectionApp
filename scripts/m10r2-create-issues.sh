@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Crée les 8 issues M-10R2 via gh. Usage: bash scripts/m10r2-create-issues.sh [--dry-run]
+# Crée les 10 issues M-10R2 via gh. Usage: bash scripts/m10r2-create-issues.sh [--dry-run]
 set -euo pipefail
 DRY_RUN="${1:-}"
 MILESTONE="M-10R2 — 2ᵉ passe retours test physique (v0.9.2)"
@@ -12,6 +12,8 @@ declare -A ISSUES=(
   ["[UX] M10R2-06 Paramètres : refonte en sous-menus (Apparence, Sauvegarde, Accessibilité, Retour)"]="docs/issues/M10R2-06-settings-submenus.md enhancement,priority-medium,size/l,to-do"
   ["[Nav] M10R2-07 Fiche magazine : header menu/titre/scan (app-header)"]="docs/issues/M10R2-07-detail-header.md enhancement,priority-high,epic/collection,size/s,to-do"
   ["[UX] M10R2-08 Collection : bouton Tri (numéros croissant/décroissant)"]="docs/issues/M10R2-08-collection-sort.md enhancement,priority-medium,epic/collection,size/m,to-do"
+  ["[Bug] M10R2-09 OCR : détection du numéro affinée (préfixe « N° ») + reconnaissance texte stylisé"]="docs/issues/M10R2-09-ocr-number-detection.md bug,priority-high,epic/identification,size/m,to-do"
+  ["[Nav] M10R2-10 Saisie manuelle du flux identification → écran Recherche (pas le formulaire d'ajout)"]="docs/issues/M10R2-10-manual-search-flow.md enhancement,priority-high,epic/identification,size/m,to-do"
 )
 for title in "${!ISSUES[@]}"; do
   # shellcheck disable=SC2086

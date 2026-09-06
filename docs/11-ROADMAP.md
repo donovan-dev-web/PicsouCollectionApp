@@ -77,9 +77,9 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 8 — Optimisation | `M-08 — Optimisation & qualité` | `US-QA-02`, #136 | 2 |
 | 10 — Refonte UI/UX | `M-10 — Refonte UI/UX « Vault Lisible »` | `US-UX-01..06` (issues M10-01..12) | 12 |
 | 10R — Retours test M-10 | `M-10R — Retours test physique (v0.9.1)` | `US-UX-07..12` (issues M10R-01..11) | 11 |
-| 10R2 — 2ᵉ passe retours | `M-10R2 — 2ᵉ passe retours test physique (v0.9.2)` | `US-UX-13..20` (issues M10R2-01..08) | 8 |
+| 10R2 — 2ᵉ passe retours | `M-10R2 — 2ᵉ passe retours test physique (v0.9.2)` | `US-UX-13..22` (issues M10R2-01..10) | 10 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **101** |
+| **Total** | | | **103** |
 
 ---
 
@@ -390,8 +390,10 @@ magazine, tri de la collection.
 | Paramètres : sous-menus + lien Discussions GitHub | US-UX-18 / M10R2-06 | À faire |
 | Fiche magazine : header menu/titre/scan | US-UX-19 / M10R2-07 | À faire |
 | Collection : tri numéros croissant/décroissant | US-UX-20 / M10R2-08 | À faire |
+| OCR : numéro affiné (préfixe « N° ») + textes stylisés | US-UX-21 / M10R2-09 | À faire |
+| Saisie manuelle flux identification → écran Recherche | US-UX-22 / M10R2-10 | À faire |
 
-**Livrables** : 8 issues M10R2-01..08, `docs/issues/M10R2-*.md`,
+**Livrables** : 10 issues M10R2-01..10, `docs/issues/M10R2-*.md`,
 `scripts/m10r2-*.sh`. Détail :
 [docs/issues/M10R2-MILESTONE.md](issues/M10R2-MILESTONE.md).
 
@@ -448,6 +450,6 @@ Pour chaque phase, les critères de sortie sont :
 | 8 — Optimisation | Performance | US-QA-02 | 1 |
 | 10 — Refonte UI/UX | Vault Lisible (v0.9.0) | US-UX-01..06 (M10-01..12) | 12 |
 | 10R — Retours test M-10 | Retours v0.9.1 (drawer, tabs, OCR) | US-UX-07..12 (M10R-01..11) | 11 |
-| 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..20 (M10R2-01..08) | 8 |
+| 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..22 (M10R2-01..10) | 10 |
 | 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **69** |
+| **Total** | | | **102** |
