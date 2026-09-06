@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Linking,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -487,7 +488,10 @@ export default function CameraOcrScreen() {
 
       {state.status === 'found' && (
         <View style={styles.overlay}>
-          <View style={styles.resultCard} testID="ocr-found">
+          <ScrollView
+            style={styles.resultCard}
+            contentContainerStyle={styles.resultCardContent}
+            testID="ocr-found">
             <Text style={styles.mutedTitle}>Couverture reconnue</Text>
             <Text style={styles.magazine} testID="ocr-publication">
               {state.publication}
@@ -524,13 +528,16 @@ export default function CameraOcrScreen() {
               accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>Saisie manuelle</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </View>
       )}
 
       {state.status === 'unknown' && (
         <View style={styles.overlay}>
-          <View style={styles.resultCard} testID="ocr-unknown">
+          <ScrollView
+            style={styles.resultCard}
+            contentContainerStyle={styles.resultCardContent}
+            testID="ocr-unknown">
             <Text style={styles.mutedTitle}>Non trouvé en collection</Text>
             <Text style={styles.magazine}>{state.publication}</Text>
             {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
@@ -558,7 +565,7 @@ export default function CameraOcrScreen() {
               accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>Réessayer avec la caméra</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </View>
       )}
     </View>
@@ -661,12 +668,16 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
     resultCard: {
       alignSelf: 'stretch',
       marginHorizontal: Spacing.four,
+      marginTop: insets.top + Spacing.three,
+      marginBottom: insets.bottom + Spacing.three,
       maxHeight: '85%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
       padding: Spacing.four,
+    },
+    resultCardContent: {
       alignItems: 'center',
-      gap: Spacing.two,
+      gap: Spacing.three,
     },
     mutedTitle: {
       fontSize: 14,
