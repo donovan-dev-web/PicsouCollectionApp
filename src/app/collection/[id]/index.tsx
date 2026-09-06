@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
+import { AppHeader } from '@/components/app-header';
 import { ErrorView } from '@/components/error-view';
 import { LoadingView } from '@/components/loading-view';
 import { Screen } from '@/components/screen';
@@ -97,6 +98,20 @@ export default function MagazineDetailScreen() {
 
   return (
     <Screen>
+      <AppHeader
+        title="Fiche magazine"
+        trailing={
+          <Pressable
+            style={({ pressed }) => [styles.headerClose, pressed && styles.pressed]}
+            onPress={goBack}
+            testID="detail-close"
+            accessibilityRole="button"
+            accessibilityLabel="Fermer la fiche"
+            hitSlop={HitTarget.hitSlop}>
+            <Feather name="x" size={24} color={colors.text} />
+          </Pressable>
+        }
+      />
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <Text style={styles.publication}>{detail.publication}</Text>
         <Text style={styles.issue} testID="detail-issue">
@@ -203,6 +218,12 @@ function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
     screen: {
       flex: 1,
+    },
+    headerClose: {
+      width: HitTarget.minHeight,
+      minHeight: HitTarget.minHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     content: {
       padding: Spacing.four,

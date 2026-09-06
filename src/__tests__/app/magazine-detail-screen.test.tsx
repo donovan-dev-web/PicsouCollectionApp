@@ -12,7 +12,7 @@ const mockBack = jest.fn();
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
   useLocalSearchParams: () => ({ id: 'mag-1' }),
-  useRouter: () => ({ push: jest.fn(), back: mockBack }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: mockBack, canGoBack: () => true }),
 }));
 
 const detail = {
@@ -149,5 +149,18 @@ describe('MagazineDetailScreen', () => {
     fireEvent.press(screen.getByTestId('detail-add-copy'));
 
     await waitFor(() => expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1'));
+  });
+
+  it('affiche le header fiche (menu, titre, scan, fermeture) et ferme le modal', () => {
+    useCollectionStore.setState({ detail, detailLoading: false });
+    render(<MagazineDetailScreen />);
+
+    expect(screen.getByText('Fiche magazine')).toBeTruthy();
+    expect(screen.getByTestId('header-menu')).toBeTruthy();
+    expect(screen.getByTestId('header-scan')).toBeTruthy();
+    expect(screen.getByTestId('detail-close')).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId('detail-close'));
+    expect(mockBack).toHaveBeenCalled();
   });
 });
