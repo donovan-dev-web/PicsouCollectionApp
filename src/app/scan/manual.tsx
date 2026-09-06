@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRef } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { MagazineForm } from '@/components/magazine-form';
+import { MagazineForm, type MagazineFormHandle } from '@/components/magazine-form';
 import { Screen } from '@/components/screen';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -21,6 +22,7 @@ export default function ManualEntryScreen() {
   const addMagazine = useCollectionStore((s) => s.addMagazine);
   const colors = useThemeColors();
   const styles = makeStyles(colors);
+  const formRef = useRef<MagazineFormHandle>(null);
 
   const handleSubmit = async (input: CreateMagazineInput) => {
     await addMagazine(input);
@@ -57,8 +59,18 @@ export default function ManualEntryScreen() {
             <Feather name="arrow-left" size={22} color={colors.text} />
           </Pressable>
           <Text style={styles.title}>Ajouter une édition</Text>
+          <Pressable
+            style={({ pressed }) => [styles.submitHeader, pressed && styles.pressed]}
+            onPress={() => formRef.current?.submit()}
+            testID="manual-submit-header"
+            accessibilityRole="button"
+            accessibilityLabel="Valider la saisie"
+            hitSlop={HitTarget.hitSlop}>
+            <Feather name="check" size={24} color={colors.accent} />
+          </Pressable>
         </View>
         <MagazineForm
+          ref={formRef}
           submitLabel="Enregistrer"
           initialBarcode={barcode}
           initialPublication={publication}
@@ -93,10 +105,17 @@ function makeStyles(colors: ThemeColors) {
       opacity: 0.7,
     },
     title: {
+      flex: 1,
       fontSize: 24,
       lineHeight: 32,
       fontWeight: '700',
       color: colors.text,
+    },
+    submitHeader: {
+      minWidth: HitTarget.minHeight,
+      minHeight: HitTarget.minHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }
