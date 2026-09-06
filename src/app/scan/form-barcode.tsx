@@ -1,10 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CameraPermissionScreen } from '@/components/camera-permission-screen';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { BarcodeStabilizer } from '@/identification/barcodeStabilizer';
@@ -43,53 +44,15 @@ export default function FormBarcodeScreen() {
     router.back();
   };
 
-  if (!permission) {
+  if (!permission || !permission.granted) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator color={colors.accent} />
-        <Text style={styles.message}>Demande d&apos;accès à la caméra…</Text>
-      </View>
-    );
-  }
-
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Accès à la caméra requis</Text>
-        <Text style={styles.message}>
-          Le scan de code-barres a besoin de la caméra pour remplir le champ.
-        </Text>
-        {permission.canAskAgain ? (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={requestPermission}
-            testID="permission-request"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
-          </Pressable>
-        ) : (
-          <>
-            <Text style={styles.errorText} testID="permission-denied">
-              Permission refusée. Autorisez la caméra dans les réglages.
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={() => void Linking.openSettings()}
-              testID="permission-settings"
-              accessibilityRole="button"
-              accessibilityLabel="Ouvrir les réglages">
-              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
-            </Pressable>
-          </>
-        )}
-        <Pressable
-          style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
-          onPress={() => router.back()}
-          testID="permission-cancel"
-          accessibilityRole="button">
-          <Text style={styles.cancelButtonText}>Retour</Text>
-        </Pressable>
-      </View>
+      <CameraPermissionScreen
+        loading={!permission}
+        canAskAgain={permission?.canAskAgain ?? false}
+        onRequestPermission={requestPermission}
+        onCancel={() => router.back()}
+        description="Le scan de code-barres a besoin de la caméra pour remplir le champ."
+      />
     );
   }
 
@@ -177,51 +140,6 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       borderRadius: 8,
       overflow: 'hidden',
     },
-    title: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      textAlign: 'center',
-    },
-    errorText: {
-      fontSize: 14,
-      color: colors.danger,
-      textAlign: 'center',
-    },
-    primaryButton: {
-      marginTop: Spacing.three,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.accent,
-      paddingVertical: Spacing.three,
-      borderRadius: 12,
-    },
-    primaryButtonText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: colors.accentText,
-      textAlign: 'center',
-    },
-    cancelButton: {
-      marginTop: Spacing.three,
-      alignSelf: 'center',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-    },
-    cancelButtonText: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    buttonPressed: {
-      opacity: 0.8,
-    },
     backButton: {
       position: 'absolute',
       top: insets.top + 12,
@@ -232,6 +150,9 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       backgroundColor: 'rgba(0,0,0,0.55)',
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    buttonPressed: {
+      opacity: 0.8,
     },
   });
 }

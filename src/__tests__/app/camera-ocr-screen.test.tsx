@@ -133,6 +133,7 @@ describe('CameraOcrScreen', () => {
 
     render(<CameraOcrScreen />);
     await tick();
+    await tick();
 
     expect(screen.getByTestId('ocr-found')).toBeTruthy();
     expect(screen.getByTestId('ocr-publication')).toHaveTextContent('Picsou Magazine');
@@ -159,6 +160,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
+    await tick();
     await tick();
 
     fireEvent.press(screen.getByTestId('ocr-confirm'));
@@ -224,8 +226,9 @@ describe('CameraOcrScreen', () => {
     expect(screen.getByTestId('ocr-confirm-detected')).toBeTruthy();
 
     await tick();
+    await tick();
     expect(screen.getByTestId('ocr-found')).toBeTruthy();
-    expect(identity).toHaveBeenCalledTimes(2);
+    expect(identity).toHaveBeenCalledWith('Picsou Magazine N° 547');
   });
 
   it('Scanner le code-barres mène au scan de code-barres', async () => {
@@ -251,6 +254,7 @@ describe('CameraOcrScreen', () => {
 
     render(<CameraOcrScreen />);
     await tick();
+    await tick();
 
     expect(screen.getByTestId('ocr-unknown')).toBeTruthy();
     expect(screen.getByText(/Non trouvé en collection/)).toBeTruthy();
@@ -272,6 +276,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
+    await tick();
     await tick();
 
     fireEvent.press(screen.getByTestId('ocr-manual'));

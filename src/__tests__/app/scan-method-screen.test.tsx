@@ -43,10 +43,10 @@ describe('ScanMethodScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/scan/camera');
   });
 
-  it('navigue vers la saisie manuelle', () => {
+  it('navigue vers la saisie manuelle (écran recherche)', () => {
     render(<ScanMethodScreen />);
     fireEvent.press(screen.getByTestId('method-manual'));
-    expect(mockPush).toHaveBeenCalledWith('/scan/manual');
+    expect(mockPush).toHaveBeenCalledWith('/scan/search');
   });
 
   it('annule et revient en arrière', () => {

@@ -20,13 +20,50 @@ import { Screen } from '@/components/screen';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
+import type { MagazineListItem } from '@/types';
 
 const PAGE_SIZE = 20;
+
+/** Options de tri de la collection (M10R2-08). */
+const SORT_OPTIONS = ['Numéro ↑', 'Numéro ↓', 'Ajout récent', 'Édition (A → Z)'] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
 
 function pageWindow(current: number, total: number): number[] {
   const start = Math.max(1, current - 2);
   const end = Math.min(total, current + 2);
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+function sortMagazines(list: MagazineListItem[], sort: SortOption): MagazineListItem[] {
+  const sorted = [...list];
+  switch (sort) {
+    case 'Numéro ↓':
+      return sorted.sort((a, b) => {
+        const na = a.issueNumber ?? Number.MIN_SAFE_INTEGER;
+        const nb = b.issueNumber ?? Number.MIN_SAFE_INTEGER;
+        if (na !== nb) return nb - na;
+        return a.publication.localeCompare(b.publication);
+      });
+    case 'Ajout récent':
+      return sorted.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    case 'Édition (A → Z)':
+      return sorted.sort((a, b) => {
+        const ea = (a.edition?.trim() || '').toLowerCase();
+        const eb = (b.edition?.trim() || '').toLowerCase();
+        if (ea !== eb) return ea.localeCompare(eb);
+        return a.publication.localeCompare(b.publication);
+      });
+    case 'Numéro ↑':
+    default:
+      return sorted.sort((a, b) => {
+        const na = a.issueNumber ?? Number.MAX_SAFE_INTEGER;
+        const nb = b.issueNumber ?? Number.MAX_SAFE_INTEGER;
+        if (na !== nb) return na - nb;
+        return a.publication.localeCompare(b.publication);
+      });
+  }
 }
 
 export default function CollectionScreen() {
@@ -39,6 +76,7 @@ export default function CollectionScreen() {
   const load = useCollectionStore((s) => s.load);
   const [issueQuery, setIssueQuery] = useState('');
   const [editionFilter, setEditionFilter] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortOption>('Numéro ↑');
   const [page, setPage] = useState(1);
   const [lastParamEdition, setLastParamEdition] = useState<string | undefined>(undefined);
 
@@ -67,7 +105,7 @@ export default function CollectionScreen() {
 
   const filtered = useMemo(() => {
     const issue = issueQuery.trim();
-    return magazines.filter((m) => {
+    const list = magazines.filter((m) => {
       if (editionFilter) {
         const edition = m.edition?.trim() ? m.edition.trim() : 'Sans édition';
         if (edition !== editionFilter) {
@@ -82,7 +120,8 @@ export default function CollectionScreen() {
       }
       return true;
     });
-  }, [magazines, issueQuery, editionFilter]);
+    return sortMagazines(list, sort);
+  }, [magazines, issueQuery, editionFilter, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -103,6 +142,13 @@ export default function CollectionScreen() {
   const applyEdition = (value: string | null) => {
     setEditionFilter(value);
     setPage(1);
+  };
+
+  const applySort = (value: string | null) => {
+    if (value != null) {
+      setSort(value as SortOption);
+      setPage(1);
+    }
   };
 
   const hasFilters = issueQuery.trim().length > 0 || editionFilter !== null;
@@ -138,6 +184,14 @@ export default function CollectionScreen() {
             onSelect={applyEdition}
             noneLabel="Toutes les éditions"
             testID="filter-edition"
+          />
+          <SelectField
+            label="Tri"
+            placeholder="Tri"
+            value={sort}
+            options={SORT_OPTIONS}
+            onSelect={applySort}
+            testID="filter-sort"
           />
           {hasFilters ? (
             <Pressable
@@ -179,6 +233,7 @@ export default function CollectionScreen() {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
               keyboardShouldPersistTaps="handled"
+              testID="collection-list"
               refreshControl={
                 <RefreshControl
                   refreshing={loading}

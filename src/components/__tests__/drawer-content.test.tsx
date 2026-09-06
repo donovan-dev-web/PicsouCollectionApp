@@ -16,6 +16,10 @@ describe('DrawerMenu', () => {
     onClose.mockClear();
   });
 
+  afterEach(() => {
+    global.__resetSafeAreaInsets?.();
+  });
+
   it("affiche les liens directs d'accès", () => {
     render(<DrawerMenu visible onClose={onClose} editions={['Panini']} />);
 
@@ -65,5 +69,28 @@ describe('DrawerMenu', () => {
 
     rerender(<DrawerMenu visible onClose={onClose} editions={editions} />);
     expect(screen.getByTestId('drawer-sub-edition-1')).toBeTruthy();
+  });
+
+  it('applique la SafeZone (insets encoche + gesture bar)', () => {
+    global.__setSafeAreaInsets?.({ top: 44, bottom: 34 });
+    render(<DrawerMenu visible onClose={onClose} editions={[]} />);
+
+    const header = screen.getByTestId('drawer-header');
+    expect(header.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ paddingTop: 44 + 16 })]),
+    );
+
+    const panel = screen.getByTestId('drawer-panel');
+    expect(panel).toBeTruthy();
+  });
+
+  it('n\u2019applique aucun inset suppl\u00e9mentaire sans encoche', () => {
+    global.__resetSafeAreaInsets?.();
+    render(<DrawerMenu visible onClose={onClose} editions={[]} />);
+
+    const header = screen.getByTestId('drawer-header');
+    expect(header.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ paddingTop: 0 + 16 })]),
+    );
   });
 });

@@ -32,7 +32,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings/index"
+        name="settings"
         options={{
           title: 'Paramètres',
           tabBarIcon: ({ color, size }) => <Feather name="settings" size={size} color={color} />,

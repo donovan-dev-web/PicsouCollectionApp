@@ -3,8 +3,8 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Linking,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,12 +14,21 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CameraView as CameraViewType } from 'expo-camera';
 
+import { CameraPermissionScreen } from '@/components/camera-permission-screen';
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
+import { OcrTextStabilizer } from '@/identification/ocr/ocrTextStabilizer';
 
 /** Intervalle d'analyse OCR : quelques frames / seconde max (pas toutes). */
 const ANALYSIS_INTERVAL_MS = 500;
+
+/**
+ * Lectures OCR identiques requises avant de conclure une identification
+ * (M10R2-09 — vote multi-frames conservateur, une lecture isolée pouvant être
+ * erronée sur des textes stylisés / à encres faibles).
+ */
+const OCR_STABLE_READS = 2;
 
 /**
  * Informations détectées par l'OCR, affichées en surcouche caméra (US-ID-08)
@@ -72,6 +81,7 @@ export default function CameraOcrScreen() {
   const [weakCycles, setWeakCycles] = useState(0);
   const inFlight = useRef(false);
   const cameraRef = useRef<CameraViewType>(null);
+  const ocrStabilizer = useRef(new OcrTextStabilizer(OCR_STABLE_READS));
 
   useEffect(() => {
     if (!permission?.granted) {
@@ -89,7 +99,11 @@ export default function CameraOcrScreen() {
       inFlight.current = true;
       try {
         // Capture éphémère d'une photo (aucune image persistée) → URI.
-        const photo = await cameraRef.current?.takePictureAsync?.();
+        // Haute résolution (M10R2-09) : préserve les petites encres des textes stylisés.
+        const photo = await cameraRef.current?.takePictureAsync?.({
+          quality: 1,
+          skipProcessing: false,
+        });
         const uri = photo?.uri ?? null;
         const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
         if (!frame) {
@@ -122,6 +136,18 @@ export default function CameraOcrScreen() {
           return;
         }
 
+        // Vote multi-frames (M10R2-09) : on ne conclut pas sur une lecture
+        // isolée, une frame suivante identique est requise (textes stylisés).
+        const key = [
+          result.publication ?? '',
+          result.issueNumber != null ? String(result.issueNumber) : '',
+          result.date ?? '',
+        ].join('|');
+        if (!ocrStabilizer.current.push(key)) {
+          return;
+        }
+        ocrStabilizer.current.reset();
+
         if (result.status === 'unknown') {
           setState({
             status: 'unknown',
@@ -150,6 +176,7 @@ export default function CameraOcrScreen() {
   }, [permission?.granted, state.status]);
 
   const stopAndRetry = () => {
+    ocrStabilizer.current.reset();
     setWeakCycles(0);
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
@@ -223,51 +250,15 @@ export default function CameraOcrScreen() {
     });
   };
 
-  if (!permission) {
+  if (!permission || !permission.granted) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator color={colors.accent} />
-        <Text style={styles.message}>Demande d’accès à la caméra…</Text>
-      </View>
-    );
-  }
-
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Accès à la caméra requis</Text>
-        <Text style={styles.message}>La reconnaissance de couverture a besoin de la caméra.</Text>
-        {permission.canAskAgain ? (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={requestPermission}
-            testID="ocr-permission-request"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Autoriser la caméra</Text>
-          </Pressable>
-        ) : (
-          <>
-            <Text style={styles.errorText} testID="ocr-permission-denied">
-              Permission refusée. Autorisez la caméra dans les réglages.
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={() => void Linking.openSettings()}
-              testID="ocr-permission-settings"
-              accessibilityRole="button"
-              accessibilityLabel="Ouvrir les réglages">
-              <Text style={styles.primaryButtonText}>Ouvrir les réglages</Text>
-            </Pressable>
-          </>
-        )}
-        <Pressable
-          style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
-          onPress={() => router.back()}
-          testID="ocr-permission-cancel"
-          accessibilityRole="button">
-          <Text style={styles.cancelButtonText}>Retour</Text>
-        </Pressable>
-      </View>
+      <CameraPermissionScreen
+        loading={!permission}
+        canAskAgain={permission?.canAskAgain ?? false}
+        onRequestPermission={requestPermission}
+        onCancel={() => router.back()}
+        description="La reconnaissance de couverture a besoin de la caméra."
+      />
     );
   }
 
@@ -487,7 +478,10 @@ export default function CameraOcrScreen() {
 
       {state.status === 'found' && (
         <View style={styles.overlay}>
-          <View style={styles.resultCard} testID="ocr-found">
+          <ScrollView
+            style={styles.resultCard}
+            contentContainerStyle={styles.resultCardContent}
+            testID="ocr-found">
             <Text style={styles.mutedTitle}>Couverture reconnue</Text>
             <Text style={styles.magazine} testID="ocr-publication">
               {state.publication}
@@ -524,13 +518,16 @@ export default function CameraOcrScreen() {
               accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>Saisie manuelle</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </View>
       )}
 
       {state.status === 'unknown' && (
         <View style={styles.overlay}>
-          <View style={styles.resultCard} testID="ocr-unknown">
+          <ScrollView
+            style={styles.resultCard}
+            contentContainerStyle={styles.resultCardContent}
+            testID="ocr-unknown">
             <Text style={styles.mutedTitle}>Non trouvé en collection</Text>
             <Text style={styles.magazine}>{state.publication}</Text>
             {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
@@ -558,7 +555,7 @@ export default function CameraOcrScreen() {
               accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>Réessayer avec la caméra</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </View>
       )}
     </View>
@@ -661,12 +658,16 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
     resultCard: {
       alignSelf: 'stretch',
       marginHorizontal: Spacing.four,
+      marginTop: insets.top + Spacing.three,
+      marginBottom: insets.bottom + Spacing.three,
       maxHeight: '85%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
       padding: Spacing.four,
+    },
+    resultCardContent: {
       alignItems: 'center',
-      gap: Spacing.two,
+      gap: Spacing.three,
     },
     mutedTitle: {
       fontSize: 14,
@@ -753,17 +754,6 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
     },
     buttonPressed: {
       opacity: 0.8,
-    },
-    errorText: {
-      fontSize: 14,
-      color: colors.danger,
-      textAlign: 'center',
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
     },
     cancelButton: {
       marginTop: Spacing.three,

@@ -92,6 +92,55 @@ describe('parseOcrText', () => {
   });
 });
 
+describe('parseOcrText — M10R2-09 exclusions renforcées', () => {
+  it('ne retient jamais un nombre de pages comme numéro', () => {
+    expect(parseOcrText('Picsou Magazine\n52 pages')).toMatchObject({ issueNumber: null });
+    expect(parseOcrText('Picsou Magazine\n52\npages')).toMatchObject({ issueNumber: null });
+  });
+
+  it('ne retient jamais un prix comme numéro', () => {
+    expect(parseOcrText('Picsou Magazine\n3,50 €')).toMatchObject({ issueNumber: null });
+    expect(parseOcrText('Picsou Magazine\n12\n€')).toMatchObject({ issueNumber: null });
+    expect(parseOcrText('Picsou Magazine\n58 F')).toMatchObject({ issueNumber: null });
+  });
+
+  it('ne retient jamais une année même préfixée par N°', () => {
+    expect(parseOcrText('Picsou Magazine\nN° 2020')).toMatchObject({ issueNumber: null });
+  });
+
+  it('ne retient pas un jour de date complète comme numéro isolé', () => {
+    expect(parseOcrText('Picsou Magazine\n12 janvier 2024')).toMatchObject({ issueNumber: null });
+  });
+
+  it('retient « N° 547 » même entouré d’année, de pages et de prix', () => {
+    const result = parseOcrText('Picsou Magazine\nN° 547\n52 pages\n3,50 €\n2024');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.issueNumber).toBe(547);
+      expect(result.date).toBe('2024');
+    }
+  });
+
+  it('priorise le numéro préfixé par rapport au repli nombre isolé', () => {
+    const result = parseOcrText('Picsou Magazine\n547\nN° 12');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.issueNumber).toBe(12);
+    }
+  });
+
+  it('en cas de multiples N°, retient celui le plus proche du titre', () => {
+    const result = parseOcrText('Picsou Magazine\n52\nN° 3\nN° 547');
+
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.issueNumber).toBe(3);
+    }
+  });
+});
+
 describe('isConfident', () => {
   it('exige nom + numéro pour déclencher la recherche (US-ID-08)', () => {
     const publicationOnly = parseOcrText('Picsou Magazine');

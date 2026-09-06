@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 import { Alert, type AlertButton } from 'react-native';
 
-import SettingsScreen from '@/app/(tabs)/settings/index';
+import AppearanceScreen from '@/app/(tabs)/settings/appearance';
+import BackupScreen from '@/app/(tabs)/settings/backup';
 import { setDepsForTest, __resetForTests, type Dependencies } from '@/dependencies';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useBackupStore } from '@/store/use-backup-store';
@@ -17,6 +18,15 @@ jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'b1a2c3d4-0000-4000-8000-000000000001'),
 }));
 
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    back: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    canGoBack: () => true,
+  }),
+}));
+
 function stubDeps(): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
@@ -26,13 +36,17 @@ function stubDeps(): Dependencies {
     settingsRepository: {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: setColorSchemeMock,
+      getOnboardingDone: jest.fn().mockResolvedValue(false),
+      setOnboardingDone: jest.fn().mockResolvedValue(undefined),
+      getReducedMotion: jest.fn().mockResolvedValue(false),
+      setReducedMotion: jest.fn().mockResolvedValue(undefined),
     } as unknown as Dependencies['settingsRepository'],
     backupService: {} as Dependencies['backupService'],
     fileGateway: {} as Dependencies['fileGateway'],
   };
 }
 
-describe('SettingsScreen', () => {
+describe('AppearanceScreen', () => {
   beforeEach(() => {
     setColorSchemeMock.mockClear();
     setColorSchemeMock.mockResolvedValue(undefined);
@@ -45,16 +59,16 @@ describe('SettingsScreen', () => {
   });
 
   it('affiche les options de theme', () => {
-    render(<SettingsScreen />);
+    render(<AppearanceScreen />);
 
-    expect(screen.getByText('Apparence')).toBeTruthy();
+    expect(screen.getByText('Thème')).toBeTruthy();
     expect(screen.getByTestId('theme-option-system')).toBeTruthy();
     expect(screen.getByTestId('theme-option-light')).toBeTruthy();
     expect(screen.getByTestId('theme-option-dark')).toBeTruthy();
   });
 
   it('selectionne le theme sombre au tap', () => {
-    render(<SettingsScreen />);
+    render(<AppearanceScreen />);
 
     fireEvent.press(screen.getByTestId('theme-option-dark'));
 
@@ -64,14 +78,14 @@ describe('SettingsScreen', () => {
 
   it('marque l option courante comme selectionnee', () => {
     useSettingsStore.setState({ colorScheme: 'light' });
-    render(<SettingsScreen />);
+    render(<AppearanceScreen />);
 
     expect(screen.getByTestId('theme-option-light').props.accessibilityState?.checked).toBe(true);
     expect(screen.getByTestId('theme-option-system').props.accessibilityState?.checked).toBe(false);
   });
 });
 
-describe('SettingsScreen — Sauvegarde', () => {
+describe('BackupScreen — Sauvegarde', () => {
   let testDb: ReturnType<typeof createTestDatabase>;
   let service: BackupService;
   const writeExport = jest.fn();
@@ -114,7 +128,7 @@ describe('SettingsScreen — Sauvegarde', () => {
   }
 
   it('affiche la section sauvegarde avec export et import', () => {
-    render(<SettingsScreen />);
+    render(<BackupScreen />);
     expect(screen.getByTestId('backup-export')).toBeTruthy();
     expect(screen.getByTestId('backup-import')).toBeTruthy();
   });
@@ -127,7 +141,7 @@ describe('SettingsScreen — Sauvegarde', () => {
       name: 'picsou-collection-2026-09-01.json',
     });
 
-    render(<SettingsScreen />);
+    render(<BackupScreen />);
     fireEvent.press(screen.getByTestId('backup-export'));
     await pressAlertButton(alertSpy.mock.calls[0][2], 'JSON');
 
@@ -149,7 +163,7 @@ describe('SettingsScreen — Sauvegarde', () => {
     const magazine = await magazineRepo.create({ publication: 'Picsou', issueNumber: 1 });
     await collectionRepo.addCopy(magazine.id, { notes: 'OK' });
 
-    render(<SettingsScreen />);
+    render(<BackupScreen />);
     fireEvent.press(screen.getByTestId('backup-export'));
     await pressAlertButton(alertSpy.mock.calls[0][2], 'CSV');
 
@@ -167,7 +181,7 @@ describe('SettingsScreen — Sauvegarde', () => {
       content: JSON.stringify({ format: 'autre', version: 1, magazines: [] }),
     });
 
-    render(<SettingsScreen />);
+    render(<BackupScreen />);
     fireEvent.press(screen.getByTestId('backup-import'));
     await pressAlertButton(alertSpy.mock.calls[0][2], 'JSON');
 
@@ -186,7 +200,7 @@ describe('SettingsScreen — Sauvegarde', () => {
     source.magazines[0].publication = 'Csv Importer';
     pickFile.mockResolvedValue({ name: 'backup.csv', content: service.toCsv(source) });
 
-    render(<SettingsScreen />);
+    render(<BackupScreen />);
     fireEvent.press(screen.getByTestId('backup-import'));
     await pressAlertButton(alertSpy.mock.calls[0][2], 'CSV');
 

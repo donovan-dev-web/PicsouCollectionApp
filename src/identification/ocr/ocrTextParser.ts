@@ -36,6 +36,114 @@ const ISSUE_PATTERNS: readonly RegExp[] = [
   /(?:^|\s)[°º#]\s*(\d{1,4})\b/i,
 ];
 
+/** Une année (19xx/20xx) n'est jamais un numéro d'exemplaire. */
+function isYear(value: string): boolean {
+  return /^(19|20)\d{2}$/.test(value);
+}
+
+const PAGE_COUNT =
+  /\b(?:pages?|pp?\.?|seiten|paginas?)\s*(?:[:,]?\s*)?\d+\b|\b\d+\s*(?:pages?|pp?\.?|seiten|paginas?)\b/i;
+const PRICE = /(?:[€$£]\s*\d+|\d+\s*[€$£]|\d+\s*(?:euros?|eur)\b|\bprix\s*:?\s*\d+)/i;
+
+/**
+ * Exclusions renforcées du repli « nombre isolé » (M10R2-09) : invalide tout
+ * candidat qui ressemble à un nombre de pages, un prix, une date complète ou
+ * une année, en parcourant l'intégralité du texte OCR normalisé.
+ */
+function isRejectedContextNumber(normalized: string, candidate: string): boolean {
+  if (isYear(candidate)) {
+    return true;
+  }
+  const lower = normalized.toLowerCase();
+  const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (PAGE_COUNT.test(lower)) {
+    if (new RegExp(`\\b${escaped}\\s*(?:pages?|pp?\\.?|seiten|paginas?)`, 'i').test(lower)) {
+      return true;
+    }
+    if (new RegExp(`(?:pages?|pp?\\.?|seiten|paginas?)[^\\n]*\\b${escaped}\\b`, 'i').test(lower)) {
+      return true;
+    }
+  }
+  if (PRICE.test(lower)) {
+    if (
+      new RegExp(`[€$£]\\s*${escaped}\\b`).test(lower) ||
+      new RegExp(`\\b${escaped}\\s*[€$£]`).test(lower) ||
+      new RegExp(`\\b${escaped}\\s*(?:euros?|eur)\\b`).test(lower)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function findIssueCandidates(raw: string): { num: number; index: number }[] {
+  const candidates: { num: number; index: number }[] = [];
+  for (const regex of ISSUE_PATTERNS) {
+    const global = new RegExp(
+      regex.source,
+      `${regex.flags.includes('g') ? regex.flags : `${regex.flags}g`}`,
+    );
+    for (const m of raw.matchAll(global)) {
+      const num = Number(m[1]);
+      const index = m.index ?? -1;
+      if (Number.isFinite(num) && !isYear(m[1]) && !candidates.some((c) => c.index === index)) {
+        candidates.push({ num, index });
+      }
+    }
+  }
+  return candidates;
+}
+
+function extractIssueNumber(raw: string): number | null {
+  const candidates = findIssueCandidates(raw);
+
+  // Repli M-07R (bug #127) : sur une vraie couverture, le numéro est souvent lu
+  // seul (sans préfixe « n° »). Une ligne composée uniquement de 1 à 4 chiffres
+  // est alors retenue comme numéro, mais uniquement en dernier recours après les
+  // occurrences préfixées, avec les exclusions renforcées M10R2-09 (année,
+  // nombre de pages, prix, date complète).
+  if (candidates.length === 0) {
+    const normalized = normalize(raw);
+    for (const line of raw.split('\n')) {
+      const trimmed = line.trim();
+      if (!/^\d{1,4}$/.test(trimmed) || isRejectedContextNumber(normalized, trimmed)) {
+        continue;
+      }
+      if (MONTH_YEAR.test(line) || PRICE.test(line) || PAGE_COUNT.test(line)) {
+        continue;
+      }
+      const n = Number(trimmed);
+      if (Number.isFinite(n)) {
+        return n;
+      }
+    }
+    return null;
+  }
+
+  // Priorité « N° / No / numéro » (M10R2-09). Si plusieurs numéros préfixés
+  // existent, retenir celui le plus proche du titre/publication reconnue.
+  if (candidates.length > 1) {
+    const publication = closestPublication(raw);
+    if (publication) {
+      const publicationLower = publication.toLowerCase();
+      const positions = [
+        ...raw
+          .toLowerCase()
+          .matchAll(new RegExp(publicationLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')),
+      ].map((m) => m.index ?? -1);
+      if (positions.length > 0) {
+        candidates.sort(
+          (a, b) =>
+            Math.min(...positions.map((p) => Math.abs(p - a.index))) -
+            Math.min(...positions.map((p) => Math.abs(p - b.index))),
+        );
+      }
+    }
+  }
+
+  return candidates[0].num;
+}
+
 /**
  * Noms connus de publications. Permet de reconnaître le titre de la couverture
  * même quand il est déjà présent dans le texte scanné. Ordre : plus long d'abord
@@ -65,38 +173,6 @@ const MONTH_YEAR =
 
 function normalize(text: string): string {
   return text.replace(/\s+/g, ' ').trim();
-}
-
-function extractIssueNumber(raw: string): number | null {
-  for (const regex of ISSUE_PATTERNS) {
-    const m = raw.match(regex);
-    if (m) {
-      const n = Number(m[1]);
-      if (Number.isFinite(n)) {
-        return n;
-      }
-    }
-  }
-
-  // Repli M-07R (bug #127) : sur une vraie couverture, le numéro est souvent lu
-  // seul (sans préfixe « n° »). Une ligne composée uniquement de 1 à 4 chiffres
-  // est alors retenue comme numéro. Les années (19xx/20xx) et les textes longs
-  // (codes-barres en clair) sont exclus pour éviter les faux positifs.
-  for (const line of raw.split('\n')) {
-    const trimmed = line.trim();
-    if (!/^\d{1,4}$/.test(trimmed)) {
-      continue;
-    }
-    if (/^(19|20)\d{2}$/.test(trimmed)) {
-      continue;
-    }
-    const n = Number(trimmed);
-    if (Number.isFinite(n)) {
-      return n;
-    }
-  }
-
-  return null;
 }
 
 function closestPublication(raw: string): string | null {

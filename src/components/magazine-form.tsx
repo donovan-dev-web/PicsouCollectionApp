@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useImperativeHandle, useState, type Ref } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -45,6 +45,15 @@ type Props = {
   initialYear?: string | null;
   submitLabel: string;
   onSubmit: (input: CreateMagazineInput) => Promise<void> | void;
+  /**
+   * Poignée impérative permettant à l'écran d'hôte de déclencher la soumission
+   * depuis le header (icône Valider), tout en gardant le bouton pied de formulaire.
+   */
+  ref?: Ref<MagazineFormHandle>;
+};
+
+export type MagazineFormHandle = {
+  submit: () => Promise<void>;
 };
 
 function publicationDateFrom(month: string | null, year: string | null): string | null {
@@ -62,6 +71,7 @@ export function MagazineForm({
   initialYear,
   submitLabel,
   onSubmit,
+  ref,
 }: Props) {
   const colors = useThemeColors();
   const router = useRouter();
@@ -119,7 +129,7 @@ export function MagazineForm({
 
   const canSubmit = values.publication.trim().length > 0 && !submitting;
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!canSubmit) {
       return;
     }
@@ -146,7 +156,9 @@ export function MagazineForm({
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [canSubmit, onSubmit, values]);
+
+  useImperativeHandle(ref, () => ({ submit: () => handleSubmit() }), [handleSubmit]);
 
   return (
     <KeyboardAvoidingView

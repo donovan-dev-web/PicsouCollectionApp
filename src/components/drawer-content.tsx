@@ -2,10 +2,12 @@ import React, { useCallback, useMemo } from 'react';
 import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { slug } from '@/lib/slug';
+import { useSettingsStore } from '@/store/use-settings-store';
 
 const DRAWER_WIDTH = 300;
 const CLOSE_MS = 250;
@@ -116,6 +118,8 @@ export function DrawerMenu({
   const colors = useThemeColors();
   const styles = makeStyles(colors);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const reducedMotion = useSettingsStore((s) => s.reducedMotion);
   const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
   const [scanExpanded, setScanExpanded] = React.useState(false);
   const [editionsExpanded, setEditionsExpanded] = React.useState(!editions || editions.length <= 5);
@@ -125,15 +129,25 @@ export function DrawerMenu({
     if (!editionsManuallyToggled) {
       setEditionsExpanded(!editions || editions.length <= 5);
     }
+    if (reducedMotion) {
+      translateX.setValue(0);
+      return;
+    }
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
       bounciness: 0,
     }).start();
-  }, [editions, editionsManuallyToggled, translateX]);
+  }, [editions, editionsManuallyToggled, translateX, reducedMotion]);
 
   const runAfterClose = useCallback(
     (action: () => void) => {
+      if (reducedMotion) {
+        translateX.setValue(-DRAWER_WIDTH);
+        onClose();
+        action();
+        return;
+      }
       Animated.timing(translateX, {
         toValue: -DRAWER_WIDTH,
         duration: CLOSE_MS,
@@ -146,7 +160,7 @@ export function DrawerMenu({
         action();
       });
     },
-    [translateX, onClose],
+    [translateX, onClose, reducedMotion],
   );
 
   const close = useCallback(() => runAfterClose(() => {}), [runAfterClose]);
@@ -191,9 +205,12 @@ export function DrawerMenu({
         <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Fermer le menu" />
         <Animated.View
           style={[styles.drawerPanel, { transform: [{ translateX }] }]}
+          testID="drawer-panel"
           {...panResponder.panHandlers}>
-          <View style={styles.drawer}>
-            <View style={styles.drawerHeader}>
+          <View style={[styles.drawer, { paddingBottom: insets.bottom }]}>
+            <View
+              style={[styles.drawerHeader, { paddingTop: insets.top + 16 }]}
+              testID="drawer-header">
               <Feather name="book-open" size={24} color={colors.accent} />
               <Text style={styles.drawerTitle}>Picsou Collection</Text>
             </View>
@@ -244,7 +261,7 @@ export function DrawerMenu({
                   <SubItem
                     icon="edit-3"
                     label="Saisie manuelle"
-                    route="/scan/manual"
+                    route="/scan/search"
                     colors={colors}
                     onPress={navigate}
                   />
