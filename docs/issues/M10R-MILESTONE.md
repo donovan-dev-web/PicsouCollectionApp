@@ -23,14 +23,28 @@
 | 6 | Accès scan trop profond depuis Collection/Fiche | M10R-10 | `enhancement, priority-high` | M | #162 |
 | 7 | OCR : bouton code-barres sous la gesture bar | M10R-11 | `bug, priority-high, epic/identification` | S | #163 |
 
+## Décisions de conception (post-test physique)
+
+- **M10R-03 (#155) Tabs** — conservé **Accueil | Collection | Paramètres** : le
+  scan reste accessible en 1 tap via le **lien rapide header** (M10R-10) et le
+  CTA Accueil ; un onglet Scan central a été écarté (pas de 4e onglet, le drawer
+  sert d'accès direct). Issue fermée en `wontfix` avec justification ;
+- **M10R-04 (#156) Drawer** — `@react-navigation/drawer` **incompatible avec
+  expo-router SDK 57** (crash startup). Dessin final : `DrawerMenu` **custom**
+  (Modal transparent + `Animated.spring` + `PanResponder` bord gauche), piloté
+  par `DrawerProvider` context (`useDrawer()`) ;
+- **M10R-10 (#162) Accès scan** — le FAB 56px bas-droit est remplacé par un
+  **petit bouton discret dans le header commun** (`AppHeader`, à droite :
+  burger à gauche, titre centré) sur les écrans tabs. `scan-fab.tsx` supprimé.
+
 ## Causes racine (qualifiées dans le code)
 
 1. `native-file-gateway.ts:57` : `getDocumentAsync({ type: 'text/csv' })` — MIME non reconnu par les gestionnaires Android → fichiers grisés.
 2. `(tabs)/index.tsx` : CTA après `recentSection` (+ `marginTop:auto` fragile).
-3. `(tabs)/_layout.tsx` : onglets Accueil/Collection/Paramètres, zéro `Drawer` (dép. absente). → DrawerMenu custom (Animated + PanResponder) avec DrawerProvider context.
+3. `(tabs)/_layout.tsx` : onglets Accueil/Collection/Paramètres, zéro `Drawer` (dép. absente). → DrawerMenu custom (Animated + PanResponder) + AppHeader (burger/scan).
 4. `select-field.tsx` : `FlatList` imbriquée dans le `ScrollView` du formulaire (conflit de scroll) ; pas de spacer bas clavier.
 5. ML Kit texte standard faible sur typographies display ; pas de `enableTorch`, pas de guidage.
-6. Aucun FAB dans `src/` (grep Ø).
+6. Aucun accès scan direct depuis Collection/Fiche/Paramètres (grep Ø `ScanFAB`).
 7. `scan/camera.tsx:693` : `secondaryButton` en flux sous la caméra, sans `marginBottom` insets.
 
 ## User Stories associées (voir `docs/08-USER-STORIES.md` §10)
@@ -42,4 +56,4 @@ US-UX-11 (OCR réel) → M10R-08/09 · US-UX-12 (scan permanent) → M10R-10/11.
 ## Critères de sortie (cf. 11-ROADMAP §critères)
 
 Toutes issues Done, CI verte, test physique de validation (import CSV réel,
-drawer, formulaire au clavier, torche, FAB, gesture bar), tag `v0.9.1`.
+drawer, formulaire au clavier, torche, header/scan, gesture bar), tag `v0.9.1`.

@@ -51,8 +51,8 @@ Phase 5  ███████████████████████�
 Phase 6  ██████████████████████████████  Terminé ✓ (v0.6.0)
 Phase 7  ██████████████████████████████  Terminé ✓ (v0.7.0)
 Phase 8  ██████████████████████████████  Terminé ✓ (v0.8.0)
-Phase 10 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  En cours (M-10 → v0.9.0, PR #152)
-Phase 10R ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-10R → v0.9.1)
+Phase 10 ██████████████████████████████  Terminé ✓ (v0.9.0, PR #152)
+Phase 10R ██████████████████████████████  Terminé ✓ (v0.9.1)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
 ```
 
@@ -345,24 +345,24 @@ parcours brocante < 3s à 1 main.
 (PR #152) — import CSV, CTA sans scroll, navigation drawer + tabs, formulaire au
 clavier, OCR en conditions réelles, FAB scan, safezone OCR.
 
-| Tâche | Story / Issue |
-|---|---|
-| Import CSV sélectionnable (types MIME + repli extension) | US-UX-07 / M10R-01 |
-| Accueil : CTA au-dessus des récents | US-UX-08 / M10R-02 |
-| Tabs Accueil \| Scan \| Collection | US-UX-09 / M10R-03 |
-| Drawer latéral + liens directs (+ dép. `@react-navigation/drawer`) | US-UX-09 / M10R-04 |
-| Drawer : éditions dynamiques repliables + pré-filtre | US-UX-09 / M10R-05 |
-| Formulaire Mois/Année scrollables | US-UX-10 / M10R-06 |
-| Formulaire : spacer clavier (Notes visible) | US-UX-10 / M10R-07 |
-| Torche caméra (OCR + code-barres) | US-UX-11 / M10R-08 |
-| OCR texte stylisé : guidage + replis persistants | US-UX-11 / M10R-09 |
-| FAB scan global (Accueil/Collection/Fiche/Paramètres) | US-UX-12 / M10R-10 |
-| OCR : bouton code-barres hors gesture bar | US-UX-12 / M10R-11 |
+| Tâche | Story / Issue | Statut |
+|---|---|---|
+| Import CSV sélectionnable (types MIME + repli extension) | US-UX-07 / M10R-01 | Done |
+| Accueil : CTA au-dessus des récents | US-UX-08 / M10R-02 | Done |
+| Tabs Accueil \| Scan \| Collection | US-UX-09 / M10R-03 | **Écarté** (wontfix) : tabs conservés, scan via header |
+| Drawer latéral custom + liens directs (sans `@react-navigation/drawer`, crash SDK 57) | US-UX-09 / M10R-04 | Done |
+| Drawer : éditions dynamiques repliables + pré-filtre | US-UX-09 / M10R-05 | Done |
+| Formulaire Mois/Année scrollables | US-UX-10 / M10R-06 | Done |
+| Formulaire : spacer clavier (Notes visible) | US-UX-10 / M10R-07 | Done |
+| Torche caméra (OCR + code-barres) | US-UX-11 / M10R-08 | Done |
+| OCR texte stylisé : guidage + replis persistants | US-UX-11 / M10R-09 | Done |
+| Accès scan global via header commun (burger/scan) — FAB 56px remplacé | US-UX-12 / M10R-10 | Done |
+| OCR : bouton code-barres hors gesture bar | US-UX-12 / M10R-11 | Done |
 
 **Livrables** : 11 issues M10R-01..11, `docs/issues/M10R-*.md`.
 Détail : [docs/issues/M10R-MILESTONE.md](issues/M10R-MILESTONE.md).
 
-**Statut : À venir** — après merge M-10, avant M-09.
+**Statut : Done (v0.9.1)** — issues #153-#163 fermées, tag `v0.9.1`, build EAS preview.
 
 ---
 

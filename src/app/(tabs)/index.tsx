@@ -5,10 +5,9 @@ import { Feather } from '@expo/vector-icons';
 
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { AppHeader } from '@/components/app-header';
 import { Screen } from '@/components/screen';
-import { ScanFAB } from '@/components/scan-fab';
 import { useCollectionStore } from '@/store/use-collection-store';
-import { useDrawer } from '@/lib/drawer-context';
 
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
@@ -33,7 +32,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
-  const { open: openDrawer } = useDrawer();
   const totalCopies = useCollectionStore((s) => s.totalCopies);
   const recentCopies = useCollectionStore((s) => s.recentCopies);
   const loading = useCollectionStore((s) => s.loading);
@@ -49,21 +47,8 @@ export default function HomeScreen() {
 
   return (
     <Screen noBottom>
+      <AppHeader title="Picsou Collection" />
       <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
-        <View style={styles.headerRow}>
-          <Pressable
-            style={({ pressed }) => [styles.menuButton, pressed && styles.buttonPressed]}
-            onPress={openDrawer}
-            testID="menu-button"
-            accessibilityRole="button"
-            accessibilityLabel="Ouvrir le menu">
-            <Feather name="menu" size={22} color={colors.text} />
-          </Pressable>
-          <Text style={styles.title} accessibilityLabel="Picsou Collection">
-            Picsou Collection
-          </Text>
-          <View style={styles.menuSpacer} />
-        </View>
         <Text style={styles.subtitle}>
           Collectionnez vos magazines Disney, sans doublons, sans internet.
         </Text>
@@ -152,7 +137,6 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
-      <ScanFAB />
     </Screen>
   );
 }
@@ -168,27 +152,6 @@ function makeStyles(colors: ThemeColors) {
       padding: Spacing.four,
       gap: Spacing.three,
       flexGrow: 1,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-    },
-    menuButton: {
-      width: 44,
-      height: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    menuSpacer: {
-      width: 44,
-    },
-    title: {
-      fontSize: 28,
-      lineHeight: 36,
-      fontWeight: '700',
-      textAlign: 'center',
-      color: colors.text,
     },
     subtitle: {
       fontSize: 16,

@@ -5,10 +5,12 @@ import { useCollectionStore } from '@/store/use-collection-store';
 import type { MagazineListItem } from '@/types';
 
 const mockUseFocusEffect = jest.fn();
+const mockUseLocalSearchParams = jest.fn<Record<string, string | string[] | undefined>, []>();
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), setParams: jest.fn() }),
+  useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 
 const magazines: MagazineListItem[] = [
@@ -63,6 +65,7 @@ describe('CollectionScreen', () => {
   beforeEach(() => {
     mockUseFocusEffect.mockClear();
     mockUseFocusEffect.mockImplementation((cb: () => void) => cb());
+    mockUseLocalSearchParams.mockReturnValue({});
     useCollectionStore.setState({
       magazines,
       loading: false,
@@ -79,6 +82,24 @@ describe('CollectionScreen', () => {
     expect(screen.getAllByTestId('magazine-card')).toHaveLength(3);
     expect(screen.getByText('Picsou Magazine')).toBeTruthy();
     expect(screen.getByText('Mickey Parade')).toBeTruthy();
+  });
+
+  it('pre-filtre la collection via le param edition du drawer', () => {
+    mockUseLocalSearchParams.mockReturnValue({ edition: 'collection' });
+
+    render(<CollectionScreen />);
+
+    expect(screen.getAllByTestId('magazine-card')).toHaveLength(1);
+    expect(screen.getByText('Mickey Parade')).toBeTruthy();
+  });
+
+  it('pre-filtre sans edition (null) via le param edition', () => {
+    mockUseLocalSearchParams.mockReturnValue({ edition: 'Sans édition' });
+
+    render(<CollectionScreen />);
+
+    expect(screen.getAllByTestId('magazine-card')).toHaveLength(1);
+    expect(screen.getByText('Super Picsou Géant')).toBeTruthy();
   });
 
   it('filtre par numero exact', () => {

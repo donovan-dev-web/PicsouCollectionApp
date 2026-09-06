@@ -1,20 +1,14 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import {
-  Animated,
-  Modal,
-  PanResponder,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { slug } from '@/lib/slug';
 
-const DRAWER_WIDTH = 280;
+const DRAWER_WIDTH = 300;
+const CLOSE_MS = 250;
 
 type DrawerItemProps = {
   icon: React.ComponentProps<typeof Feather>['name'];
@@ -31,16 +25,84 @@ function DrawerItem({ icon, label, route, colors, onPress }: DrawerItemProps) {
       style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
       onPress={() => onPress(route)}
       accessibilityRole="button"
-      accessibilityLabel={label}>
+      accessibilityLabel={label}
+      testID={`drawer-item-${slug(label)}`}>
       <Feather name={icon} size={20} color={colors.text} />
       <Text style={styles.drawerItemLabel}>{label}</Text>
     </Pressable>
   );
 }
 
+type CollapsibleProps = {
+  label: string;
+  icon: React.ComponentProps<typeof Feather>['name'];
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+};
+
+function Collapsible({ label, icon, expanded, onToggle, children }: CollapsibleProps) {
+  const colors = useThemeColors();
+  const styles = makeStyles(colors);
+  return (
+    <>
+      <Pressable
+        style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
+        onPress={onToggle}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ expanded }}
+        testID={`drawer-collapsible-${slug(label)}`}>
+        <Feather name={icon} size={20} color={colors.text} />
+        <Text style={styles.drawerItemLabel}>{label}</Text>
+        <Feather
+          name={expanded ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={colors.textSecondary}
+          style={styles.drawerChevron}
+        />
+      </Pressable>
+      {expanded && <View style={styles.drawerSubSection}>{children}</View>}
+    </>
+  );
+}
+
+function SubItem({
+  icon,
+  label,
+  route,
+  colors,
+  onPress,
+}: {
+  icon: React.ComponentProps<typeof Feather>['name'];
+  label: string;
+  route: string;
+  colors: ThemeColors;
+  onPress: (route: string) => void;
+}) {
+  const styles = makeStyles(colors);
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.drawerSubItem, pressed && styles.pressed]}
+      onPress={() => onPress(route)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      testID={`drawer-sub-${slug(label)}`}>
+      <Feather name={icon} size={16} color={colors.textSecondary} />
+      <Text style={styles.drawerSubItemLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
 /**
  * Menu latéral custom (M10R-04/M10R-05) — panneau animé sans
- * @react-navigation/drawer (incompatible expo-router SDK 57).
+ * `@react-navigation/drawer` (incompatible expo-router SDK 57).
+ * Liens directs : Accueil | Scan (sous-catégories) | Collection
+ * (bouton global + « Par édition » repliable) | Paramètres.
+ *
+ * Le Modal reste monté en permanence (visible piloté par `useDrawer()`) pour
+ * préserver l'état plié/déplié « Par édition » entre les ouvertures
+ * (persistance de session, M10R-05).
  */
 export function DrawerMenu({
   visible,
@@ -56,28 +118,38 @@ export function DrawerMenu({
   const router = useRouter();
   const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
   const [scanExpanded, setScanExpanded] = React.useState(false);
+  const [editionsExpanded, setEditionsExpanded] = React.useState(!editions || editions.length <= 5);
+  const [editionsManuallyToggled, setEditionsManuallyToggled] = React.useState(false);
 
   const open = useCallback(() => {
+    if (!editionsManuallyToggled) {
+      setEditionsExpanded(!editions || editions.length <= 5);
+    }
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
       bounciness: 0,
     }).start();
-  }, [translateX]);
+  }, [editions, editionsManuallyToggled, translateX]);
 
-  const close = useCallback(() => {
-    Animated.timing(translateX, {
-      toValue: -DRAWER_WIDTH,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => onClose());
-  }, [translateX, onClose]);
+  const runAfterClose = useCallback(
+    (action: () => void) => {
+      Animated.timing(translateX, {
+        toValue: -DRAWER_WIDTH,
+        duration: CLOSE_MS,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (!finished) {
+          return;
+        }
+        onClose();
+        action();
+      });
+    },
+    [translateX, onClose],
+  );
 
-  useEffect(() => {
-    if (visible) {
-      open();
-    }
-  }, [visible, open]);
+  const close = useCallback(() => runAfterClose(() => {}), [runAfterClose]);
 
   const panResponder = useMemo(
     () =>
@@ -99,19 +171,24 @@ export function DrawerMenu({
     [open, close, translateX],
   );
 
-  const navigate = (route: string) => {
-    close();
-    setTimeout(() => router.push(route), 300);
-  };
+  const navigate = useCallback(
+    (route: string) => {
+      runAfterClose(() => router.push(route));
+    },
+    [runAfterClose, router],
+  );
 
-  if (!visible) {
-    return null;
-  }
+  const navigateWithParam = useCallback(
+    (edition: string) => {
+      runAfterClose(() => router.push({ pathname: '/collection', params: { edition } }));
+    },
+    [runAfterClose, router],
+  );
 
   return (
-    <Modal transparent visible={visible} onRequestClose={close} animationType="none">
+    <Modal transparent visible={visible} onShow={open} onRequestClose={close} animationType="none">
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={close} />
+        <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Fermer le menu" />
         <Animated.View
           style={[styles.drawerPanel, { transform: [{ translateX }] }]}
           {...panResponder.panHandlers}>
@@ -129,13 +206,16 @@ export function DrawerMenu({
                 colors={colors}
                 onPress={navigate}
               />
+            </View>
 
+            <View style={styles.drawerSection}>
               <Pressable
                 style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
                 onPress={() => setScanExpanded((e) => !e)}
                 accessibilityRole="button"
                 accessibilityLabel="Scan"
-                accessibilityState={{ expanded: scanExpanded }}>
+                accessibilityState={{ expanded: scanExpanded }}
+                testID="drawer-collapsible-scan">
                 <Feather name="camera" size={20} color={colors.text} />
                 <Text style={styles.drawerItemLabel}>Scan</Text>
                 <Feather
@@ -145,36 +225,65 @@ export function DrawerMenu({
                   style={styles.drawerChevron}
                 />
               </Pressable>
-
               {scanExpanded && (
                 <View style={styles.drawerSubSection}>
-                  {(
-                    [
-                      ['camera', 'OCR (couverture)', '/scan/camera'],
-                      ['crop', 'Code-barres', '/scan/barcode'],
-                      ['edit-3', 'Saisie manuelle', '/scan/manual'],
-                    ] as const
-                  ).map(([icon, label, route]) => (
-                    <Pressable
-                      key={route}
-                      style={({ pressed }) => [styles.drawerSubItem, pressed && styles.pressed]}
-                      onPress={() => navigate(route)}
-                      accessibilityRole="button"
-                      accessibilityLabel={label}>
-                      <Feather name={icon} size={16} color={colors.textSecondary} />
-                      <Text style={styles.drawerSubItemLabel}>{label}</Text>
-                    </Pressable>
-                  ))}
+                  <SubItem
+                    icon="camera"
+                    label="OCR (couverture)"
+                    route="/scan/camera"
+                    colors={colors}
+                    onPress={navigate}
+                  />
+                  <SubItem
+                    icon="crop"
+                    label="Code-barres"
+                    route="/scan/barcode"
+                    colors={colors}
+                    onPress={navigate}
+                  />
+                  <SubItem
+                    icon="edit-3"
+                    label="Saisie manuelle"
+                    route="/scan/manual"
+                    colors={colors}
+                    onPress={navigate}
+                  />
                 </View>
               )}
+            </View>
 
+            <View style={styles.drawerSection}>
               <DrawerItem
                 icon="book-open"
-                label="Collection"
+                label="Toute la collection"
                 route="/collection"
                 colors={colors}
                 onPress={navigate}
               />
+              {editions && editions.length > 0 ? (
+                <Collapsible
+                  label="Par édition"
+                  icon="layers"
+                  expanded={editionsExpanded}
+                  onToggle={() => {
+                    setEditionsExpanded((e) => !e);
+                    setEditionsManuallyToggled(true);
+                  }}>
+                  {editions.map((edition) => (
+                    <SubItem
+                      key={edition}
+                      icon="book"
+                      label={edition}
+                      route={`${edition}`}
+                      colors={colors}
+                      onPress={navigateWithParam}
+                    />
+                  ))}
+                </Collapsible>
+              ) : null}
+            </View>
+
+            <View style={styles.drawerSection}>
               <DrawerItem
                 icon="settings"
                 label="Paramètres"
@@ -183,30 +292,6 @@ export function DrawerMenu({
                 onPress={navigate}
               />
             </View>
-
-            {editions && editions.length > 0 && (
-              <View style={styles.drawerSection}>
-                <Text style={styles.drawerSectionTitle}>Éditions</Text>
-                {editions.map((edition) => (
-                  <Pressable
-                    key={edition}
-                    style={({ pressed }) => [styles.drawerEditionItem, pressed && styles.pressed]}
-                    onPress={() => {
-                      close();
-                      setTimeout(
-                        () => router.push({ pathname: '/collection', params: { edition } }),
-                        300,
-                      );
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Voir l'édition ${edition}`}>
-                    <Text style={styles.drawerEditionLabel} numberOfLines={1}>
-                      {edition}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
           </View>
         </Animated.View>
       </View>
@@ -262,16 +347,6 @@ function makeStyles(colors: ThemeColors) {
       borderBottomWidth: 1,
       borderBottomColor: colors.backgroundElement,
     },
-    drawerSectionTitle: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      paddingHorizontal: Spacing.four,
-      paddingTop: Spacing.three,
-      paddingBottom: Spacing.two,
-    },
     drawerItem: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -298,21 +373,12 @@ function makeStyles(colors: ThemeColors) {
       gap: Spacing.two,
       paddingHorizontal: Spacing.four,
       paddingVertical: Spacing.two,
-      minHeight: 40,
+      minHeight: 44,
     },
     drawerSubItemLabel: {
       fontSize: 14,
       color: colors.textSecondary,
-    },
-    drawerEditionItem: {
-      paddingHorizontal: Spacing.four,
-      paddingVertical: Spacing.two,
-      minHeight: 36,
-      justifyContent: 'center',
-    },
-    drawerEditionLabel: {
-      fontSize: 14,
-      color: colors.text,
+      flex: 1,
     },
     pressed: {
       opacity: 0.7,

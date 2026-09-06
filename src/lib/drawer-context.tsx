@@ -3,9 +3,14 @@ import { createContext, useCallback, useContext, useState } from 'react';
 type DrawerContextValue = {
   open: () => void;
   close: () => void;
+  visible: boolean;
 };
 
-const DrawerContext = createContext<DrawerContextValue>({ open: () => {}, close: () => {} });
+const DrawerContext = createContext<DrawerContextValue>({
+  open: () => {},
+  close: () => {},
+  visible: false,
+});
 
 export function useDrawer() {
   return useContext(DrawerContext);
@@ -16,9 +21,9 @@ export function DrawerProvider({ children }: { children: React.ReactNode }) {
   const open = useCallback(() => setVisible(true), []);
   const close = useCallback(() => setVisible(false), []);
 
-  void visible;
-
-  return <DrawerContext.Provider value={{ open, close }}>{children}</DrawerContext.Provider>;
+  return (
+    <DrawerContext.Provider value={{ open, close, visible }}>{children}</DrawerContext.Provider>
+  );
 }
 
 export { DrawerProvider as default };

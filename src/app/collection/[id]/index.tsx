@@ -7,9 +7,9 @@ import { ErrorView } from '@/components/error-view';
 import { LoadingView } from '@/components/loading-view';
 import { Screen } from '@/components/screen';
 import { StatusBadge } from '@/components/status-badge';
-import { ScanFAB } from '@/components/scan-fab';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { slug } from '@/lib/slug';
 import { toast } from '@/lib/toast';
 import { useCollectionStore } from '@/store/use-collection-store';
 
@@ -20,15 +20,6 @@ function formatDate(iso: string | null): string {
     return 'Inconnue';
   }
   return new Date(iso).toLocaleDateString('fr-FR');
-}
-
-/** Slugifie un libellé FR pour un testID stable (sans accents, sans espaces). */
-function slug(label: string): string {
-  return label
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-');
 }
 
 export default function MagazineDetailScreen() {
@@ -106,7 +97,6 @@ export default function MagazineDetailScreen() {
 
   return (
     <Screen>
-      <ScanFAB testID="detail-scan-fab" />
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <Text style={styles.publication}>{detail.publication}</Text>
         <Text style={styles.issue} testID="detail-issue">

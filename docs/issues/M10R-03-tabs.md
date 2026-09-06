@@ -7,20 +7,28 @@ milestone: "M-10R — Retours test physique (v0.9.1)"
 # Contexte
 
 US-UX-09. Test physique : le scan est le geste premier (brocante) mais n'a pas
-d'entrée directe. Cible : TabBar **Accueil | Scan | Collection** —
+d'entrée directe. Cible initiale : TabBar **Accueil | Scan | Collection** —
 `src/app/(tabs)/_layout.tsx` actuel : Accueil/Collection/Paramètres.
 
-# Tâche
+# Décision finale (wontfix)
 
-- Remplacer l'onglet Collection→Scan ? Non : ordre **Accueil, Scan, Collection** ;
-  l'onglet Scan ouvre `/scan` (choix OCR/Code-barres/Manuel, M10-03) ;
-- Paramètres sort des tabs → accessible via drawer (M10R-04) ; prévoir redirection
-  d'ancien deep-link `/ (tabs)/settings` si nécessaire ;
-- Icônes Feather : `home`, `crop` (scan), `book-open` ; `navActive` conservé ;
-  badge compteur collection sur l'onglet Collection (rappel M10-03).
+L'issue est **fermée en `wontfix`** après décision de conception post-test :
+la TabBar reste **Accueil | Collection | Paramètres** et l'accès direct au scan
+est couvert par :
+- le **lien scan discret du header commun** (`AppHeader`, à droite) — M10R-10 (§#162) ;
+- le CTA Scanner primaire de l'Accueil (M10-04 + M10R-02) ;
+- le drawer (M10R-04) qui donne aussi accès direct aux sous-écrans de scan.
 
-# Critères de fin (DoD)
+Un onglet Scan central a été écarté pour ne pas encombrer la TabBar et
+considérant que le scan reste atteignable en ≤ 1 tap partout.
 
-- [ ] 3 onglets avec icônes, actif visible clair/sombre, cibles ≥ 44px
-- [ ] Deep-link `/scan` direct depuis l'onglet, retour tabs cohérent
-- [ ] `lint` + `typecheck` verts, tests tabs maj (icônes + routes)
+# Tâche (abandonnée)
+
+- ~~Remplacer l'onglet Collection→Scan : ordre Accueil, Scan, Collection ; l'onglet
+  Scan ouvre `/scan` (choix OCR/Code-barres/Manuel, M10-03)~~ ;
+- ~~Paramètres sort des tabs → accessible via drawer (M10R-04)~~ ;
+- ~~Icônes Feather : `home`, `crop`, `book-open` ; badge compteur collection~~.
+
+# Critères de fin (DoD) — non applicables
+
+Fermée sans implémentation. Voir M10R-04/M10R-10 pour les alternatives retenues.

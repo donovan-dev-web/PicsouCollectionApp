@@ -11,8 +11,8 @@ import { Feather } from '@expo/vector-icons';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { AppHeader } from '@/components/app-header';
 import { Screen } from '@/components/screen';
-import { ScanFAB } from '@/components/scan-fab';
 import { useSettingsStore, type ColorSchemeSetting } from '@/store/use-settings-store';
 import { useBackupStore } from '@/store/use-backup-store';
 import type { BackupFormat } from '@/backup/backup-types';
@@ -86,10 +86,8 @@ export default function SettingsScreen() {
 
   return (
     <Screen noBottom>
-      <ScanFAB testID="settings-scan-fab" />
+      <AppHeader title="Paramètres" />
       <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Paramètres</Text>
-
         <Text style={styles.sectionTitle}>Apparence</Text>
         <View style={styles.options} testID="theme-options">
           {THEME_OPTIONS.map((option) => {
@@ -212,11 +210,6 @@ function makeStyles(colors: ThemeColors) {
     container: {
       padding: Spacing.four,
       gap: Spacing.three,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: colors.text,
     },
     sectionTitle: {
       fontSize: 16,
