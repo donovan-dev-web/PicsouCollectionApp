@@ -9,10 +9,13 @@ interface SettingsState {
   loaded: boolean;
   onboardingDone: boolean;
   onboardingLoaded: boolean;
+  reducedMotion: boolean;
   setColorScheme: (colorScheme: ColorSchemeSetting) => void;
   loadColorScheme: () => Promise<void>;
   loadOnboardingDone: () => Promise<void>;
   markOnboardingDone: () => void;
+  setReducedMotion: (reduced: boolean) => void;
+  loadReducedMotion: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -20,6 +23,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   loaded: false,
   onboardingDone: false,
   onboardingLoaded: false,
+  reducedMotion: false,
 
   setColorScheme: (colorScheme) => {
     set({ colorScheme });
@@ -51,5 +55,21 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     } catch {
       // dépendances pas encore initialisées : on ignore la persistance
     }
+  },
+
+  setReducedMotion: (reduced) => {
+    set({ reducedMotion: reduced });
+    try {
+      void getDeps()
+        .settingsRepository.setReducedMotion(reduced)
+        .catch(() => undefined);
+    } catch {
+      // dépendances pas encore initialisées : on ignore la persistance
+    }
+  },
+
+  loadReducedMotion: async () => {
+    const reducedMotion = await getDeps().settingsRepository.getReducedMotion();
+    set({ reducedMotion });
   },
 }));

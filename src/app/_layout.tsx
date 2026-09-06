@@ -17,6 +17,7 @@ function RootLayoutInner() {
   const loadSummary = useCollectionStore((s) => s.loadSummary);
   const loadColorScheme = useSettingsStore((s) => s.loadColorScheme);
   const loadOnboardingDone = useSettingsStore((s) => s.loadOnboardingDone);
+  const loadReducedMotion = useSettingsStore((s) => s.loadReducedMotion);
   const onboardingDone = useSettingsStore((s) => s.onboardingDone);
   const onboardingLoaded = useSettingsStore((s) => s.onboardingLoaded);
   const magazines = useCollectionStore((s) => s.magazines);
@@ -31,9 +32,9 @@ function RootLayoutInner() {
 
   useEffect(() => {
     initialize().then(async () => {
-      await Promise.all([loadColorScheme(), loadSummary(), loadOnboardingDone()]);
+      await Promise.all([loadColorScheme(), loadSummary(), loadOnboardingDone(), loadReducedMotion()]);
     });
-  }, [loadColorScheme, loadSummary, loadOnboardingDone]);
+  }, [loadColorScheme, loadSummary, loadOnboardingDone, loadReducedMotion]);
 
   return (
     <SafeAreaProvider>
