@@ -9,7 +9,7 @@
 ![Database](https://img.shields.io/badge/Base%20de%20donne%CC%81es-Locale%20SQLite-orange?style=for-the-badge&logo=sqlite&logoColor=white&color=47A248)
 ![Offline](https://img.shields.io/badge/Offline%20First-100%25-brightgreen?style=for-the-badge&logo=cloud-offline&color=2E7D32)
 ![Status](https://img.shields.io/badge/Statut-En%20de%CC%81veloppement-informational?style=for-the-badge&color=00629E)
-![Version](https://img.shields.io/badge/Version-0.9.2-yellow?style=for-the-badge&color=FDD835)
+![Version](https://img.shields.io/badge/Version-0.9.3-yellow?style=for-the-badge&color=FDD835)
 
 <br/>
 
@@ -152,6 +152,7 @@ PicsouCollectionApp/
 | **10 — Refonte UI/UX** | Vault Lisible : SafeZone, contraste AA, TabBar icônes, parcours <3s | ✅ Terminé — **v0.9.0** |
 | **10R — Retours test** | Drawer + tabs, formulaire au clavier, torche, import CSV | ✅ Terminé — **v0.9.1** |
 | **10R2 — Retours test** | Drawer SafeZone, onboard + permission, paramètres sous-menus, header fiche, tri, OCR numéro, recherche | ✅ Terminé — **v0.9.2** |
+| **10R3 — Retours test** | Panneau de recherche repliable Collection, drawer scrollable, popup/form, renommage **Mag Collection** | ✅ Terminé — **v0.9.3** |
 | **9 — Tests terrain & publication** | Vrais magazines, Play Store | ⬜ À venir |
 
 Détail complet : [docs/11-ROADMAP.md](docs/11-ROADMAP.md)

@@ -13,6 +13,28 @@
 
 ---
 
+## [0.9.3] — 2026-09-07
+
+> Treizième release : **retours test physique v0.9.2** — panneau de recherche
+> repliable sur la Collection, drawer scrollable, popup résultat et formulaire
+> au clavier, renommage de l'app en **« Mag Collection »**, version alignée 0.9.3.
+
+### Added
+- **Collection** : bouton jaune « Rechercher » + panneau repliable — Numéro et Tri côte à côte, Édition dessous, ouverture automatique quand le drawer pré-filtre (`params.edition`) — #177 / US-UX-23
+- **Drawer** : menu rendu **scrollable** quand la section « Par édition » dépasse la hauteur d'écran (header fixe) — accès à tous les items
+- Documentation : registre des issues **unifié** dans `docs/09-ISSUE.md` (§6.1 + décisions §6.2), dossier `docs/issues/` et scripts de création archivés ; US-UX-23
+
+### Changed
+- **Nom affiché de l'app** : `PicsouCollection` → **`Mag Collection`** (sous l'icône, display name ; `slug`/`package` inchangés)
+- **Version** alignée sur la release : `0.9.3` (app.json + package.json)
+- Construction : profil `preview` en `buildType: apk`, build local `eas build --profile preview --platform android --local` (doc `10-CI-CD.md` §5), scripts npm `android/ios` → `expo run:android/ios`
+
+### Fixed
+- Scan : espacement des boutons de la popup « Couverture reconnue » resserré
+- Formulaire : bouton Enregistrer accessible sans scroll (spacer clavier déplacé sous le submit)
+
+---
+
 ## [0.9.2] — 2026-09-06
 
 > Douzième release : **reprise M-10R** — drawer conforme aux issues #156/#157,
