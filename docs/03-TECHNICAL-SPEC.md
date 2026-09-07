@@ -24,14 +24,14 @@
 
 | Domaine | Technologie | Version cible |
 |---|---|---|
-| Framework | React Native | via Expo (SDK ~52) |
+| Framework | React Native | via Expo (SDK ~57) |
 | Runtime | Expo (Development Build) | — |
-| Langage | TypeScript | ~5.x |
+| Langage | TypeScript | ~6.x |
 | Navigation | Expo Router | — |
 | Base de données | SQLite (`expo-sqlite`) | — |
 | Gestion d'état | Zustand | — |
 | Caméra | `expo-camera` | — |
-| Scan code-barres | `expo-barcode-scanner` ou `expo-camera` (scan) | — |
+| Scan code-barres | `expo-camera` (scan EAN-13 / ISBN) | — |
 | OCR | Google ML Kit Text Recognition (module natif) | — |
 | Fichiers | `expo-file-system` + `expo-document-picker` + `expo-sharing` | — |
 | Tests | Jest + React Native Testing Library | — |
@@ -75,8 +75,8 @@ Navigation par fichiers, alignée sur la structure décrite dans `05-ARCHITECTUR
 | Store | Responsabilité |
 |---|---|
 | `useCollectionStore` | Liste de la collection, compteur, opérations CRUD sur magazines/exemplaires |
-| `useSettingsStore` | Thème, langue (FR), préférences |
-| `useIdentificationStore` | État du flux d'identification (méthode courante, résultat, confiance) |
+| `useSettingsStore` | Thème (système / clair / sombre), langue (FR) |
+| `useBackupStore` | État du flux export / import (fichier choisi, busy, erreurs) |
 
 > La source de vérité de la collection reste **SQLite** : les stores Zustand servent de cache/état UI synchronisé avec la base via les repositories.
 
@@ -220,16 +220,16 @@ Priorités :
 
 ```json
 {
-  "expo": "^52.0.0",
-  "expo-router": "^4.0.0",
-  "expo-sqlite": "^15.0.0",
-  "expo-camera": "^16.0.0",
-  "expo-file-system": "^18.0.0",
-  "expo-document-picker": "^13.0.0",
-  "expo-sharing": "^13.0.0",
-  "react-native": "0.76.x",
-  "react": "18.3.x",
-  "zustand": "^5.0.0"
+  "expo": "~57.0.20",
+  "expo-router": "~57.0.19",
+  "expo-sqlite": "~57.0.2",
+  "expo-camera": "~57.0.4",
+  "expo-file-system": "~57.0.6",
+  "expo-document-picker": "~57.0.1",
+  "expo-sharing": "~57.0.18",
+  "react-native": "0.86.3",
+  "react": "19.2.3",
+  "zustand": "^5.0.15"
 }
 ```
 
@@ -237,12 +237,13 @@ Priorités :
 
 ```json
 {
-  "typescript": "^5.x",
-  "jest": "^29.x",
-  "jest-expo": "~52.0.0",
-  "@testing-library/react-native": "^12.x",
-  "eslint": "^8.x",
-  "eslint-config-expo": "~8.0.0"
+  "typescript": "~6.0.3",
+  "jest": "^29.7.0",
+  "jest-expo": "^57.0.5",
+  "@testing-library/react-native": "13.2.0",
+  "eslint": "^9.39.5",
+  "eslint-config-expo": "~57.0.2",
+  "prettier": "^3.9.6"
 }
 ```
 
@@ -250,7 +251,7 @@ Priorités :
 ```json
 {
   "expo-mlkit-ocr": "^0.2.7",
-  "expo-build-properties": "~57.0.16"
+  "expo-build-properties": "~57.0.17"
 }
 ```
 Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.

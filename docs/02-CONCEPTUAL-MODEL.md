@@ -112,13 +112,13 @@ La publication est représentée textuellement par le champ `publication` de l'�
 ## 5. Relations entre entités
 
 ```
-magazines ─┬── 1:N ──> code-barres        (dans edition.barcode)
+magazines ─┬── 0..1 ──> barcode (valeur EAN-13 / ISBN)
            │
            └── 1:N ──> collection_items   (exemplaires possédés)
 ```
 
 ### 5.1 Édition → Code-barres
-Une édition peut avoir **au plus un code-barres principal** dans le MVP (attribut `barcode`). Le passage à plusieurs codes-barres par édition est une évolution possible.
+Une édition peut avoir **au plus un code-barres principal** dans le MVP (attribut `barcode`). Plusieurs éditions peuvent partager la **même valeur** de code-barres (index non unique) — cas d'une réédition au même code. Le passage à plusieurs codes-barres par édition est une évolution possible.
 
 ### 5.2 Édition → Exemplaires
 Une édition peut avoir **zéro ou plusieurs** exemplaires. Le nombre d'exemplaires s'obtient en comptant les `collection_items`.

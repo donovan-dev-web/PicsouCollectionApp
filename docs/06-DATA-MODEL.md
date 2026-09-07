@@ -23,10 +23,11 @@
 
 > **SQLite via `expo-sqlite`, avec un schéma simple et orienté document.**
 
-Le MVP utilise **deux tables** :
+Le MVP utilise **trois tables** :
 
 - `magazines` — l'édition (entité centrale) ;
-- `collection_items` — les exemplaires physiques possédés.
+- `collection_items` — les exemplaires physiques possédés ;
+- `settings` — les paramètres applicatifs (thème, etc.).
 
 Contrairement à la version 0.2 qui prévoyait quatre tables (`magazines`, `magazine_barcodes`, `magazine_details`, `collection_items`), le schéma a été **rationalisé** pour un projet personnel de volume modéré (moins de ~5 000 magazines).
 

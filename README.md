@@ -110,7 +110,7 @@ PicsouCollectionApp/
 │   ├── store/             # Zustand stores
 │   └── __tests__/         # Tests Jest (co-localisés)
 │
-├── eas.json               # Profils EAS Build (development / preview / production)
+├── eas.json               # Profils EAS Build (development / preview)
 ├── package.json           # Scripts & dépendances
 └── CONTRIBUTING.md        # Conventions de contribution
 ```
@@ -129,8 +129,8 @@ PicsouCollectionApp/
 | **Caméra** | `expo-camera` |
 | **OCR** | Google ML Kit Text Recognition (`expo-mlkit-ocr`) |
 | **Fichiers** | `expo-file-system` + `expo-sharing` |
-| **Tests** | Jest (`jest-expo`) + `expo-doctor` |
-| **Build / CI** | EAS Build (development / preview / production) + Git Flow, GitHub Actions |
+| **Tests** | Jest (`jest-expo`) + React Native Testing Library + `expo-doctor` |
+| **Build / CI** | EAS Build (development / preview) + Git Flow, GitHub Actions |
 
 ---
 
@@ -172,7 +172,7 @@ La documentation complète du projet se trouve dans [`docs/`](docs/), organisée
 | [04-FONCTIONAL-SPEC.md](docs/04-FONCTIONAL-SPEC.md) | Spécifications fonctionnelles |
 | [05-ARCHITECTURE.md](docs/05-ARCHITECTURE.md) | Architecture logicielle |
 | [06-DATA-MODEL.md](docs/06-DATA-MODEL.md) | Modèle de données |
-| [07-DATABASE-SCHEMA.md](docs/07-DATABASE-SCHEMA.md) | Schéma SQLite (2 tables) |
+| [07-DATABASE-SCHEMA.md](docs/07-DATABASE-SCHEMA.md) | Schéma SQLite (3 tables) |
 | [08-USER-STORIES.md](docs/08-USER-STORIES.md) | User stories |
 | [09-ISSUE.md](docs/09-ISSUE.md) | Workflow agile |
 | [10-CI-CD.md](docs/10-CI-CD.md) | Pipeline CI/CD |
