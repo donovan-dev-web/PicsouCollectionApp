@@ -335,8 +335,8 @@ parcours brocante < 3s à 1 main.
 | Empty/Loading/Error + Toast partagés | US-UX-06 / M10-11 |
 | Docs + scripts `gh` | M10-12 |
 
-**Livrables** : 12 issues M10-01..12, `docs/issues/M10-*.md`, `scripts/m10-*.sh`,
-`docs/design/M10-TOKENS.md`. Détail : [docs/issues/M10-MILESTONE.md](issues/M10-MILESTONE.md).
+**Livrables** : 12 issues M10-01..12 (#140-#151), `docs/design/M10-TOKENS.md`.
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : À venir** — prérequis de Phase 9.
 
@@ -362,8 +362,8 @@ clavier, OCR en conditions réelles, FAB scan, safezone OCR.
 | Accès scan global via header commun (burger/scan) — FAB 56px remplacé | US-UX-12 / M10R-10 | Done |
 | OCR : bouton code-barres hors gesture bar | US-UX-12 / M10R-11 | Done |
 
-**Livrables** : 11 issues M10R-01..11, `docs/issues/M10R-*.md`.
-Détail : [docs/issues/M10R-MILESTONE.md](issues/M10R-MILESTONE.md).
+**Livrables** : 11 issues M10R-01..11 (#153-#163).
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : Done (v0.9.1 + v0.9.2)** — issues #153-#163 fermées. Tag `v0.9.1`
 crash fix + M10R initial, tag `v0.9.2` reprise M-10R (drawer conforme
@@ -393,9 +393,8 @@ magazine, tri de la collection, OCR numéro affiné, écran Recherche.
 | OCR : numéro affiné (préfixe « N° ») + textes stylisés | US-UX-21 / M10R2-09 | Done |
 | Saisie manuelle flux identification → écran Recherche | US-UX-22 / M10R2-10 | Done |
 
-**Livrables** : 10 issues M10R2-01..10, `docs/issues/M10R2-*.md`,
-`scripts/m10r2-*.sh`. Détail :
-[docs/issues/M10R2-MILESTONE.md](issues/M10R2-MILESTONE.md).
+**Livrables** : 10 issues M10R2-01..10 (#166-#175).
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : Done (v0.9.2)** — issues #166-#175 fermées, **PR #176** mergée sur
 `develop` (CI Quality verte, 337 tests). Le build de validation / tag sont à
