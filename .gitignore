@@ -15,10 +15,15 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Builds locaux EAS (APK / AAB)
+build-*.apk
+build-*.aab
+
 # Web
 web-build/
 dist/
 web-report.html
+.c_preview/
 
 # Tests / coverage
 coverage/

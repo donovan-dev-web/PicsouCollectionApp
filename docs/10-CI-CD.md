@@ -172,12 +172,39 @@ jobs:
 Le module OCR `expo-mlkit-ocr` (Google ML Kit) est **natif** : il n'est pas disponible dans Expo Go. Pour le valider sur un **téléphone Android physique** :
 
 ```bash
-eas build --profile preview --platform android   # produit un APK installable
+eas build --profile preview --platform android   # produit un APK installable (cloud)
 # ou, pour un Development Build (débogage JS + module natif) :
 eas build --profile development --platform android
 ```
 
 À la première exécution, le module est récupéré via le prebuild (config plugins `expo-mlkit-ocr` + `expo-build-properties` déjà paramétrés dans `app.json`). Une fois l'APK installé, ouvrir **Scan → Caméra / OCR** et viser une couverture : le texte reconnu doit alimenter l'écran `/scan/camera`.
+
+### 5.0.1 Build APK local (sans consommer le quota cloud)
+
+Le build cloud consomme les minutes du quota EAS. Pour produire le même APK de préview **localement** :
+
+```bash
+# Prérequis :
+# - Android SDK installé (ANDROID_HOME=$HOME/Android/Sdk, build-tools 36.x + platform android-36 + NDK 27.1)
+# - EAS_CLI connecté (eas login)
+
+# 1) Générer le projet natif (dossier android/ est gitignoré, régénéré à chaque build)
+ANDROID_HOME="$HOME/Android/Sdk" npx expo prebuild --platform android --no-install
+
+# 2) Build APK local (préview)
+ANDROID_HOME="$HOME/Android/Sdk" \
+EAS_LOCAL_BUILD_WORKINGDIR="$HOME/eas-build-local" \
+eas build --profile preview --platform android --local --non-interactive
+```
+
+Points clés pour éviter les pièges rencontrés :
+
+| Point | Détail |
+|---|---|
+| Piège `tmpfs` `/tmp` | `EAS_LOCAL_BUILD_WORKINGDIR` doit pointer sur le disque principal : le plugin copie le projet + node_modules + `.gradle` dans ce dossier, et le `tmpfs` de `/tmp` (~7,5 Go) est trop petit → erreur `Disk quota exceeded` |
+| Artifact | L'APK est écrit à la racine du projet : `build-<timestamp>.apk` (gitignoré via `build-*.apk`) |
+| Signing | Le keystore est géré côté EAS (signing : remote) ; aucun secret local requis. En local, le build utilise le keystore de debug par défaut |
+| `local.properties` | Généré automatiquement si `ANDROID_HOME` est défini ; sinon créer `android/local.properties` avec `sdk.dir=<chemin>` |
 
 ### 5.1 À venir — Workflow GitHub (build automatique sur release)
 
