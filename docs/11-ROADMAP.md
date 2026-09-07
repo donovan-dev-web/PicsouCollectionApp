@@ -55,7 +55,9 @@ Phase 8  ███████████████████████�
 Phase 10 ██████████████████████████████  Terminé ✓ (v0.9.0, PR #152)
 Phase 10R ██████████████████████████████  Terminé ✓ (v0.9.1)
 Phase 10R2 ██████████████████████████████  Terminé ✓ (v0.9.2)
+Phase 10R3 ██████████████████████████████  Terminé ✓ (v0.9.3)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
+Phase 11 ▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░  En cours (M-11 → v1.0.0)
 ```
 
 ### 2.1 Correspondance phase ↔ milestone ↔ issues
@@ -78,8 +80,10 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 10 — Refonte UI/UX | `M-10 — Refonte UI/UX « Vault Lisible »` | `US-UX-01..06` (issues M10-01..12) | 12 |
 | 10R — Retours test M-10 | `M-10R — Retours test physique (v0.9.1)` | `US-UX-07..12` (issues M10R-01..11) | 11 |
 | 10R2 — 2ᵉ passe retours | `M-10R2 — 2ᵉ passe retours test physique (v0.9.2)` | `US-UX-13..22` (issues M10R2-01..10) | 10 |
-| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03`, `US-UX-23` (#177) | 2 |
-| **Total** | | | **103** |
+| 10R3 — Retours test v0.9.3 | `M-09 — Tests terrain & publication` | `US-UX-23` (#177), retours physiques v0.9.3 | 1 |
+| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
+| 11 — Review & Qualité | `M-11 — Review & Qualité v1.0.0` | issues M11-01..10 (#181-#190) | 10 |
+| **Total** | | | **114** |
 
 ---
 
@@ -137,9 +141,9 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 |---|---|
 | Schéma SQL `magazines` + `collection_items` | US-DB-01 |
 | Gestion des migrations (`PRAGMA user_version`) | US-DB-01 |
-| Repository `magazineRepository` (CRUD) | US-DB-02, US-DB-03, US-DB-04 |
-| Repository `collectionRepository` (exemplaires) | US-DB-05 |
-| Service `collectionService` | — |
+| Repository `magazine-repository` (CRUD) | US-DB-02, US-DB-03, US-DB-04 |
+| Repository `collection-repository` (exemplaires) | US-DB-05 |
+| Logique de collection (via `useCollectionStore`) | — |
 | Tests unitaires repositories | US-QA-02 |
 
 **Livrables** : couche persistance testée et fonctionnelle (29 tests / 7 suites, 100 % couverture).
@@ -338,7 +342,8 @@ parcours brocante < 3s à 1 main.
 **Livrables** : 12 issues M10-01..12 (#140-#151), `docs/design/M10-TOKENS.md`.
 Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
-**Statut : À venir** — prérequis de Phase 9.
+**Statut : Terminé ✓ (release `v0.9.0`)** — issues M10-01..12 (#140-#151),
+build preview (PR #152) puis livraison PR #148.
 
 ---
 
@@ -402,7 +407,30 @@ v1.0.0 sont vérifiés dans la **phase M-11** (#182, #189).
 
 ---
 
-## 17. Phase 9 — Tests terrain & publication
+## 17. Phase 10R3 — Retours test physique (M-09 → v0.9.3)
+
+**Objectif** : derniers retours du test physique sur le build v0.9.2 — recherche
+repliable sur la Collection, drawer scrollable, formulaire au clavier et popup
+« Couverture reconnue », renommage en **Mag Collection**.
+
+| Tâche | Story / Issue | Statut |
+|---|---|---|
+| Collection : panneau de recherche repliable (bouton Rechercher) | US-UX-23 / M09-01 (#177) | Done |
+| Drawer : scroll quand « Par édition » dépasse l'écran | retours v0.9.2 | Done |
+| Popup « Couverture reconnue » : espacement boutons | retours v0.9.2 | Done |
+| Formulaire : bouton Enregistrer accessible sans scroll | retours v0.9.2 | Done |
+| Renommage : PicsouCollection → **Mag Collection** | — | Done |
+
+**Livrables** : release **v0.9.3** — **PR #178** mergée sur `develop` (CI verte,
+40 suites / 339 tests), tag `v0.9.3`, GitHub Release + APK
+`Mag-Collection-v0.9.3.apk`.
+
+**Statut : Done (v0.9.3)** — le build de validation / tag de la v1.0.0 sont
+vérifiés dans la **phase M-11** (#182, #189).
+
+---
+
+## 18. Phase 9 — Tests terrain & publication
 
 **Objectif** : Validation réelle puis **publication finale v1.0.0** sous forme d'APK téléchargeable sur GitHub.
 
@@ -411,16 +439,40 @@ v1.0.0 sont vérifiés dans la **phase M-11** (#182, #189).
 | Test avec magazines réels (nouveaux, anciens, abîmés) | — |
 | Test en conditions réelles (brocante, réseau absent) | — |
 | Corrections finales | — |
-| Collection : panneau de recherche repliable (bouton Rechercher) | US-UX-23 / M09-01 (#177) |
 | Build APK final (profil `preview`) | US-QA-03 |
-| Retrait des références Play Store de la doc | M11-02 (#182) |
 | GitHub Release v1.0.0 : APK téléchargeable + notes | M11-09 (#189) |
 
 **Livrables** : application validée, release v1.0.0 publiée avec son APK sur GitHub.
 
 ---
 
-## 18. Critères de sortie de chaque phase
+## 19. Phase 11 — Review & Qualité v1.0.0 (M-11)
+
+**Objectif** : préparer la **v1.0.0** — audit documentation ↔ code, revue
+complète du code, refactor & nettoyage, renfort des tests, retrait du Play
+Store et publication finale en APK GitHub.
+
+| Tâche | Issue | Statut |
+|---|---|---|
+| Audit & réalignement documentation ↔ code | M11-01 (#181) | En cours |
+| Retirer le Play Store → publication APK GitHub | M11-02 (#182) | Done |
+| Revue complète du code | M11-03 (#183) | À faire |
+| Découper les gros écrans (`camera.tsx`, `barcode.tsx`) | M11-04 (#184) | À faire |
+| Découper services & composants métier | M11-05 (#185) | À faire |
+| Code mort, commentaires, conventions | M11-06 (#186) | À faire |
+| Tests orienté utilisateur (acceptance) | M11-07 (#187) | À faire |
+| Tests fonctions/execution + couverture alignée doc | M11-08 (#188) | À faire |
+| Release v1.0.0 : version, tag, APK téléchargeable | M11-09 (#189) | À faire |
+| Hygiène des milestones obsolètes | M11-10 (#190) | À faire |
+
+**Livrables** : 10 issues M11-01..10 (#181-#190).
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
+
+**Statut : En cours** — milestone **M-11 — Review & Qualité v1.0.0** ouvert.
+
+---
+
+## 20. Critères de sortie de chaque phase
 
 Pour chaque phase, les critères de sortie sont :
 
@@ -449,9 +501,11 @@ Pour chaque phase, les critères de sortie sont :
 | 6 — Parcours complet | Boucle complète | US-ID-04, US-ID-06, US-COL-06 | 3 |
 | 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
 | 7R — Retours test | Retours v0.7.0 (OCR + format) | US-ID-08..09 (1 bug), US-BK-04..05 | 5 |
-| 8 — Optimisation | Performance | US-QA-02 | 1 |
+| 8 — Optimisation | Performance | US-QA-02, #136 | 2 |
 | 10 — Refonte UI/UX | Vault Lisible (v0.9.0) | US-UX-01..06 (M10-01..12) | 12 |
 | 10R — Retours test M-10 | Retours v0.9.1 (drawer, tabs, OCR) | US-UX-07..12 (M10R-01..11) | 11 |
 | 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..22 (M10R2-01..10) | 10 |
-| 9 — Publication | APK GitHub (release) | US-QA-03, US-UX-23 (M09-01) | 2 |
-| **Total** | | | **103** |
+| 10R3 — Retours test v0.9.3 | Recherche repliable, drawer scroll, renommage | US-UX-23 (M09-01) | 1 |
+| 9 — Publication | APK GitHub (release v1.0.0) | US-QA-03 | 1 |
+| 11 — Review & Qualité | Préparation v1.0.0 | M11-01..10 (#181-#190) | 10 |
+| **Total** | | | **114** |

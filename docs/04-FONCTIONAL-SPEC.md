@@ -31,18 +31,25 @@ L'application comporte les écrans suivants (navigation Expo Router) :
 
 | Écran | Route | Objectif |
 |---|---|---|
-| Accueil | `/` | Cockpit : compteur + actions principales |
+| Onboarding | `/onboarding` | Accueil (thème, modèle de franchise, fin) |
+| Accueil | `/` (tabs) | Cockpit : compteur + actions principales |
+| TabBar | `(tabs)` | Navigation Accueil \| Ma Collection \| Paramètres |
 | Choix méthode | `/scan` | Choix code-barres / caméra / manuel |
 | Scanner code-barres | `/scan/barcode` | Scan EAN-13 / ISBN |
 | Caméra / OCR | `/scan/camera` | Reconnaissance par flux caméra |
 | Saisie manuelle | `/scan/manual` | Formulaire de saisie |
+| Saisie formulaire | `/scan/form-barcode` | Enregistrement d'un code-barres reconnu |
+| Rechercher | `/scan/search` | Recherche par franchise / titre / numéro |
 | Résultat | `/scan/result` | Possédé / Absent |
 | Plusieurs éditions | `/scan/multiple` | Code-barres → liste d'éditions |
-| Ma Collection | `/collection` | Liste, recherche, filtres |
+| Ma Collection | `/collection` (tabs) | Liste, recherche, filtres |
 | Fiche Magazine | `/collection/[id]` | Détail d'une édition |
-| Paramètres | `/settings` | Sauvegarde, données, version |
-| Export | `/settings/export` | Export JSON |
-| Import | `/settings/import` | Import JSON |
+| Modifier | `/collection/[id]/edit` | Édition de la fiche |
+| Paramètres | `/settings` (tabs) | Sous-menus, sauvegarde, version |
+| Sauvegarde | `/settings/backup` | Export / Import JSON ou CSV |
+| Apparence | `/settings/appearance` | Thème (système / clair / sombre) |
+| Accessibilité | `/settings/accessibility` | Réductions de mouvements |
+| Aide | `/settings/help` | À propos, version |
 
 ---
 

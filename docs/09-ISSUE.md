@@ -539,7 +539,7 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 À l'initialisation du dépôt GitHub, configurer :
 
 - [ ] **Labels** : types, priorités, épiques, complexité (section 5) ;
-- [ ] **Milestones** : M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
+- [ ] **Milestones** : M-01 à M-11 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
 - [ ] **Project** : board Kanban "Picsou Collection" (section 10) ;
 - [ ] **Branch protection** sur `main` et `develop` (section 7) ;
 - [ ] **Templates d'issue** (bug + tâche) via `.github/ISSUE_TEMPLATE/` ;
@@ -557,6 +557,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
+| Milestones | M-01 à M-11 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |

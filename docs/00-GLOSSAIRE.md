@@ -80,7 +80,7 @@ Le statut est **toujours dérivé** du nombre réel d'exemplaires, jamais d'un c
 ### Schéma
 **Général :** définition structurelle d'une base de données (tables, colonnes, index).
 
-**Contexte :** le schéma cible du MVP comporte **2 tables** : `magazines` (édition) et `collection_items` (exemplaire). La version de schéma est stockée dans `PRAGMA user_version`.
+**Contexte :** le schéma cible du MVP comporte **3 tables** : `magazines` (édition), `collection_items` (exemplaire) et `settings` (paramètres). La version de schéma est stockée dans `PRAGMA user_version`.
 
 ### Migration
 **Général :** procédure de passage d'une version de schéma à une autre.
@@ -115,7 +115,7 @@ Le statut est **toujours dérivé** du nombre réel d'exemplaires, jamais d'un c
 ### Expo Router
 **Général :** bibliothèque de navigation basée sur les fichiers pour React Native/Expo.
 
-**Contexte :** navigation par arborescence de fichiers dans `app/` (accueil, scan, collection, settings).
+**Contexte :** navigation par arborescence de fichiers dans `src/app/` (accueil, scan, collection, settings).
 
 ### EAS Build
 **Général :** service cloud d'Expo pour construire des builds.

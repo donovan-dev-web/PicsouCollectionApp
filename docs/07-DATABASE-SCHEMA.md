@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS magazines (
 - **`language`** : langue de l'édition ou valeur normalisée (ex. `FR`) ;
 - **`condition`** : état de l'édition (ex. `neuf`, `usé`) ;
 - **`publication_date`** : texte ISO selon la précision disponible (`2023-03-01` ou `2023-03`) ;
-- **`barcode`** : EAN-13 ou ISBN. Index unique (voir section Index). `NULL` autorisé (magazine sans code-barres) ;
+- **`barcode`** : EAN-13 ou ISBN. Index non unique (voir section Index). `NULL` autorisé (magazine sans code-barres) ;
 - **`notes`** : notes libres sur l'édition ;
 - **`ocr_text`** : texte brut OCR éventuellement conservé. Ne contient **jamais** d'image ;
 - **`created_at` / `updated_at`** : timestamps ISO 8601.

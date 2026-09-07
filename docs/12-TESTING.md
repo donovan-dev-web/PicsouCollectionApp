@@ -56,7 +56,7 @@ Les deux catégories sont **réalisées en parallèle et sont toutes deux néces
 Ces tests valident les **contrats de code** : entrées → sorties, gestion des cas limites, intégrité des données. Ils sont **indépendants de l'interface**.
 
 ### Exemples de volets vérifiés
-- le `collectionService` retourne le bon statut Possédé / Absent selon le nombre d'exemplaires ;
+- la logique de collection (`useCollectionStore`) retourne le bon statut Possédé / Absent selon le nombre d'exemplaires ;
 - le parseur EAN-13/ISBN lit correctement un code donné ;
 - la validation d'import rejette un fichier au mauvais format ;
 - l'export JSON produit un fichier bien formé ;
@@ -97,12 +97,12 @@ Ces tests s'appuient sur les **user stories** et leurs **critères d'acceptation
 Couvrent les **services** et **repositories** de façon isolée.
 
 **Cibles :**
-- `collectionService` : logique de possession (Possédé / Absent) ;
+- store Collection : logique de possession (Possédé / Absent) ;
 - `identificationService` : identification par barcode / OCR ;
-- `confidence` : calcul et seuils de confiance ;
-- `backup/export` : sérialisation JSON ;
-- `backup/import` : validation et import ;
-- `magazineRepository` : CRUD et requêtes ;
+- `ocrTextParser` : extraction et seuils de confiance ;
+- `backup-service` : sérialisation JSON / CSV ;
+- `backup-service` : validation et import ;
+- `magazine-repository` : CRUD et requêtes ;
 
 **But :** vérifier la logique métier sans dépendre de l'UI ni du matériel.
 
@@ -130,10 +130,11 @@ Tests sur **téléphone physique** avec de vrais magazines, notamment pour camé
 | **Jest** | Framework de test (runner + assertions) |
 | **jest-expo** | Preset Jest pour React Native / Expo |
 | **@types/jest** | Types TS pour Jest (29.5.14, aligné Expo SDK 57) |
+| **@testing-library/react-native** | Rendu et interactions des composants en environnement de test |
 | **react-test-renderer** | Rendu des composants en environnement de test |
 | **expo-doctor** | Vérification de la santé du projet / écosystème Expo (21 checks) |
 
-> **À venir** : React Native Testing Library (tests de composants interactifs) et `ts-jest` seront ajoutés quand les écrans seront développés (M-03).
+> React Native Testing Library est utilisé pour les tests de composants et d'écrans (convention `*.test.tsx`).
 
 ---
 
@@ -143,18 +144,24 @@ Les tests sont placés **à côté du code source** qu'ils couvrent, convention 
 
 ```
 src/
-├── collection/
-│   ├── collectionService.ts
-│   └── __tests__/
-│       └── collectionService.test.ts
-│
 ├── identification/
 │   ├── scanBarcode.ts
 │   └── __tests__/
 │       └── scanBarcode.test.ts
+│
+├── backup/
+│   ├── backup-service.ts
+│   └── __tests__/
+│       └── backup-service.test.ts
+│
+└── app/
+    ├── settings/
+    │   ├── backup.tsx
+    │   └── backup.test.tsx
+    └── ...
 ```
 
-Alternativement, les tests peuvent être co-localisés `collectionService.test.ts` au même niveau.
+Les tests peuvent également être co-localisés au niveau du fichier couvert (convention `*.test.ts` / `*.test.tsx`).
 
 ---
 
@@ -175,11 +182,11 @@ Alternativement, les tests peuvent être co-localisés `collectionService.test.t
 
 | Zone | Couverture actuelle | Couverture cible |
 |---|---|---|
-| Global | **90,24 %** (seuil CI ≥ 80 %, M-08) | ≥ 80 % |
+| Global | **87,38 %** (statements, seuil CI ≥ 80 %) | ≥ 80 % |
 | Services / repositories | consolidée (M-02) | ≥ 85 % |
 | Composants critiques | consolidée (M-03) | ≥ 70 % |
 
-> État M-08 : 270 tests / 33 suites, couverture globale 90,24 % (statements), branches 85,86 %, seuils globaux 80 %.
+> État M-11 : **339 tests / 40 suites**, couverture globale — statements **87,38 %**, branches **80,78 %**, functions **85,21 %**, lines **87,77 %** (seuil global CI ≥ 80 %). État mesuré en M-08 : 270 tests / 33 suites, statements 90,24 %, branches 85,86 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
