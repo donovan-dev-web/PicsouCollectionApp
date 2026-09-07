@@ -310,8 +310,6 @@ export function MagazineForm({
           </Text>
         ) : null}
 
-        <View style={styles.keyboardSpacer} />
-
         <Pressable
           style={[styles.submit, !canSubmit && styles.submitDisabled]}
           onPress={handleSubmit}
@@ -326,6 +324,7 @@ export function MagazineForm({
             Renseignez la publication pour enregistrer.
           </Text>
         ) : null}
+        <View style={styles.keyboardSpacer} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
