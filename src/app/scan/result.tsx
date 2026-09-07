@@ -172,7 +172,7 @@ function makeStyles(colors: ThemeColors) {
       backgroundColor: colors.background,
       padding: Spacing.four,
       justifyContent: 'center',
-      gap: Spacing.three,
+      gap: Spacing.one,
     },
     title: {
       fontSize: 24,
@@ -229,7 +229,7 @@ function makeStyles(colors: ThemeColors) {
       textAlign: 'center',
     },
     actions: {
-      gap: Spacing.three,
+      gap: Spacing.two,
       marginTop: Spacing.two,
     },
     primaryButton: {
@@ -237,7 +237,7 @@ function makeStyles(colors: ThemeColors) {
       justifyContent: 'center',
       backgroundColor: colors.accent,
       minHeight: 48,
-      paddingVertical: Spacing.two,
+      paddingVertical: Spacing.one,
       paddingHorizontal: Spacing.three,
       borderRadius: 12,
     },
@@ -251,7 +251,7 @@ function makeStyles(colors: ThemeColors) {
       justifyContent: 'center',
       backgroundColor: colors.backgroundElement,
       minHeight: 48,
-      paddingVertical: Spacing.two,
+      paddingVertical: Spacing.one,
       paddingHorizontal: Spacing.three,
       borderRadius: 12,
     },
