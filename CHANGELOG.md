@@ -81,8 +81,8 @@
 > WCAG AA, TabBar icônes, sémantique Possédé=vert, parcours brocante <3s.
 
 ### Added
-- Milestone M-10 : 12 issues `docs/issues/M10-*.md` (#140-#151) + User Stories US-UX-01..06
-- Scripts `scripts/m10-create-milestone.sh`, `scripts/m10-create-issues.sh` (dry-run OK)
+- Milestone M-10 : 12 issues (#140-#151, registre `docs/09-ISSUE.md` §6.1) + User Stories US-UX-01..06
+- Scripts `scripts/m10-create-milestone.sh`, `scripts/m10-create-issues.sh` (dry-run OK, archivés avec la consolidation doc en Phase 9)
 - Tokens étendus : échelle Spacing/Typo, statuts vert positif, `accentText` lisible
 - Composant `Screen` SafeArea + TabBar à icônes + `StatusBadge` thématisé
 - Dépendance `@expo/vector-icons` (Feather) + `jest.setup.js` (mock SafeArea/icônes)

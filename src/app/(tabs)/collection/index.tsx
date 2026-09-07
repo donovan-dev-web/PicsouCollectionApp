@@ -78,6 +78,7 @@ export default function CollectionScreen() {
   const [editionFilter, setEditionFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOption>('Numéro ↑');
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [lastParamEdition, setLastParamEdition] = useState<string | undefined>(undefined);
 
   const paramEdition = typeof params.edition === 'string' ? params.edition : undefined;
@@ -86,6 +87,7 @@ export default function CollectionScreen() {
     if (paramEdition) {
       setEditionFilter(paramEdition);
       setPage(1);
+      setFiltersOpen(true);
     }
   }
 
@@ -164,46 +166,72 @@ export default function CollectionScreen() {
       <AppHeader title="Ma Collection" />
       <View style={styles.screen}>
         <View style={styles.filters}>
-          <Text style={styles.filterLabel}>Numéro</Text>
-          <TextInput
-            style={styles.input}
-            value={issueQuery}
-            onChangeText={applyIssue}
-            placeholder="Ex : 547"
-            keyboardType="number-pad"
-            returnKeyType="done"
-            placeholderTextColor={colors.textSecondary}
-            testID="filter-issue"
-            accessibilityLabel="Filtrer par numéro"
-          />
-          <SelectField
-            label="Édition"
-            placeholder="Toutes les éditions"
-            value={editionFilter}
-            options={editions}
-            onSelect={applyEdition}
-            noneLabel="Toutes les éditions"
-            testID="filter-edition"
-          />
-          <SelectField
-            label="Tri"
-            placeholder="Tri"
-            value={sort}
-            options={SORT_OPTIONS}
-            onSelect={applySort}
-            testID="filter-sort"
-          />
-          {hasFilters ? (
-            <Pressable
-              style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}
-              onPress={clearFilters}
-              testID="filter-clear"
-              accessibilityRole="button"
-              accessibilityLabel="Effacer les filtres"
-              android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
-              <Feather name="x" size={16} color={colors.textSecondary} />
-              <Text style={styles.clearButtonText}>Effacer les filtres</Text>
-            </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.searchButton, pressed && styles.buttonPressed]}
+            onPress={() => setFiltersOpen((o) => !o)}
+            testID="filter-toggle"
+            accessibilityRole="button"
+            accessibilityLabel="Rechercher"
+            accessibilityState={{ expanded: filtersOpen }}>
+            <Feather name="search" size={20} color={colors.accentText} />
+            <Text style={styles.searchButtonText}>Rechercher</Text>
+            <Feather
+              name={filtersOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.accentText}
+            />
+          </Pressable>
+
+          {filtersOpen ? (
+            <View style={styles.filtersPanel}>
+              <View style={styles.filtersRow}>
+                <View style={styles.filtersColumn}>
+                  <Text style={styles.filterLabel}>Numéro</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={issueQuery}
+                    onChangeText={applyIssue}
+                    placeholder="Ex : 547"
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                    placeholderTextColor={colors.textSecondary}
+                    testID="filter-issue"
+                    accessibilityLabel="Filtrer par numéro"
+                  />
+                </View>
+                <View style={styles.filtersColumn}>
+                  <SelectField
+                    label="Tri"
+                    placeholder="Tri"
+                    value={sort}
+                    options={SORT_OPTIONS}
+                    onSelect={applySort}
+                    testID="filter-sort"
+                  />
+                </View>
+              </View>
+              <SelectField
+                label="Édition"
+                placeholder="Toutes les éditions"
+                value={editionFilter}
+                options={editions}
+                onSelect={applyEdition}
+                noneLabel="Toutes les éditions"
+                testID="filter-edition"
+              />
+              {hasFilters ? (
+                <Pressable
+                  style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}
+                  onPress={clearFilters}
+                  testID="filter-clear"
+                  accessibilityRole="button"
+                  accessibilityLabel="Effacer les filtres"
+                  android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+                  <Feather name="x" size={16} color={colors.textSecondary} />
+                  <Text style={styles.clearButtonText}>Effacer les filtres</Text>
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
         </View>
 
@@ -309,6 +337,33 @@ function makeStyles(colors: ThemeColors) {
     },
     filters: {
       gap: Spacing.two,
+    },
+    searchButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.two,
+      minHeight: 48,
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 12,
+      backgroundColor: colors.accent,
+    },
+    searchButtonText: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.accentText,
+    },
+    filtersPanel: {
+      gap: Spacing.two,
+    },
+    filtersRow: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+      alignItems: 'flex-start',
+    },
+    filtersColumn: {
+      flex: 1,
     },
     filterLabel: {
       fontSize: 14,
