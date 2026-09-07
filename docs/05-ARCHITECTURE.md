@@ -202,7 +202,7 @@ identifyByOCR(text): Promise<OcrLookupResult>
 identifyManually(data): Promise<MagazineIdentification>
 ```
 
-#### `ocr/` — moteur OCR (M-05, US-ID-03)
+#### `ocr/` — moteur OCR (M-05, US-ID-03 / M10R2-09, US-UX-21)
 ```ts
 // ocrTypes.ts
 interface OcrEngine { recognize(frame): Promise<OcrFrameResult> }  // OcrFrameResult = { text } | null
@@ -210,6 +210,9 @@ interface OcrEngine { recognize(frame): Promise<OcrFrameResult> }  // OcrFrameRe
 // ocrTextParser.ts  (pur, testable)
 parseOcrText(raw): OcrParseResult      // publication, issueNumber, date, confidence (0..1)
 isConfident(parse): boolean            // seuil MIN_CONFIDENCE
+
+// ocrTextStabilizer.ts (pur, testable) — vote multi-frames M10R2-09
+OcrTextStabilizer(threshold = 2)       // exige 2 lectures OCR identiques avant de conclure
 
 // ocrEngine.ts      (moteur de repli CI-safe)
 NoopOcrEngine                        // retourne toujours null
@@ -225,6 +228,18 @@ moteur est `MlKitOcrEngine` : il capture une photo via `expo-camera`
 module natif est **paresseux** (dans `recognize`) : sur CI / hors Development Build il
 retourne `null` sans bloquer les tests. `NoopOcrEngine` reste disponible comme repli.
 <b>La reconnaissance brute se valide sur téléphone physique</b> (Development Build).
+
+**Qualité lecture (M10R2-09, US-UX-21)** — textes stylisés / encres faibles :
+- Capture **haute résolution** (`takePictureAsync({ quality: 1, skipProcessing: false })`)
+  dans `camera.tsx` pour préserver les petites encres des titres dessinés ;
+- **Vote multi-frames** : seules `OCR_STABLE_READS = 2` lectures concordantes
+  (`publication|numéro|date`) concluent l'identification (`OcrTextStabilizer`),
+  à l'image du `BarcodeStabilizer` (M-04R) ; une lecture isolée reste en analyse ;
+- Extraction du numéro : priorité au préfixe « N° / No / numéro », exclusions
+  renforcées (année `19xx/20xx`, nombre de pages, prix, date complète) ; en cas de
+  multiples « N° », le plus proche du titre reconnu est retenu ;
+- Le **repli code-barres** en confiance faible (M-05) et la règle nom + numéro
+  (`isConfident`, US-ID-08) sont inchangés.
 
 #### `collectionService.ts`
 ```ts

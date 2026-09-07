@@ -50,7 +50,7 @@ export default function ScanMethodScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-            onPress={() => router.push('/scan/manual')}
+            onPress={() => router.push('/scan/search')}
             testID="method-manual"
             accessibilityRole="button"
             accessibilityLabel="Saisir manuellement"

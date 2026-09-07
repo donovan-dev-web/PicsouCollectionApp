@@ -75,6 +75,8 @@ describe('CollectionScreen', () => {
     });
   });
 
+  const openFilters = () => fireEvent.press(screen.getByTestId('filter-toggle'));
+
   it('affiche la liste complete', () => {
     render(<CollectionScreen />);
 
@@ -82,6 +84,20 @@ describe('CollectionScreen', () => {
     expect(screen.getAllByTestId('magazine-card')).toHaveLength(3);
     expect(screen.getByText('Picsou Magazine')).toBeTruthy();
     expect(screen.getByText('Mickey Parade')).toBeTruthy();
+  });
+
+  it('masque les champs de filtre par defaut et les deroule via Rechercher', () => {
+    render(<CollectionScreen />);
+
+    expect(screen.queryByTestId('filter-issue')).toBeNull();
+    expect(screen.queryByTestId('filter-edition')).toBeNull();
+    expect(screen.queryByTestId('filter-sort')).toBeNull();
+
+    openFilters();
+
+    expect(screen.getByTestId('filter-issue')).toBeTruthy();
+    expect(screen.getByTestId('filter-edition')).toBeTruthy();
+    expect(screen.getByTestId('filter-sort')).toBeTruthy();
   });
 
   it('pre-filtre la collection via le param edition du drawer', () => {
@@ -104,6 +120,7 @@ describe('CollectionScreen', () => {
 
   it('filtre par numero exact', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.changeText(screen.getByTestId('filter-issue'), '547');
 
@@ -113,6 +130,7 @@ describe('CollectionScreen', () => {
 
   it('filtre par edition via la liste deroulante', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.press(screen.getByTestId('filter-edition'));
     fireEvent.press(screen.getByTestId('filter-edition-option-collection'));
@@ -123,6 +141,7 @@ describe('CollectionScreen', () => {
 
   it('applique les filtres numero et edition simultanement', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.changeText(screen.getByTestId('filter-issue'), '547');
     fireEvent.press(screen.getByTestId('filter-edition'));
@@ -137,6 +156,7 @@ describe('CollectionScreen', () => {
 
   it('affiche un message quand un filtre ne renvoie rien', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.changeText(screen.getByTestId('filter-issue'), '999');
 
@@ -145,6 +165,7 @@ describe('CollectionScreen', () => {
 
   it('reinitialise le filtre edition via Toutes les editions', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.press(screen.getByTestId('filter-edition'));
     fireEvent.press(screen.getByTestId('filter-edition-option-collection'));
@@ -162,6 +183,35 @@ describe('CollectionScreen', () => {
     expect(cards[2]).toBeTruthy();
     expect(screen.getAllByText(/Absent/).length).toBe(1);
     expect(screen.getAllByText(/Possédé/).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('trie par numero decroissant', () => {
+    render(<CollectionScreen />);
+    openFilters();
+
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
+
+    const data = screen.getByTestId('collection-list').props.data;
+    expect(data.map((m: MagazineListItem) => m.publication)).toEqual([
+      'Picsou Magazine',
+      'Mickey Parade',
+      'Super Picsou Géant',
+    ]);
+  });
+
+  it('combine tri decroissant et filtre edition', () => {
+    render(<CollectionScreen />);
+    openFilters();
+
+    fireEvent.press(screen.getByTestId('filter-edition'));
+    fireEvent.press(screen.getByTestId('filter-edition-option-collection'));
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
+
+    const data = screen.getByTestId('collection-list').props.data;
+    expect(data).toHaveLength(1);
+    expect(data[0].publication).toBe('Mickey Parade');
   });
 });
 
@@ -181,6 +231,8 @@ describe('CollectionScreen (pagination)', () => {
     updatedAt: '2026-09-01T10:00:00Z',
     quantity: 1,
   }));
+
+  const openFilters = () => fireEvent.press(screen.getByTestId('filter-toggle'));
 
   beforeEach(() => {
     useCollectionStore.setState({
@@ -221,6 +273,7 @@ describe('CollectionScreen (pagination)', () => {
 
   it('revient a la page 1 quand un filtre est applique', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.press(screen.getByTestId('pagination-page-3'));
     fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
@@ -231,6 +284,7 @@ describe('CollectionScreen (pagination)', () => {
 
   it('masque la pagination quand une seule page suffit', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
 
@@ -240,10 +294,24 @@ describe('CollectionScreen (pagination)', () => {
 
   it('efface les filtres via le bouton dédié', () => {
     render(<CollectionScreen />);
+    openFilters();
 
     fireEvent.changeText(screen.getByTestId('filter-issue'), '45');
     fireEvent.press(screen.getByTestId('filter-clear'));
 
     expect(screen.getByTestId('pagination-page-1')).toBeTruthy();
+  });
+
+  it('revient a la page 1 au changement de tri', () => {
+    render(<CollectionScreen />);
+    openFilters();
+
+    fireEvent.press(screen.getByTestId('pagination-page-3'));
+    expect(screen.getByTestId('pagination-page-3').props.accessibilityState?.selected).toBe(true);
+
+    fireEvent.press(screen.getByTestId('filter-sort'));
+    fireEvent.press(screen.getByTestId('filter-sort-option-Ajout récent'));
+
+    expect(screen.getByTestId('pagination-page-1').props.accessibilityState?.selected).toBe(true);
   });
 });

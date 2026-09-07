@@ -20,13 +20,50 @@ import { Screen } from '@/components/screen';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
+import type { MagazineListItem } from '@/types';
 
 const PAGE_SIZE = 20;
+
+/** Options de tri de la collection (M10R2-08). */
+const SORT_OPTIONS = ['Numéro ↑', 'Numéro ↓', 'Ajout récent', 'Édition (A → Z)'] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
 
 function pageWindow(current: number, total: number): number[] {
   const start = Math.max(1, current - 2);
   const end = Math.min(total, current + 2);
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+function sortMagazines(list: MagazineListItem[], sort: SortOption): MagazineListItem[] {
+  const sorted = [...list];
+  switch (sort) {
+    case 'Numéro ↓':
+      return sorted.sort((a, b) => {
+        const na = a.issueNumber ?? Number.MIN_SAFE_INTEGER;
+        const nb = b.issueNumber ?? Number.MIN_SAFE_INTEGER;
+        if (na !== nb) return nb - na;
+        return a.publication.localeCompare(b.publication);
+      });
+    case 'Ajout récent':
+      return sorted.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    case 'Édition (A → Z)':
+      return sorted.sort((a, b) => {
+        const ea = (a.edition?.trim() || '').toLowerCase();
+        const eb = (b.edition?.trim() || '').toLowerCase();
+        if (ea !== eb) return ea.localeCompare(eb);
+        return a.publication.localeCompare(b.publication);
+      });
+    case 'Numéro ↑':
+    default:
+      return sorted.sort((a, b) => {
+        const na = a.issueNumber ?? Number.MAX_SAFE_INTEGER;
+        const nb = b.issueNumber ?? Number.MAX_SAFE_INTEGER;
+        if (na !== nb) return na - nb;
+        return a.publication.localeCompare(b.publication);
+      });
+  }
 }
 
 export default function CollectionScreen() {
@@ -39,7 +76,9 @@ export default function CollectionScreen() {
   const load = useCollectionStore((s) => s.load);
   const [issueQuery, setIssueQuery] = useState('');
   const [editionFilter, setEditionFilter] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortOption>('Numéro ↑');
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [lastParamEdition, setLastParamEdition] = useState<string | undefined>(undefined);
 
   const paramEdition = typeof params.edition === 'string' ? params.edition : undefined;
@@ -48,6 +87,7 @@ export default function CollectionScreen() {
     if (paramEdition) {
       setEditionFilter(paramEdition);
       setPage(1);
+      setFiltersOpen(true);
     }
   }
 
@@ -67,7 +107,7 @@ export default function CollectionScreen() {
 
   const filtered = useMemo(() => {
     const issue = issueQuery.trim();
-    return magazines.filter((m) => {
+    const list = magazines.filter((m) => {
       if (editionFilter) {
         const edition = m.edition?.trim() ? m.edition.trim() : 'Sans édition';
         if (edition !== editionFilter) {
@@ -82,7 +122,8 @@ export default function CollectionScreen() {
       }
       return true;
     });
-  }, [magazines, issueQuery, editionFilter]);
+    return sortMagazines(list, sort);
+  }, [magazines, issueQuery, editionFilter, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -105,6 +146,13 @@ export default function CollectionScreen() {
     setPage(1);
   };
 
+  const applySort = (value: string | null) => {
+    if (value != null) {
+      setSort(value as SortOption);
+      setPage(1);
+    }
+  };
+
   const hasFilters = issueQuery.trim().length > 0 || editionFilter !== null;
   const clearFilters = () => {
     setIssueQuery('');
@@ -118,38 +166,72 @@ export default function CollectionScreen() {
       <AppHeader title="Ma Collection" />
       <View style={styles.screen}>
         <View style={styles.filters}>
-          <Text style={styles.filterLabel}>Numéro</Text>
-          <TextInput
-            style={styles.input}
-            value={issueQuery}
-            onChangeText={applyIssue}
-            placeholder="Ex : 547"
-            keyboardType="number-pad"
-            returnKeyType="done"
-            placeholderTextColor={colors.textSecondary}
-            testID="filter-issue"
-            accessibilityLabel="Filtrer par numéro"
-          />
-          <SelectField
-            label="Édition"
-            placeholder="Toutes les éditions"
-            value={editionFilter}
-            options={editions}
-            onSelect={applyEdition}
-            noneLabel="Toutes les éditions"
-            testID="filter-edition"
-          />
-          {hasFilters ? (
-            <Pressable
-              style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}
-              onPress={clearFilters}
-              testID="filter-clear"
-              accessibilityRole="button"
-              accessibilityLabel="Effacer les filtres"
-              android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
-              <Feather name="x" size={16} color={colors.textSecondary} />
-              <Text style={styles.clearButtonText}>Effacer les filtres</Text>
-            </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.searchButton, pressed && styles.buttonPressed]}
+            onPress={() => setFiltersOpen((o) => !o)}
+            testID="filter-toggle"
+            accessibilityRole="button"
+            accessibilityLabel="Rechercher"
+            accessibilityState={{ expanded: filtersOpen }}>
+            <Feather name="search" size={20} color={colors.accentText} />
+            <Text style={styles.searchButtonText}>Rechercher</Text>
+            <Feather
+              name={filtersOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.accentText}
+            />
+          </Pressable>
+
+          {filtersOpen ? (
+            <View style={styles.filtersPanel}>
+              <View style={styles.filtersRow}>
+                <View style={styles.filtersColumn}>
+                  <Text style={styles.filterLabel}>Numéro</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={issueQuery}
+                    onChangeText={applyIssue}
+                    placeholder="Ex : 547"
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                    placeholderTextColor={colors.textSecondary}
+                    testID="filter-issue"
+                    accessibilityLabel="Filtrer par numéro"
+                  />
+                </View>
+                <View style={styles.filtersColumn}>
+                  <SelectField
+                    label="Tri"
+                    placeholder="Tri"
+                    value={sort}
+                    options={SORT_OPTIONS}
+                    onSelect={applySort}
+                    testID="filter-sort"
+                  />
+                </View>
+              </View>
+              <SelectField
+                label="Édition"
+                placeholder="Toutes les éditions"
+                value={editionFilter}
+                options={editions}
+                onSelect={applyEdition}
+                noneLabel="Toutes les éditions"
+                testID="filter-edition"
+              />
+              {hasFilters ? (
+                <Pressable
+                  style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}
+                  onPress={clearFilters}
+                  testID="filter-clear"
+                  accessibilityRole="button"
+                  accessibilityLabel="Effacer les filtres"
+                  android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+                  <Feather name="x" size={16} color={colors.textSecondary} />
+                  <Text style={styles.clearButtonText}>Effacer les filtres</Text>
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
         </View>
 
@@ -179,6 +261,7 @@ export default function CollectionScreen() {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
               keyboardShouldPersistTaps="handled"
+              testID="collection-list"
               refreshControl={
                 <RefreshControl
                   refreshing={loading}
@@ -254,6 +337,33 @@ function makeStyles(colors: ThemeColors) {
     },
     filters: {
       gap: Spacing.two,
+    },
+    searchButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.two,
+      minHeight: 48,
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 12,
+      backgroundColor: colors.accent,
+    },
+    searchButtonText: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.accentText,
+    },
+    filtersPanel: {
+      gap: Spacing.two,
+    },
+    filtersRow: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+      alignItems: 'flex-start',
+    },
+    filtersColumn: {
+      flex: 1,
     },
     filterLabel: {
       fontSize: 14,

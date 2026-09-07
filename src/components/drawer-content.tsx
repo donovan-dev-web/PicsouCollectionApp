@@ -1,11 +1,22 @@
 import React, { useCallback, useMemo } from 'react';
-import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { slug } from '@/lib/slug';
+import { useSettingsStore } from '@/store/use-settings-store';
 
 const DRAWER_WIDTH = 300;
 const CLOSE_MS = 250;
@@ -116,6 +127,8 @@ export function DrawerMenu({
   const colors = useThemeColors();
   const styles = makeStyles(colors);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const reducedMotion = useSettingsStore((s) => s.reducedMotion);
   const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
   const [scanExpanded, setScanExpanded] = React.useState(false);
   const [editionsExpanded, setEditionsExpanded] = React.useState(!editions || editions.length <= 5);
@@ -125,15 +138,25 @@ export function DrawerMenu({
     if (!editionsManuallyToggled) {
       setEditionsExpanded(!editions || editions.length <= 5);
     }
+    if (reducedMotion) {
+      translateX.setValue(0);
+      return;
+    }
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
       bounciness: 0,
     }).start();
-  }, [editions, editionsManuallyToggled, translateX]);
+  }, [editions, editionsManuallyToggled, translateX, reducedMotion]);
 
   const runAfterClose = useCallback(
     (action: () => void) => {
+      if (reducedMotion) {
+        translateX.setValue(-DRAWER_WIDTH);
+        onClose();
+        action();
+        return;
+      }
       Animated.timing(translateX, {
         toValue: -DRAWER_WIDTH,
         duration: CLOSE_MS,
@@ -146,7 +169,7 @@ export function DrawerMenu({
         action();
       });
     },
-    [translateX, onClose],
+    [translateX, onClose, reducedMotion],
   );
 
   const close = useCallback(() => runAfterClose(() => {}), [runAfterClose]);
@@ -191,107 +214,116 @@ export function DrawerMenu({
         <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Fermer le menu" />
         <Animated.View
           style={[styles.drawerPanel, { transform: [{ translateX }] }]}
+          testID="drawer-panel"
           {...panResponder.panHandlers}>
           <View style={styles.drawer}>
-            <View style={styles.drawerHeader}>
+            <View
+              style={[styles.drawerHeader, { paddingTop: insets.top + 16 }]}
+              testID="drawer-header">
               <Feather name="book-open" size={24} color={colors.accent} />
               <Text style={styles.drawerTitle}>Picsou Collection</Text>
             </View>
 
-            <View style={styles.drawerSection}>
-              <DrawerItem
-                icon="home"
-                label="Accueil"
-                route="/"
-                colors={colors}
-                onPress={navigate}
-              />
-            </View>
-
-            <View style={styles.drawerSection}>
-              <Pressable
-                style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
-                onPress={() => setScanExpanded((e) => !e)}
-                accessibilityRole="button"
-                accessibilityLabel="Scan"
-                accessibilityState={{ expanded: scanExpanded }}
-                testID="drawer-collapsible-scan">
-                <Feather name="camera" size={20} color={colors.text} />
-                <Text style={styles.drawerItemLabel}>Scan</Text>
-                <Feather
-                  name={scanExpanded ? 'chevron-up' : 'chevron-down'}
-                  size={16}
-                  color={colors.textSecondary}
-                  style={styles.drawerChevron}
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: insets.bottom }}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              testID="drawer-scroll">
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                  icon="home"
+                  label="Accueil"
+                  route="/"
+                  colors={colors}
+                  onPress={navigate}
                 />
-              </Pressable>
-              {scanExpanded && (
-                <View style={styles.drawerSubSection}>
-                  <SubItem
-                    icon="camera"
-                    label="OCR (couverture)"
-                    route="/scan/camera"
-                    colors={colors}
-                    onPress={navigate}
-                  />
-                  <SubItem
-                    icon="crop"
-                    label="Code-barres"
-                    route="/scan/barcode"
-                    colors={colors}
-                    onPress={navigate}
-                  />
-                  <SubItem
-                    icon="edit-3"
-                    label="Saisie manuelle"
-                    route="/scan/manual"
-                    colors={colors}
-                    onPress={navigate}
-                  />
-                </View>
-              )}
-            </View>
+              </View>
 
-            <View style={styles.drawerSection}>
-              <DrawerItem
-                icon="book-open"
-                label="Toute la collection"
-                route="/collection"
-                colors={colors}
-                onPress={navigate}
-              />
-              {editions && editions.length > 0 ? (
-                <Collapsible
-                  label="Par édition"
-                  icon="layers"
-                  expanded={editionsExpanded}
-                  onToggle={() => {
-                    setEditionsExpanded((e) => !e);
-                    setEditionsManuallyToggled(true);
-                  }}>
-                  {editions.map((edition) => (
+              <View style={styles.drawerSection}>
+                <Pressable
+                  style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
+                  onPress={() => setScanExpanded((e) => !e)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Scan"
+                  accessibilityState={{ expanded: scanExpanded }}
+                  testID="drawer-collapsible-scan">
+                  <Feather name="camera" size={20} color={colors.text} />
+                  <Text style={styles.drawerItemLabel}>Scan</Text>
+                  <Feather
+                    name={scanExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={16}
+                    color={colors.textSecondary}
+                    style={styles.drawerChevron}
+                  />
+                </Pressable>
+                {scanExpanded && (
+                  <View style={styles.drawerSubSection}>
                     <SubItem
-                      key={edition}
-                      icon="book"
-                      label={edition}
-                      route={`${edition}`}
+                      icon="camera"
+                      label="OCR (couverture)"
+                      route="/scan/camera"
                       colors={colors}
-                      onPress={navigateWithParam}
+                      onPress={navigate}
                     />
-                  ))}
-                </Collapsible>
-              ) : null}
-            </View>
+                    <SubItem
+                      icon="crop"
+                      label="Code-barres"
+                      route="/scan/barcode"
+                      colors={colors}
+                      onPress={navigate}
+                    />
+                    <SubItem
+                      icon="edit-3"
+                      label="Saisie manuelle"
+                      route="/scan/search"
+                      colors={colors}
+                      onPress={navigate}
+                    />
+                  </View>
+                )}
+              </View>
 
-            <View style={styles.drawerSection}>
-              <DrawerItem
-                icon="settings"
-                label="Paramètres"
-                route="/settings"
-                colors={colors}
-                onPress={navigate}
-              />
-            </View>
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                  icon="book-open"
+                  label="Toute la collection"
+                  route="/collection"
+                  colors={colors}
+                  onPress={navigate}
+                />
+                {editions && editions.length > 0 ? (
+                  <Collapsible
+                    label="Par édition"
+                    icon="layers"
+                    expanded={editionsExpanded}
+                    onToggle={() => {
+                      setEditionsExpanded((e) => !e);
+                      setEditionsManuallyToggled(true);
+                    }}>
+                    {editions.map((edition) => (
+                      <SubItem
+                        key={edition}
+                        icon="book"
+                        label={edition}
+                        route={`${edition}`}
+                        colors={colors}
+                        onPress={navigateWithParam}
+                      />
+                    ))}
+                  </Collapsible>
+                ) : null}
+              </View>
+
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                  icon="settings"
+                  label="Paramètres"
+                  route="/settings"
+                  colors={colors}
+                  onPress={navigate}
+                />
+              </View>
+            </ScrollView>
           </View>
         </Animated.View>
       </View>

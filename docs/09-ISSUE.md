@@ -209,12 +209,147 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-08` | Optimisation & qualité | Performance, tests, couverture |
 | `M-10` | Refonte UI/UX « Vault Lisible » | SafeZone, contraste AA, TabBar icônes, parcours <3s → v0.9.0 |
 | `M-10R` | Retours test physique (M-10) | Import CSV, drawer + tabs, form clavier, torche/FAB/safezone → v0.9.1 |
-| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 |
+| `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection, OCR numéro, écran Recherche → v0.9.2 (livrée, PR #176) |
+| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 (M09-01 panneau recherche #177) |
 
 ### Règle d'attribution
 - Chaque milestone a une **date de fin cible** (indicative) et une **description** ;
 - Seules les issues engagées dans le milestone actif sont travaillées ;
 - Un milestone est fermé lorsqu'une **release** le couvre.
+
+### 6.1 Registre complet des issues
+
+Le **suivi détaillé** de chaque issue (contexte, tâche, DoD, tests) est porté
+par **GitHub** (lien `#<numéro>`, labels et fermeture). Ce registre est la seule
+référence documentaire. Statut : `Done` = livré / `Écarté` = wontfix /
+`En cours` = développé / `À faire` = backlog.
+
+**Milestone M-10 « Vault Lisible » (v0.9.0)** — refonte UI/UX avant publication
+(accessible WCAG AA, lisibilité plein soleil, parcours brocante < 3 s) ·
+milestone GitHub #13 · issues **#140 à #151**
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M10-01 | Tokens + typo + contraste WCAG AA | #140 | Done |
+| M10-02 | SafeZone globale (encoche, gesture bar, tabBar) | #141 | Done |
+| M10-03 | TabBar à icônes (Feather) + routes Stack | #142 | Done |
+| M10-04 | Accueil cockpit brocante | #143 | Done |
+| M10-05 | Collection : filtres + pagination + carte | #144 | Done |
+| M10-06 | Fiche magazine + édition | #145 | Done |
+| M10-07 | Scan code-barres + scan multiple + résultat | #146 | Done |
+| M10-08 | Scan caméra OCR + saisie manuelle | #147 | Done |
+| M10-09 | Paramètres : sauvegarde | #148 | Done |
+| M10-10 | Accessibilité + lisibilité | #149 | Done |
+| M10-11 | États Empty / Loading / Error + Toast | #150 | Done |
+| M10-12 | Documentation + scripts GitHub | #151 | Done |
+
+Livré : 12 issues closes → tag **v0.9.0**. Voir `docs/design/M10-TOKENS.md`
+(tokens) et §10 de `08-USER-STORIES.md` (US-UX-01..06).
+
+**Milestone M-10R « Retours test physique M-10 » (v0.9.1)** — 7 retours terrain
+→ 11 issues · milestone GitHub #14 · issues **#153 à #163**
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M10R-01 | Import CSV : sélecteur bloque les `.csv` | #153 | Done |
+| M10R-02 | Accueil : CTA Scanner/Ajouter au-dessus des récents | #154 | Done |
+| M10R-03 | Tabs : Accueil \| Scan \| Collection | #155 | Écarté (wontfix) |
+| M10R-04 | Menu latéral (drawer) + liens directs | #156 | Done |
+| M10R-05 | Drawer : section éditions dynamique repliable | #157 | Done |
+| M10R-06 | Formulaire : champs Mois/Année non scrollables | #158 | Done |
+| M10R-07 | Formulaire : spacer clavier pour atteindre Notes | #159 | Done |
+| M10R-08 | Torche caméra (OCR + code-barres) | #160 | Done |
+| M10R-09 | OCR texte stylisé : guidage + replis visibles | #161 | Done |
+| M10R-10 | Accès rapide scan global (header) | #162 | Done |
+| M10R-11 | OCR : bouton code-barres masqué par la gesture bar | #163 | Done |
+
+Livré : issues closes → tags **v0.9.1** (crash fix + M-10R) puis **v0.9.2**
+(reprise M-10R : drawer conforme #156/#157, lien scan header).
+
+**Milestone M-10R2 « 2ᵉ passe retours test physique » (v0.9.2)** — 10 retours
+terrain → 10 issues, livrées par PR #176 · issues **#166 à #175**
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M10R2-01 | Drawer latéral : pas de SafeZone (en-tête sous l'encoche) | #167 | Done |
+| M10R2-02 | Permission caméra 1er lancement + écran partagé SafeZone | #168 | Done |
+| M10R2-03 | Popup « Couverture reconnue » : espacement boutons | #169 | Done |
+| M10R2-04 | Formulaire : icône Valider dans le header (sans scroll) | #171 | Done |
+| M10R2-05 | Premier lancement : onboarding + permission caméra | #170 | Done |
+| M10R2-06 | Paramètres : sous-menus + retour GitHub | #173 | Done |
+| M10R2-07 | Fiche magazine : header menu/titre/scan | #166 | Done |
+| M10R2-08 | Collection : bouton Tri (numéro ↑/↓) | #172 | Done |
+| M10R2-09 | OCR : numéro affiné (« N° ») + textes stylisés | #174 | Done |
+| M10R2-10 | Saisie manuelle flux identification → écran Recherche | #175 | Done |
+
+Livré : 10 issues closes → **v0.9.2** (PR #176). US-UX-13..22 (`08-USER-STORIES.md`).
+
+**Milestone M-09 « Tests terrain & publication » (→ v1.0.0)** — conventions
+M-10/M-10R/M-10R2 terminées, correction issues ouvertes pendant la Phase 9
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M09-01 | Collection : panneau de recherche repliable (bouton Rechercher) | #177 | En cours (PR #178) |
+
+### 6.2 Décisions de conception et causes racines (retours terrain)
+
+Les retours test physique ont produit des choix structurants conservés ici.
+
+**M-10R (v0.9.1)**
+
+*Décisions*
+- **M10R-03 Tabs (wontfix)** : onglets conservés **Accueil \| Collection \|
+  Paramètres** — le scan reste accessible en 1 tap via le lien rapide header
+  (M10R-10) et le CTA Accueil ; pas de 4ᵉ onglet, le drawer sert d'accès direct.
+- **M10R-04 Drawer** : `@react-navigation/drawer` **incompatible avec
+  expo-router SDK 57** (crash au démarrage) → `DrawerMenu` **custom** (Modal
+  transparent + `Animated.spring` + `PanResponder` bord gauche), piloté par le
+  context `DrawerProvider` (`useDrawer()`).
+- **M10R-10 Accès scan** : le FAB 56 px bas-droit est remplacé par un **petit
+  bouton discret dans le header commun** (`AppHeader` : burger à gauche, titre
+  centré, scan à droite). `scan-fab.tsx` supprimé.
+
+*Causes racines qualifiées dans le code*
+1. `native-file-gateway.ts` : `getDocumentAsync({ type: 'text/csv' })` — MIME non
+   reconnu par les gestionnaires Android → fichiers `.csv` grisés ;
+2. `(tabs)/index.tsx` : CTA placé *après* `recentSection` (+ `marginTop:auto`) ;
+3. `(tabs)/_layout.tsx` : aucun Drawer → `DrawerMenu` custom + `AppHeader` ;
+4. `select-field.tsx` : `FlatList` imbriquée dans le `ScrollView` du formulaire
+   (conflit de scroll), pas de spacer bas clavier ;
+5. ML Kit texte standard faible sur les typographies display ; pas de
+   `enableTorch` ni de guidage ;
+6. aucun accès scan direct depuis Collection/Fiche/Paramètres (grep Ø `ScanFAB`) ;
+7. `scan/camera.tsx` : bouton secondaire en flux sous la caméra, sans
+   `marginBottom` d'insets (gesture bar).
+
+**M-10R2 (v0.9.2)**
+
+- **M10R2-01 Drawer SafeZone** : `DrawerMenu` custom sans insets (`drawer-content`
+  header `padding: Spacing.four` fixe) → `useSafeAreaInsets`,
+  `paddingTop: insets.top` sur le header, `paddingBottom: insets.bottom` sur le
+  panneau.
+- **M10R2-02 Permission caméra** : demandée **au premier lancement** dans le
+  parcours d'onboarding (M10R2-05) + **écran de demande partagé** factorisé pour
+  les 3 écrans caméra (`camera.tsx`, `barcode.tsx`, `form-barcode.tsx`), rendu
+  dans un `Screen` avec insets (encoche + gesture bar).
+- **M10R2-04 Formulaire** : **icône `Valider` (`check`) dans le header** (haut
+  droite), toujours visible ; le bouton plein largeur reste en pied de formulaire.
+- **M10R2-05 Onboarding** : écran de présentation (fonctionnalités / description)
+  → bouton **« Commencer »** → écran de permission caméra → accueil ; flag
+  `settings.onboarding_done` persisté, redirect conditionnel dans le layout racine.
+- **M10R2-06 Paramètres** : refonte en sous-menus **Apparence** · **Sauvegarde** ·
+  **Accessibilité** · **Aide & retours** (lien Discussions GitHub via
+  `expo-linking`).
+- **M10R2-07 Fiche** : `AppHeader` (burger / titre / scan) réutilisé sur la
+  fiche magazine (modal Stack sans header par défaut).
+- **M10R2-09 OCR** : prioriser strictement les préfixes (`N°`, `No`, `numéro`,
+  `issue`) puis le repli « nombre isolé » en dernier recours (exclusions
+  dates/« 52 pages »/prix) ; reconnaissance des textes stylisés via zoom /
+  capture haute résolution / vote multi-frames.
+- **M10R2-10 Saisie manuelle** : nouvel écran de recherche `/scan/search`
+  (publication + numéro, `findByPublicationAndIssue`) ; **trouvé** → résultat
+  (Possédé/Absent) ; **non trouvé** → repli `/scan/manual` pré-rempli. Le bouton
+  « Ajouter » de l'accueil reste un ajout.
 
 ---
 
@@ -403,7 +538,7 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 À l'initialisation du dépôt GitHub, configurer :
 
 - [ ] **Labels** : types, priorités, épiques, complexité (section 5) ;
-- [ ] **Milestones** : M-01 à M-09 (+ `M-04R`, `M-07R`) (section 6) ;
+- [ ] **Milestones** : M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
 - [ ] **Project** : board Kanban "Picsou Collection" (section 10) ;
 - [ ] **Branch protection** sur `main` et `develop` (section 7) ;
 - [ ] **Templates d'issue** (bug + tâche) via `.github/ISSUE_TEMPLATE/` ;
@@ -421,6 +556,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`) (phases roadmap) |
+| Milestones | M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |

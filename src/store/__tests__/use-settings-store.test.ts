@@ -3,6 +3,8 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 const setColorSchemeMock = jest.fn().mockResolvedValue(undefined);
 const getColorSchemeMock = jest.fn().mockResolvedValue('system');
+const getOnboardingDoneMock = jest.fn().mockResolvedValue(false);
+const setOnboardingDoneMock = jest.fn().mockResolvedValue(undefined);
 
 function stubDeps(): Dependencies {
   return {
@@ -15,6 +17,8 @@ function stubDeps(): Dependencies {
     settingsRepository: {
       getColorScheme: getColorSchemeMock,
       setColorScheme: setColorSchemeMock,
+      getOnboardingDone: getOnboardingDoneMock,
+      setOnboardingDone: setOnboardingDoneMock,
     } as unknown as Dependencies['settingsRepository'],
   };
 }
@@ -26,6 +30,10 @@ describe('useSettingsStore', () => {
     setColorSchemeMock.mockResolvedValue(undefined);
     getColorSchemeMock.mockClear();
     getColorSchemeMock.mockResolvedValue('system');
+    getOnboardingDoneMock.mockClear();
+    getOnboardingDoneMock.mockResolvedValue(false);
+    setOnboardingDoneMock.mockClear();
+    setOnboardingDoneMock.mockResolvedValue(undefined);
   });
 
   it('initialise le colorScheme sur system', () => {
@@ -63,6 +71,30 @@ describe('useSettingsStore', () => {
     useSettingsStore.getState().setColorScheme('light');
     useSettingsStore.getState().setColorScheme('system');
     expect(useSettingsStore.getState().colorScheme).toBe('system');
+  });
+
+  it('charge le flag onboarding via loadOnboardingDone', async () => {
+    getOnboardingDoneMock.mockResolvedValue(true);
+    setDepsForTest(stubDeps());
+
+    await useSettingsStore.getState().loadOnboardingDone();
+
+    expect(useSettingsStore.getState().onboardingDone).toBe(true);
+    expect(useSettingsStore.getState().onboardingLoaded).toBe(true);
+  });
+
+  it('marque l onboarding comme vu via markOnboardingDone et persiste', () => {
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().markOnboardingDone();
+
+    expect(useSettingsStore.getState().onboardingDone).toBe(true);
+    expect(setOnboardingDoneMock).toHaveBeenCalledWith(true);
+  });
+
+  it('marque l onboarding sans dependances initialisees', () => {
+    useSettingsStore.getState().markOnboardingDone();
+    expect(useSettingsStore.getState().onboardingDone).toBe(true);
   });
 
   afterEach(() => {

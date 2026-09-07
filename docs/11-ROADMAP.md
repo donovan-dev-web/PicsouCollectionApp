@@ -23,8 +23,9 @@
 13. [Phase 8 — Optimisation & qualité](#13-phase-8--optimisation--qualité)
 14. [Phase 10 — Refonte UI/UX « Vault Lisible »](#14-phase-10--refonte-uiux--vault-lisible--m-10--v090)
 15. [Phase 10R — Retours test physique M-10](#15-phase-10r--retours-test-physique-m-10)
-16. [Phase 9 — Tests terrain & publication](#16-phase-9--tests-terrain--publication)
-17. [Critères de sortie de chaque phase](#17-critères-de-sortie-de-chaque-phase)
+16. [Phase 10R2 — 2ᵉ passe retours test physique](#16-phase-10r2--2ᵉ-passe-retours-test-physique)
+17. [Phase 9 — Tests terrain & publication](#17-phase-9--tests-terrain--publication)
+18. [Critères de sortie de chaque phase](#18-critères-de-sortie-de-chaque-phase)
 
 ---
 
@@ -53,6 +54,7 @@ Phase 7  ███████████████████████�
 Phase 8  ██████████████████████████████  Terminé ✓ (v0.8.0)
 Phase 10 ██████████████████████████████  Terminé ✓ (v0.9.0, PR #152)
 Phase 10R ██████████████████████████████  Terminé ✓ (v0.9.1)
+Phase 10R2 ██████████████████████████████  Terminé ✓ (v0.9.2)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
 ```
 
@@ -75,8 +77,9 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 8 — Optimisation | `M-08 — Optimisation & qualité` | `US-QA-02`, #136 | 2 |
 | 10 — Refonte UI/UX | `M-10 — Refonte UI/UX « Vault Lisible »` | `US-UX-01..06` (issues M10-01..12) | 12 |
 | 10R — Retours test M-10 | `M-10R — Retours test physique (v0.9.1)` | `US-UX-07..12` (issues M10R-01..11) | 11 |
-| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
-| **Total** | | | **70** |
+| 10R2 — 2ᵉ passe retours | `M-10R2 — 2ᵉ passe retours test physique (v0.9.2)` | `US-UX-13..22` (issues M10R2-01..10) | 10 |
+| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03`, `US-UX-23` (#177) | 2 |
+| **Total** | | | **103** |
 
 ---
 
@@ -332,8 +335,8 @@ parcours brocante < 3s à 1 main.
 | Empty/Loading/Error + Toast partagés | US-UX-06 / M10-11 |
 | Docs + scripts `gh` | M10-12 |
 
-**Livrables** : 12 issues M10-01..12, `docs/issues/M10-*.md`, `scripts/m10-*.sh`,
-`docs/design/M10-TOKENS.md`. Détail : [docs/issues/M10-MILESTONE.md](issues/M10-MILESTONE.md).
+**Livrables** : 12 issues M10-01..12 (#140-#151), `docs/design/M10-TOKENS.md`.
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : À venir** — prérequis de Phase 9.
 
@@ -359,8 +362,8 @@ clavier, OCR en conditions réelles, FAB scan, safezone OCR.
 | Accès scan global via header commun (burger/scan) — FAB 56px remplacé | US-UX-12 / M10R-10 | Done |
 | OCR : bouton code-barres hors gesture bar | US-UX-12 / M10R-11 | Done |
 
-**Livrables** : 11 issues M10R-01..11, `docs/issues/M10R-*.md`.
-Détail : [docs/issues/M10R-MILESTONE.md](issues/M10R-MILESTONE.md).
+**Livrables** : 11 issues M10R-01..11 (#153-#163).
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : Done (v0.9.1 + v0.9.2)** — issues #153-#163 fermées. Tag `v0.9.1`
 crash fix + M10R initial, tag `v0.9.2` reprise M-10R (drawer conforme
@@ -369,7 +372,37 @@ preview.
 
 ---
 
-## 16. Phase 9 — Tests terrain & publication
+## 16. Phase 10R2 — 2ᵉ passe retours test physique (M-10R2 → v0.9.2)
+
+**Objectif** : intégrer les **10 retours** du test physique sur le build v0.9.2
+— SafeZone du drawer, permission caméra au 1er lancement + écran partagé,
+popup « Couverture reconnue », formulaire Valider dans le header, onboarding
+premier lancement, paramètres en sous-menus + retour GitHub, header fiche
+magazine, tri de la collection, OCR numéro affiné, écran Recherche.
+
+| Tâche | Story / Issue | Statut |
+|---|---|---|
+| Drawer latéral : SafeZone (encoche + gesture bar) | US-UX-13 / M10R2-01 | Done |
+| Permission caméra 1er lancement + écran partagé SafeZone | US-UX-14 / M10R2-02 | Done |
+| Popup « Couverture reconnue » : espacement boutons | US-UX-15 / M10R2-03 | Done |
+| Formulaire : icône Valider dans le header (pas de scroll) | US-UX-16 / M10R2-04 | Done |
+| Premier lancement : écran de présentation + permission | US-UX-17 / M10R2-05 | Done |
+| Paramètres : sous-menus + lien Discussions GitHub | US-UX-18 / M10R2-06 | Done |
+| Fiche magazine : header menu/titre/scan | US-UX-19 / M10R2-07 | Done |
+| Collection : tri numéros croissant/décroissant | US-UX-20 / M10R2-08 | Done |
+| OCR : numéro affiné (préfixe « N° ») + textes stylisés | US-UX-21 / M10R2-09 | Done |
+| Saisie manuelle flux identification → écran Recherche | US-UX-22 / M10R2-10 | Done |
+
+**Livrables** : 10 issues M10R2-01..10 (#166-#175).
+Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
+
+**Statut : Done (v0.9.2)** — issues #166-#175 fermées, **PR #176** mergée sur
+`develop` (CI Quality verte, 337 tests). Le build de validation / tag sont à
+poser au moment de la publication (phase M-09).
+
+---
+
+## 17. Phase 9 — Tests terrain & publication
 
 **Objectif** : Validation réelle et publication Play Store.
 
@@ -378,6 +411,7 @@ preview.
 | Test avec magazines réels (nouveaux, anciens, abîmés) | — |
 | Test en conditions réelles (brocante, réseau absent) | — |
 | Corrections finales | — |
+| Collection : panneau de recherche repliable (bouton Rechercher) | US-UX-23 / M09-01 (#177) |
 | Build AAB (EAS Build) | US-QA-03 |
 | Préparer la fiche Play Store (ASO) | — |
 | Publication Play Store | — |
@@ -386,7 +420,7 @@ preview.
 
 ---
 
-## 17. Critères de sortie de chaque phase
+## 18. Critères de sortie de chaque phase
 
 Pour chaque phase, les critères de sortie sont :
 
@@ -416,5 +450,8 @@ Pour chaque phase, les critères de sortie sont :
 | 7 — Export / Import | Sauvegarde | US-BK-01..03 | 3 |
 | 7R — Retours test | Retours v0.7.0 (OCR + format) | US-ID-08..09 (1 bug), US-BK-04..05 | 5 |
 | 8 — Optimisation | Performance | US-QA-02 | 1 |
-| 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **69** |
+| 10 — Refonte UI/UX | Vault Lisible (v0.9.0) | US-UX-01..06 (M10-01..12) | 12 |
+| 10R — Retours test M-10 | Retours v0.9.1 (drawer, tabs, OCR) | US-UX-07..12 (M10R-01..11) | 11 |
+| 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..22 (M10R2-01..10) | 10 |
+| 9 — Publication | Play Store | US-QA-03, US-UX-23 (M09-01) | 2 |
+| **Total** | | | **103** |

@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { ErrorView } from '@/components/error-view';
-import { MagazineForm } from '@/components/magazine-form';
+import { MagazineForm, type MagazineFormHandle } from '@/components/magazine-form';
 import { Screen } from '@/components/screen';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -18,6 +19,7 @@ export default function EditMagazineScreen() {
   const updateMagazine = useCollectionStore((s) => s.updateMagazine);
   const colors = useThemeColors();
   const styles = makeStyles(colors);
+  const formRef = useRef<MagazineFormHandle>(null);
 
   const handleSubmit = async (input: CreateMagazineInput) => {
     await updateMagazine(id, input);
@@ -61,8 +63,22 @@ export default function EditMagazineScreen() {
             <Feather name="arrow-left" size={22} color={colors.text} />
           </Pressable>
           <Text style={styles.title}>Modifier l&apos;édition</Text>
+          <Pressable
+            style={({ pressed }) => [styles.submitHeader, pressed && styles.pressed]}
+            onPress={() => formRef.current?.submit()}
+            testID="edit-submit-header"
+            accessibilityRole="button"
+            accessibilityLabel="Valider la modification"
+            hitSlop={HitTarget.hitSlop}>
+            <Feather name="check" size={24} color={colors.accent} />
+          </Pressable>
         </View>
-        <MagazineForm initial={detail} submitLabel="Enregistrer" onSubmit={handleSubmit} />
+        <MagazineForm
+          ref={formRef}
+          initial={detail}
+          submitLabel="Enregistrer"
+          onSubmit={handleSubmit}
+        />
       </View>
     </Screen>
   );
@@ -90,10 +106,17 @@ function makeStyles(colors: ThemeColors) {
       opacity: 0.7,
     },
     title: {
+      flex: 1,
       fontSize: 24,
       lineHeight: 32,
       fontWeight: '700',
       color: colors.text,
+    },
+    submitHeader: {
+      minWidth: HitTarget.minHeight,
+      minHeight: HitTarget.minHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }

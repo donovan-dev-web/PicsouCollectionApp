@@ -9,7 +9,7 @@
 ![Database](https://img.shields.io/badge/Base%20de%20donne%CC%81es-Locale%20SQLite-orange?style=for-the-badge&logo=sqlite&logoColor=white&color=47A248)
 ![Offline](https://img.shields.io/badge/Offline%20First-100%25-brightgreen?style=for-the-badge&logo=cloud-offline&color=2E7D32)
 ![Status](https://img.shields.io/badge/Statut-En%20de%CC%81veloppement-informational?style=for-the-badge&color=00629E)
-![Version](https://img.shields.io/badge/Version-0.8.0-yellow?style=for-the-badge&color=FDD835)
+![Version](https://img.shields.io/badge/Version-0.9.3-yellow?style=for-the-badge&color=FDD835)
 
 <br/>
 
@@ -50,12 +50,12 @@ Son rôle : permettre à un collectionneur de **savoir instantanément s'il poss
 ## 🔍 Principales fonctionnalités
 
 - **🏠 Accueil** — compteur de collection, actions Scanner/Ajouter, ajouts récents.
-- **🔍 Identification** — trois méthodes complémentaires : **code-barres**, **caméra/OCR**, **saisie manuelle**.
+- **🔍 Identification** — trois méthodes complémentaires : **code-barres**, **caméra/OCR**, **saisie manuelle** (qui passe d'abord par un **mode recherche** avant un éventuel ajout).
 - **🔁 Scan en continu** — scanner plusieurs magazines à la suite sans s'arrêter, avec confirmation à chaque ajout.
 - **📚 Ma Collection** — inventaire avec recherche globale, filtres utiles (type de publication, époque/années, numéro) et tri.
 - **📇 Fiche Magazine** — détail d'une édition ; les détails de fiche (état, notes, date) sont optionnels.
 - **♻️ Gestion des doublons** — alerte puis choix de l'utilisateur (ajout d'un second exemplaire possible).
-- **📊 Paramètres** — statistiques, export/import de sauvegarde (JSON / CSV), thème, langue.
+- **📊 Paramètres** — sous-menus (Apparence, Sauvegarde, Accessibilité, Aide & retours), export/import de sauvegarde (JSON / CSV), accessibilité (« Réduire les animations ») et lien vers les Discussions GitHub.
 
 > **Clarification importante** : un code-barres ne crée jamais une édition à lui seul. Il sert uniquement à retrouver une édition **déjà présente dans la base** ; à défaut, la saisie manuelle prend le relais.
 
@@ -69,7 +69,7 @@ Deux environnements visuels, chacun avec sa charte graphique détaillée dans le
 |---|---|---|
 | **Mode** | Clair — optimisé plein air | Sombre — premium & atmosphérique |
 
-**Palette de marque** : Bleu Marine Profond `#001b3d` · Jaune Picsou `#fdd835` · Rouge (Possédé) · Vert (Manquant) · Bleu Canard (navigation).
+**Palette de marque** : Bleu Marine Profond `#001b3d` · Jaune Picsou `#fdd835` · Vert (Possédé) · Neutre (Absent) · Bleu Canard (navigation).
 
 **Typographie à trois voix** : `anybody` (chiffres/numéros), `hankenGrotesk` (interface), `jetbrainsMono` (données & libellés).
 
@@ -145,10 +145,14 @@ PicsouCollectionApp/
 | **4 — Scan code-barres** | Intégration caméra, détection, recherche | ✅ Terminé — **v0.4.0** |
 | **4R — Retours test** | Fiabilisation scan, saisie assistée, collection | ✅ Terminé — **v0.4.1** |
 | **5 — Caméra / OCR** | Librairie OCR (`expo-mlkit-ocr`), extraction, confiance | ✅ Terminé — **v0.5.0** |
-| **6 — Parcours complet** | Scan en continu, identification → Possédé / Manquant, gestion doublons | ✅ Terminé — **v0.6.0** |
+| **6 — Parcours complet** | Scan en continu, identification → Possédé / Absent, gestion doublons | ✅ Terminé — **v0.6.0** |
 | **7 — Export / Import** | Format JSON v1, partage, restauration | ✅ Terminé — **v0.7.0** |
 | **7R — Retours test** | OCR ciblé (surcouche + validation), confiance assouplie, export/import JSON ou CSV | ✅ Terminé — **v0.7.1** |
 | **8 — Optimisation & qualité** | Performance, requêtes, couverture de tests | ✅ Terminé — **v0.8.0** |
+| **10 — Refonte UI/UX** | Vault Lisible : SafeZone, contraste AA, TabBar icônes, parcours <3s | ✅ Terminé — **v0.9.0** |
+| **10R — Retours test** | Drawer + tabs, formulaire au clavier, torche, import CSV | ✅ Terminé — **v0.9.1** |
+| **10R2 — Retours test** | Drawer SafeZone, onboard + permission, paramètres sous-menus, header fiche, tri, OCR numéro, recherche | ✅ Terminé — **v0.9.2** |
+| **10R3 — Retours test** | Panneau de recherche repliable Collection, drawer scrollable, popup/form, renommage **Mag Collection** | ✅ Terminé — **v0.9.3** |
 | **9 — Tests terrain & publication** | Vrais magazines, Play Store | ⬜ À venir |
 
 Détail complet : [docs/11-ROADMAP.md](docs/11-ROADMAP.md)

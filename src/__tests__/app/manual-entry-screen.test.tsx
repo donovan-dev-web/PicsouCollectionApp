@@ -61,4 +61,21 @@ describe('ManualEntryScreen', () => {
     expect(screen.getByTestId('field-publication')).toHaveProp('value', 'Picsou Magazine');
     expect(screen.getByTestId('field-issue-number')).toHaveProp('value', '900');
   });
+
+  it('soumet via l’icône Valider du header', async () => {
+    const addMagazine = jest.fn().mockResolvedValue({
+      id: 'mag-1',
+      publication: 'Picsou Magazine',
+      quantity: 1,
+    });
+    useCollectionStore.setState({ addMagazine });
+
+    render(<ManualEntryScreen />);
+
+    fireEvent.changeText(screen.getByTestId('field-publication'), 'Picsou Magazine');
+    fireEvent.press(screen.getByTestId('manual-submit-header'));
+
+    await waitFor(() => expect(addMagazine).toHaveBeenCalledTimes(1));
+    expect(mockBack).toHaveBeenCalled();
+  });
 });

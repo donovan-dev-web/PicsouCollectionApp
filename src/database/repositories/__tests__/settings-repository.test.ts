@@ -44,3 +44,30 @@ describe('settingsRepository.setColorScheme', () => {
     expect(rows).toHaveLength(1);
   });
 });
+
+describe('settingsRepository onboarding (M10R2-05)', () => {
+  it('retourne false par defaut avant validation', async () => {
+    await expect(repo.getOnboardingDone()).resolves.toBe(false);
+  });
+
+  it('persiste le flag après validation', async () => {
+    await repo.setOnboardingDone(true);
+    await expect(repo.getOnboardingDone()).resolves.toBe(true);
+  });
+
+  it('peut marquer le flag comme non vu', async () => {
+    await repo.setOnboardingDone(true);
+    await repo.setOnboardingDone(false);
+    await expect(repo.getOnboardingDone()).resolves.toBe(false);
+  });
+
+  it('ne crée pas de ligne dupliquée', async () => {
+    await repo.setOnboardingDone(true);
+    await repo.setOnboardingDone(true);
+
+    const rows = await testDb.getAllAsync<{ key: string }>(
+      "SELECT key FROM settings WHERE key = 'onboarding_done'",
+    );
+    expect(rows).toHaveLength(1);
+  });
+});
