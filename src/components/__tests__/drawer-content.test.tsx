@@ -71,6 +71,17 @@ describe('DrawerMenu', () => {
     expect(screen.getByTestId('drawer-sub-edition-1')).toBeTruthy();
   });
 
+  it('rend le menu dans un conteneur scrollable pour atteindre toutes les éditions', () => {
+    const editions = Array.from({ length: 15 }, (_, i) => `Édition ${i + 1}`);
+    render(<DrawerMenu visible onClose={onClose} editions={editions} />);
+
+    fireEvent.press(screen.getByTestId('drawer-collapsible-par-edition'));
+
+    expect(screen.getByTestId('drawer-scroll')).toBeTruthy();
+    expect(screen.getByTestId('drawer-sub-edition-15')).toBeTruthy();
+    expect(screen.getByTestId('drawer-item-parametres')).toBeTruthy();
+  });
+
   it('applique la SafeZone (insets encoche + gesture bar)', () => {
     global.__setSafeAreaInsets?.({ top: 44, bottom: 34 });
     render(<DrawerMenu visible onClose={onClose} editions={[]} />);
