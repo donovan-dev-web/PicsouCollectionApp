@@ -24,7 +24,7 @@
 
 ## 1. Objectif
 
-Garantir la **fiabilité** et la **robustesse** de l'application, élément crucial pour objectif de publication Play Store et de qualité professionnelle.
+Garantir la **fiabilité** et la **robustesse** de l'application, élément crucial pour l'objectif de **publication finale (v1.0.0, APK sur GitHub)** et de qualité professionnelle.
 
 > Vision : *qualité pro et bonnes pratiques*, avec un suivi continu de la santé du projet, mais aussi une **attention constante à l'expérience utilisateur**.
 

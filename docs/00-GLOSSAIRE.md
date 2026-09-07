@@ -120,7 +120,7 @@ Le statut est **toujours dérivé** du nombre réel d'exemplaires, jamais d'un c
 ### EAS Build
 **Général :** service cloud d'Expo pour construire des builds.
 
-**Contexte :** utilisé pour générer l'**AAB** (Android App Bundle) de production pour le Play Store. Le build local (Gradle) reste disponible pour le développement.
+**Contexte :** utilisé pour générer l'**APK** (Android Package) de la release finale (profil `preview`, `buildType: apk`), publié comme **GitHub Release** téléchargeable. Le build local (Gradle) reste disponible pour le développement.
 
 ### Development Build
 **Contexte :** build Expo compilé nativement, installé sur le téléphone de développement. Il permet d'intégrer des modules natifs (comme l'OCR ML Kit) et de déboguer sur le matériel réel.
@@ -190,12 +190,12 @@ Le statut est **toujours dérivé** du nombre réel d'exemplaires, jamais d'un c
 ### CI / CD (Intégration/Déploiement continus)
 **Général :** automatisation des contrôles (CI) et de la livraison (CD).
 
-**Contexte :** via GitHub Actions : typecheck, lint, tests, coverage, et build EAS de production. Une PR ne fusionne que si la CI est verte.
+**Contexte :** via GitHub Actions : typecheck, lint, format, tests, coverage et doctor. Une PR ne fusionne que si la CI est verte. Un build EAS produit l'APK de release.
 
 ### Release
 **Général :** version livrée d'une application, avec notes de version.
 
-**Contexte :** une version est taguée `vX.Y.Z` (Semantic Versioning) sur `main` et publiée comme GitHub Release. Le `CHANGELOG.md` suit les changements.
+**Contexte :** une version est taguée `vX.Y.Z` (Semantic Versioning) sur `main` et publiée comme GitHub Release. Le `CHANGELOG.md` suit les changements. L'**artefact final de l'app (APK Android)** y est joint et téléchargeable.
 
 ### Tag
 **Contexte :** marqueur Git d'un commit correspondant à une version (`v0.1.0`).

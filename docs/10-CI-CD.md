@@ -165,7 +165,7 @@ jobs:
 
 ## 5. Build EAS
 
-> **Actuellement** : les builds EAS sont lancés **manuellement** via `eas build` (profils `development`, `preview`, `production` définis dans `eas.json`). Le build `preview` produit un **APK** installable sur téléphone ; le build `production` produit un **AAB** prêt pour le Play Store.
+> **Actuellement** : les builds EAS sont lancés **manuellement** via `eas build` (profils `development`, `preview` définis dans `eas.json`). Le build `preview` (`buildType: apk`) produit l'**APK installable** publié comme **GitHub Release** ; pas de Play Store ni d'AAB.
 
 ### 5.0 Validation M-05 sur téléphone physique (OCR)
 
@@ -208,7 +208,7 @@ Points clés pour éviter les pièges rencontrés :
 
 ### 5.1 À venir — Workflow GitHub (build automatique sur release)
 
-Le workflow ci-dessous sera activé pour automatiser le build de production sur `main` ou sur un tag `v*` :
+Le workflow ci-dessous sera activé pour automatiser le build de l'**APK** de release sur un tag `v*` (artefact joint à la GitHub Release) :
 
 ```yaml
 name: EAS Build
@@ -221,7 +221,7 @@ on:
 
 jobs:
   build:
-    name: EAS Build production
+    name: EAS Build APK (release)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -236,13 +236,30 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EAS_TOKEN }}
-          command: eas build --platform android --profile production --non-interactive
+          command: eas build --platform android --profile preview --non-interactive
 ```
 
 ### 5.2 Retour d'expérience (M-01)
 - `eas-cli` est utilisé en **global / `npx`** (pas en devDependency) ; la version est épinglée via `cli.version` dans `eas.json` ;
 - Le lockfile doit être généré avec **npm 10** (voir 3.2) ;
 - Le **keystore Android** est hébergé côté EAS (généré au premier build).
+
+### 5.3 Installer une release (APK depuis GitHub)
+
+La version finale est publiée sous forme de **GitHub Release** : l'APK est
+téléchargeable directement depuis le dépôt, sans Play Store.
+
+```text
+1. Ouvrir https://github.com/donovan-dev-web/PicsouCollectionApp/releases
+2. Choisir la version voulue (ex. v1.0.0)
+3. Télécharger l'artefact « Mag-Collection-vX.Y.Z.apk »
+4. Sur Android : autoriser l'installation de sources inconnues pour le
+   navigateur/fichiers (invitation présentée à l'installation), puis ouvrir
+   le fichier téléchargé et confirmer
+```
+
+> L'APK est signé par EAS (keystore géré côté EAS) et couvert par la
+> politique de confidentialité (`13-PRIVACY.md`).
 
 ---
 
