@@ -665,6 +665,17 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 **Priorité** : haute. → M-10R2 / M10R2-10 (retour n°10).
 
+### US-UX-23 — Recherche repliable dans la collection
+> En tant que **Marc**, je veux **voir ma collection sans être encombré par les filtres de recherche** afin de **consulter mes magazines d'un coup d'œil, puis affiner seulement quand c'est nécessaire**.
+
+**Critères d'acceptation** :
+- *Given* la page Collection, *When* elle s'ouvre, *Then* les filtres sont **repliés** (seul le bouton jaune « Rechercher » est visible) ;
+- *Given* le bouton « Rechercher », *When* je tape, *Then* un panneau se déplie avec **Numéro + Tri côte à côte** et **Édition** en dessous ;
+- *Given* un filtre édition issu du drawer, *When* l'écran s'ouvre, *Then* le panneau est déplié avec le pré-filtre appliqué ;
+- *Given* des filtres actifs, *When* je tape « Effacer les filtres », *Then* la liste revient complète (retour page 1).
+
+**Priorité** : moyenne. → M-09 / M09-01 (#177) (retour test physique v0.9.2).
+
 ---
 
 ## 11. Représentation graphique
@@ -701,4 +712,5 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | UI/UX M-10 | US-UX-01 à 06 | 6 |
 | UI/UX M-10R (retours terrain) | US-UX-07 à 12 | 6 |
 | UI/UX M-10R2 (2ᵉ passe retours) | US-UX-13 à 22 | 10 |
-| **Total** | | **60** |
+| UI/UX M-09 (tests terrain) | US-UX-23 | 1 |
+| **Total** | | **61** |

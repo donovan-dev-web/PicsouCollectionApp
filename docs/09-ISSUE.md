@@ -210,12 +210,76 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-10` | Refonte UI/UX « Vault Lisible » | SafeZone, contraste AA, TabBar icônes, parcours <3s → v0.9.0 |
 | `M-10R` | Retours test physique (M-10) | Import CSV, drawer + tabs, form clavier, torche/FAB/safezone → v0.9.1 |
 | `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection, OCR numéro, écran Recherche → v0.9.2 (livrée, PR #176) |
-| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 |
+| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 (M09-01 panneau recherche #177) |
 
 ### Règle d'attribution
 - Chaque milestone a une **date de fin cible** (indicative) et une **description** ;
 - Seules les issues engagées dans le milestone actif sont travaillées ;
 - Un milestone est fermé lorsqu'une **release** le couvre.
+
+### 6.1 Registre des issues par milestone
+
+Chaque fichier `docs/issues/<issue>.md` correspond à une **issue GitHub** (lien
+`#<numéro>`). Ce registre référence l'ensemble des issues des milestones UI/UX
+(M-10, M-10R, M-10R2, M-09). Statut : `Done` = livré / `Écarté` = wontfix /
+`À faire` = backlog.
+
+**Milestone M-10 « Vault Lisible » (v0.9.0) — issues #140 à #151** · détails
+[`docs/issues/M10-MILESTONE.md`](issues/M10-MILESTONE.md)
+
+| Issue | Doc | GitHub | Statut |
+|---|---|---|---|
+| M10-01 — Tokens + typo + contraste | [`M10-01-tokens-contraste.md`](issues/M10-01-tokens-contraste.md) | #140 | Done |
+| M10-02 — SafeZone globale | [`M10-02-safezone.md`](issues/M10-02-safezone.md) | #141 | Done |
+| M10-03 — TabBar icônes + routes Stack | [`M10-03-tabbar-icones.md`](issues/M10-03-tabbar-icones.md) | #142 | Done |
+| M10-04 — Accueil cockpit brocante | [`M10-04-accueil.md`](issues/M10-04-accueil.md) | #143 | Done |
+| M10-05 — Collection : filtres + pagination + carte | [`M10-05-collection.md`](issues/M10-05-collection.md) | #144 | Done |
+| M10-06 — Fiche + Edit | [`M10-06-fiche.md`](issues/M10-06-fiche.md) | #145 | Done |
+| M10-07 — Scan barcode + multiple + result | [`M10-07-scan-barcode-result.md`](issues/M10-07-scan-barcode-result.md) | #146 | Done |
+| M10-08 — Scan camera OCR + manuel | [`M10-08-scan-camera-manual.md`](issues/M10-08-scan-camera-manual.md) | #147 | Done |
+| M10-09 — Settings backup | [`M10-09-settings.md`](issues/M10-09-settings.md) | #148 | Done |
+| M10-10 — Accessibilité + lisibilité | [`M10-10-a11y.md`](issues/M10-10-a11y.md) | #149 | Done |
+| M10-11 — Empty / Loading / Error + Toast | [`M10-11-etats.md`](issues/M10-11-etats.md) | #150 | Done |
+| M10-12 — Docs + scripts gh | [`M10-12-docs-scripts.md`](issues/M10-12-docs-scripts.md) | #151 | Done |
+
+**Milestone M-10R « Retours test physique M-10 » (v0.9.1) — issues #153 à #163** · détails
+[`docs/issues/M10R-MILESTONE.md`](issues/M10R-MILESTONE.md)
+
+| Issue | Doc | GitHub | Statut |
+|---|---|---|---|
+| M10R-01 — Import CSV : sélecteur bloque les `.csv` | [`M10R-01-import-csv.md`](issues/M10R-01-import-csv.md) | #153 | Done |
+| M10R-02 — Accueil : CTA Scanner/Ajouter au-dessus des récents | [`M10R-02-accueil-cta.md`](issues/M10R-02-accueil-cta.md) | #154 | Done |
+| M10R-03 — Tabs : Accueil \| Scan \| Collection | [`M10R-03-tabs.md`](issues/M10R-03-tabs.md) | #155 | Écarté (wontfix) |
+| M10R-04 — Menu latéral (drawer) permanent + liens directs | [`M10R-04-drawer.md`](issues/M10R-04-drawer.md) | #156 | Done |
+| M10R-05 — Drawer : section éditions dynamique repliable | [`M10R-05-drawer-editions.md`](issues/M10R-05-drawer-editions.md) | #157 | Done |
+| M10R-06 — Formulaire : champs Mois/Année non scrollables | [`M10R-06-form-scroll.md`](issues/M10R-06-form-scroll.md) | #158 | Done |
+| M10R-07 — Formulaire : spacer clavier pour atteindre Notes | [`M10R-07-form-keyboard.md`](issues/M10R-07-form-keyboard.md) | #159 | Done |
+| M10R-08 — Torche caméra (OCR + code-barres) | [`M10R-08-torch.md`](issues/M10R-08-torch.md) | #160 | Done |
+| M10R-09 — OCR texte stylisé : guidage + replis | [`M10R-09-ocr-guidance.md`](issues/M10R-09-ocr-guidance.md) | #161 | Done |
+| M10R-10 — Accès rapide scan global (header) | [`M10R-10-scan-fab.md`](issues/M10R-10-scan-fab.md) | #162 | Done |
+| M10R-11 — OCR : bouton code-barres masqué par la gesture bar | [`M10R-11-ocr-safezone.md`](issues/M10R-11-ocr-safezone.md) | #163 | Done |
+
+**Milestone M-10R2 « 2ᵉ passe retours test physique » (v0.9.2) — issues #166 à #175** · détails
+[`docs/issues/M10R2-MILESTONE.md`](issues/M10R2-MILESTONE.md)
+
+| Issue | Doc | GitHub | Statut |
+|---|---|---|---|
+| M10R2-01 — Drawer latéral : pas de SafeZone | [`M10R2-01-drawer-safezone.md`](issues/M10R2-01-drawer-safezone.md) | #167 | Done |
+| M10R2-02 — Permission caméra 1er lancement + écran partagé | [`M10R2-02-camera-permission.md`](issues/M10R2-02-camera-permission.md) | #168 | Done |
+| M10R2-03 — Popup « Couverture reconnue » : espacement boutons | [`M10R2-03-result-popup-spacing.md`](issues/M10R2-03-result-popup-spacing.md) | #169 | Done |
+| M10R2-04 — Formulaire : icône Valider dans le header | [`M10R2-04-form-submit-header.md`](issues/M10R2-04-form-submit-header.md) | #171 | Done |
+| M10R2-05 — Premier lancement : onboarding + permission | [`M10R2-05-first-launch-onboarding.md`](issues/M10R2-05-first-launch-onboarding.md) | #170 | Done |
+| M10R2-06 — Paramètres : sous-menus + retour GitHub | [`M10R2-06-settings-submenus.md`](issues/M10R2-06-settings-submenus.md) | #173 | Done |
+| M10R2-07 — Fiche magazine : header menu/titre/scan | [`M10R2-07-detail-header.md`](issues/M10R2-07-detail-header.md) | #166 | Done |
+| M10R2-08 — Collection : bouton Tri (numéro ↑/↓) | [`M10R2-08-collection-sort.md`](issues/M10R2-08-collection-sort.md) | #172 | Done |
+| M10R2-09 — OCR : numéro affiné (« N° ») + textes stylisés | [`M10R2-09-ocr-number-detection.md`](issues/M10R2-09-ocr-number-detection.md) | #174 | Done |
+| M10R2-10 — Saisie manuelle flux identification → Recherche | [`M10R2-10-manual-search-flow.md`](issues/M10R2-10-manual-search-flow.md) | #175 | Done |
+
+**Milestone M-09 « Tests terrain & publication » (→ v1.0.0)** · nouvelles issues ouvertes pendant la Phase 9
+
+| Issue | Doc | GitHub | Statut |
+|---|---|---|---|
+| M09-01 — Collection : panneau de recherche repliable (bouton Rechercher) | [`M09-01-collection-search-panel.md`](issues/M09-01-collection-search-panel.md) | #177 | À faire (PR en cours) |
 
 ---
 

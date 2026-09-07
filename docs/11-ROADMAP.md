@@ -78,7 +78,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 10 — Refonte UI/UX | `M-10 — Refonte UI/UX « Vault Lisible »` | `US-UX-01..06` (issues M10-01..12) | 12 |
 | 10R — Retours test M-10 | `M-10R — Retours test physique (v0.9.1)` | `US-UX-07..12` (issues M10R-01..11) | 11 |
 | 10R2 — 2ᵉ passe retours | `M-10R2 — 2ᵉ passe retours test physique (v0.9.2)` | `US-UX-13..22` (issues M10R2-01..10) | 10 |
-| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
+| 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03`, `US-UX-23` (#177) | 2 |
 | **Total** | | | **103** |
 
 ---
@@ -412,6 +412,7 @@ poser au moment de la publication (phase M-09).
 | Test avec magazines réels (nouveaux, anciens, abîmés) | — |
 | Test en conditions réelles (brocante, réseau absent) | — |
 | Corrections finales | — |
+| Collection : panneau de recherche repliable (bouton Rechercher) | US-UX-23 / M09-01 (#177) |
 | Build AAB (EAS Build) | US-QA-03 |
 | Préparer la fiche Play Store (ASO) | — |
 | Publication Play Store | — |
@@ -453,5 +454,5 @@ Pour chaque phase, les critères de sortie sont :
 | 10 — Refonte UI/UX | Vault Lisible (v0.9.0) | US-UX-01..06 (M10-01..12) | 12 |
 | 10R — Retours test M-10 | Retours v0.9.1 (drawer, tabs, OCR) | US-UX-07..12 (M10R-01..11) | 11 |
 | 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..22 (M10R2-01..10) | 10 |
-| 9 — Publication | Play Store | US-QA-03 | 1 |
-| **Total** | | | **102** |
+| 9 — Publication | Play Store | US-QA-03, US-UX-23 (M09-01) | 2 |
+| **Total** | | | **103** |
