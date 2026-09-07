@@ -165,8 +165,8 @@ Deux modes de build :
 - Gradle local pour générer un APK de test.
 
 ### 7.2 EAS Build (release)
-- Configuration de `eas.json` pour les builds de production (AAB) ;
-- Génère l'**AAB** (Android App Bundle) pour le Play Store.
+- Le profil `preview` (`buildType: apk`) génère l'**APK** de la release finale ;
+- L'**APK** est publié comme **GitHub Release** téléchargeable (pas de Play Store, ni d'AAB).
 
 ### 7.3 Configuration `eas.json` (indicative)
 
@@ -181,15 +181,11 @@ Deux modes de build :
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
-    },
-    "production": {
-      "channel": "production",
-      "autoIncrement": true
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
 ```

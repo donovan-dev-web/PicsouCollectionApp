@@ -153,7 +153,7 @@ PicsouCollectionApp/
 | **10R — Retours test** | Drawer + tabs, formulaire au clavier, torche, import CSV | ✅ Terminé — **v0.9.1** |
 | **10R2 — Retours test** | Drawer SafeZone, onboard + permission, paramètres sous-menus, header fiche, tri, OCR numéro, recherche | ✅ Terminé — **v0.9.2** |
 | **10R3 — Retours test** | Panneau de recherche repliable Collection, drawer scrollable, popup/form, renommage **Mag Collection** | ✅ Terminé — **v0.9.3** |
-| **9 — Tests terrain & publication** | Vrais magazines, Play Store | ⬜ À venir |
+| **9 — Tests terrain & publication** | Vrais magazines, release **APK sur GitHub** (v1.0.0) | ⬜ À venir |
 
 Détail complet : [docs/11-ROADMAP.md](docs/11-ROADMAP.md)
 

@@ -439,12 +439,13 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 **Priorité** : haute.
 
 ### US-QA-03 — Build de production
-> En tant que **developpeur**, je veux **générer un build de production** afin de **préparer la publication Play Store**.
+> En tant que **developpeur**, je veux **générer un build de production (APK de release)** afin de **publier la version finale (v1.0.0)**.
 
 **Critères d'acceptation** :
-- EAS Build produit un AAB ;
-- Le build local produit un APK ;
-- L'application fonctionne en production.
+- Le build local produit un APK installable ;
+- Le profil EAS `preview` produit l'APK de la release finale ;
+- L'application fonctionne en production ;
+- L'APK est publié comme **GitHub Release** téléchargeable.
 
 **Priorité** : moyenne.
 

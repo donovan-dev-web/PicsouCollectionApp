@@ -397,26 +397,26 @@ magazine, tri de la collection, OCR numéro affiné, écran Recherche.
 Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 **Statut : Done (v0.9.2)** — issues #166-#175 fermées, **PR #176** mergée sur
-`develop` (CI Quality verte, 337 tests). Le build de validation / tag sont à
-poser au moment de la publication (phase M-09).
+`develop` (CI Quality verte, 337 tests). Le build de validation / tag de la
+v1.0.0 sont vérifiés dans la **phase M-11** (#182, #189).
 
 ---
 
 ## 17. Phase 9 — Tests terrain & publication
 
-**Objectif** : Validation réelle et publication Play Store.
+**Objectif** : Validation réelle puis **publication finale v1.0.0** sous forme d'APK téléchargeable sur GitHub.
 
-| Tâche | Story |
+| Tâche | Story / Issue |
 |---|---|
 | Test avec magazines réels (nouveaux, anciens, abîmés) | — |
 | Test en conditions réelles (brocante, réseau absent) | — |
 | Corrections finales | — |
 | Collection : panneau de recherche repliable (bouton Rechercher) | US-UX-23 / M09-01 (#177) |
-| Build AAB (EAS Build) | US-QA-03 |
-| Préparer la fiche Play Store (ASO) | — |
-| Publication Play Store | — |
+| Build APK final (profil `preview`) | US-QA-03 |
+| Retrait des références Play Store de la doc | M11-02 (#182) |
+| GitHub Release v1.0.0 : APK téléchargeable + notes | M11-09 (#189) |
 
-**Livrables** : application validée et publiée.
+**Livrables** : application validée, release v1.0.0 publiée avec son APK sur GitHub.
 
 ---
 
@@ -453,5 +453,5 @@ Pour chaque phase, les critères de sortie sont :
 | 10 — Refonte UI/UX | Vault Lisible (v0.9.0) | US-UX-01..06 (M10-01..12) | 12 |
 | 10R — Retours test M-10 | Retours v0.9.1 (drawer, tabs, OCR) | US-UX-07..12 (M10R-01..11) | 11 |
 | 10R2 — 2ᵉ passe retours | Retours v0.9.2 (safezone, onboarding) | US-UX-13..22 (M10R2-01..10) | 10 |
-| 9 — Publication | Play Store | US-QA-03, US-UX-23 (M09-01) | 2 |
+| 9 — Publication | APK GitHub (release) | US-QA-03, US-UX-23 (M09-01) | 2 |
 | **Total** | | | **103** |

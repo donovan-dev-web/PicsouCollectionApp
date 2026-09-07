@@ -77,13 +77,13 @@ Fournir un outil de terrain fiable, rapide et hors ligne pour vérifier la posse
 Ce projet est avant tout un **projet personnel** conçu pour un usage individuel. Il s'inscrit dans une démarche d'apprentissage et de démonstration de compétences.
 
 ### 4.3 Objectif de publication
-L'application a pour objectif final la **publication sur le Google Play Store**, dans une perspective de **portfolio professionnel**. Cela conditionne :
+L'application a pour objectif final la **livraison d'une version 1.0.0 stable**, publiée sous forme d'**APK téléchargeable sur le dépôt GitHub** (GitHub Releases), dans une perspective de portfolio professionnel. Cela conditionne :
 
 - la qualité et la maintenabilité du code ;
 - la documentation ;
 - la couverture de tests ;
 - la politique de confidentialité ;
-- les métadonnées du store (ASO).
+- la notice d'installation de la release.
 
 ---
 
@@ -123,7 +123,7 @@ Si elle ajoute de la complexité sans améliorer cette expérience, elle reste s
 Le créateur du projet lui-même, collectionneur de magazines Disney.
 
 ### 7.2 Public secondaire
-Tout collectionneur de magazines Disney/Picsou présentant le même besoin, susceptible de télécharger l'application depuis le Play Store.
+Tout collectionneur de magazines Disney/Picsou présentant le même besoin, susceptible de télécharger l'APK de la release depuis le dépôt GitHub.
 
 ### 7.3 Persona type
 
@@ -199,13 +199,13 @@ L'application sera considérée comme réussie si le collectionneur peut :
 ## 11. La stratégie de publication
 
 ### 11.1 Objectif final
-Publication sur le **Google Play Store** dans le cadre d'un portfolio professionnel.
+Livraison d'une **release v1.0.0** publiée sur **GitHub Releases** : l'**APK final** est téléchargeable depuis le dépôt du projet (le Google Play Store est écarté, trop contraignant pour le test).
 
 ### 11.2 Implications
-- Les métadonnées ASO et les captures d'écran existent déjà (`Docs Design/`) ;
-- Une **politique de confidentialité** est requise (voir `13-PRIVACY.md`) ;
+- L'**APK** de release est généré par le profil `preview` d'EAS Build (voir `03-TECHNICAL-SPEC.md` et `10-CI-CD.md`) ;
+- Chaque release est accompagnée d'un **CHANGELOG** et de **notes de version** ;
+- Une **politique de confidentialité** est fournie (voir `13-PRIVACY.md`) ;
 - La qualité de code et la couverture de tests sont des priorités (voir `12-TESTING.md`) ;
-- Le build de production utilise **EAS Build** (voir `03-TECHNICAL-SPEC.md`) ;
 - L'application doit être utilisable par un **tiers** sans documentation (onboarding implicite).
 
 ### 11.3 Non-engagement

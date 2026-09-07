@@ -2,7 +2,7 @@
 
 > **Document — v1.0**
 >
-> Ce document constitue la politique de confidentialité de l'application Picsou Collection. Il est destiné à être publié sur le **Google Play Store** (exigence) et à informer les utilisateurs de la gestion de leurs données.
+> Ce document constitue la politique de confidentialité de l'application Mag Collection. Il accompagne la **release** (disponible dans le dépôt GitHub) et informe les utilisateurs de la gestion de leurs données.
 
 ---
 
