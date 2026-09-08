@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
-import { slug } from '@/lib/slug';
 import { useSettingsStore } from '@/store/use-settings-store';
+import { Collapsible, DrawerItem, SubItem, makeDrawerItemStyles } from './drawer-items';
 
 const DRAWER_WIDTH = 300;
 const CLOSE_MS = 250;
@@ -31,88 +31,55 @@ export function isLeftEdgeGesture(dx: number, x0: number): boolean {
   return dx > 10 && x0 < 30;
 }
 
-type DrawerItemProps = {
-  icon: React.ComponentProps<typeof Feather>['name'];
-  label: string;
-  route: string;
-  colors: ThemeColors;
-  onPress: (route: string) => void;
-};
-
-function DrawerItem({ icon, label, route, colors, onPress }: DrawerItemProps) {
-  const styles = makeStyles(colors);
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
-      onPress={() => onPress(route)}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      testID={`drawer-item-${slug(label)}`}>
-      <Feather name={icon} size={20} color={colors.text} />
-      <Text style={styles.drawerItemLabel}>{label}</Text>
-    </Pressable>
-  );
-}
-
-type CollapsibleProps = {
-  label: string;
-  icon: React.ComponentProps<typeof Feather>['name'];
-  expanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-};
-
-function Collapsible({ label, icon, expanded, onToggle, children }: CollapsibleProps) {
-  const colors = useThemeColors();
-  const styles = makeStyles(colors);
-  return (
-    <>
-      <Pressable
-        style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
-        onPress={onToggle}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{ expanded }}
-        testID={`drawer-collapsible-${slug(label)}`}>
-        <Feather name={icon} size={20} color={colors.text} />
-        <Text style={styles.drawerItemLabel}>{label}</Text>
-        <Feather
-          name={expanded ? 'chevron-up' : 'chevron-down'}
-          size={16}
-          color={colors.textSecondary}
-          style={styles.drawerChevron}
-        />
-      </Pressable>
-      {expanded && <View style={styles.drawerSubSection}>{children}</View>}
-    </>
-  );
-}
-
-function SubItem({
-  icon,
-  label,
-  route,
-  colors,
-  onPress,
-}: {
-  icon: React.ComponentProps<typeof Feather>['name'];
-  label: string;
-  route: string;
-  colors: ThemeColors;
-  onPress: (route: string) => void;
-}) {
-  const styles = makeStyles(colors);
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.drawerSubItem, pressed && styles.pressed]}
-      onPress={() => onPress(route)}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      testID={`drawer-sub-${slug(label)}`}>
-      <Feather name={icon} size={16} color={colors.textSecondary} />
-      <Text style={styles.drawerSubItemLabel}>{label}</Text>
-    </Pressable>
-  );
+function makeDrawerStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      flexDirection: 'row',
+    },
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    drawerPanel: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      width: DRAWER_WIDTH,
+      elevation: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 0 },
+      shadowOpacity: 0.25,
+      shadowRadius: 8,
+    },
+    drawer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    drawerHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+      padding: Spacing.four,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.backgroundElement,
+    },
+    drawerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    drawerSection: {
+      paddingVertical: Spacing.two,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.backgroundElement,
+    },
+  });
 }
 
 /**
@@ -135,7 +102,8 @@ export function DrawerMenu({
   editions?: string[];
 }) {
   const colors = useThemeColors();
-  const styles = makeStyles(colors);
+  const styles = makeDrawerStyles(colors);
+  const itemStyles = makeDrawerItemStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
@@ -251,23 +219,23 @@ export function DrawerMenu({
 
               <View style={styles.drawerSection}>
                 <Pressable
-                  style={({ pressed }) => [styles.drawerItem, pressed && styles.pressed]}
+                  style={({ pressed }) => [itemStyles.drawerItem, pressed && itemStyles.pressed]}
                   onPress={() => setScanExpanded((e) => !e)}
                   accessibilityRole="button"
                   accessibilityLabel="Scan"
                   accessibilityState={{ expanded: scanExpanded }}
                   testID="drawer-collapsible-scan">
                   <Feather name="camera" size={20} color={colors.text} />
-                  <Text style={styles.drawerItemLabel}>Scan</Text>
+                  <Text style={itemStyles.drawerItemLabel}>Scan</Text>
                   <Feather
                     name={scanExpanded ? 'chevron-up' : 'chevron-down'}
                     size={16}
                     color={colors.textSecondary}
-                    style={styles.drawerChevron}
+                    style={itemStyles.drawerChevron}
                   />
                 </Pressable>
                 {scanExpanded && (
-                  <View style={styles.drawerSubSection}>
+                  <View style={itemStyles.drawerSubSection}>
                     <SubItem
                       icon="camera"
                       label="OCR (couverture)"
@@ -339,91 +307,4 @@ export function DrawerMenu({
       </View>
     </Modal>
   );
-}
-
-function makeStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    overlay: {
-      flex: 1,
-      flexDirection: 'row',
-    },
-    backdrop: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-    },
-    drawerPanel: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      width: DRAWER_WIDTH,
-      elevation: 16,
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 0 },
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
-    },
-    drawer: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    drawerHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-      padding: Spacing.four,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.backgroundElement,
-    },
-    drawerTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    drawerSection: {
-      paddingVertical: Spacing.two,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.backgroundElement,
-    },
-    drawerItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.three,
-      paddingHorizontal: Spacing.four,
-      paddingVertical: Spacing.three,
-      minHeight: 48,
-    },
-    drawerItemLabel: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: colors.text,
-      flex: 1,
-    },
-    drawerChevron: {
-      marginLeft: 'auto',
-    },
-    drawerSubSection: {
-      paddingLeft: Spacing.five,
-    },
-    drawerSubItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-      paddingHorizontal: Spacing.four,
-      paddingVertical: Spacing.two,
-      minHeight: 44,
-    },
-    drawerSubItemLabel: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      flex: 1,
-    },
-    pressed: {
-      opacity: 0.7,
-    },
-  });
 }
