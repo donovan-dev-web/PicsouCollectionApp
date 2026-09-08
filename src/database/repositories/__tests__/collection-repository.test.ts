@@ -43,9 +43,8 @@ describe('collectionRepository.addCopy', () => {
     expect(copy.id).toMatch(/^b1a2c3d4-0000-4000-8000-/);
     expect(copy.dateAdded).toBeDefined();
 
-    const reloaded = await repo.listByMagazine(magazineId);
-    expect(reloaded).toHaveLength(1);
-    expect(reloaded[0]).toEqual(copy);
+    const reloaded = await repo.countByMagazine(magazineId);
+    expect(reloaded).toBe(1);
   });
 
   it('refuse un exemplaire pour une edition inexistante', async () => {
@@ -69,39 +68,6 @@ describe('collectionRepository.countByMagazine', () => {
     expect(await repo.countByMagazine(magazineId)).toBe(2);
     expect(await repo.countByMagazine(otherMagazine.id)).toBe(1);
     expect(await repo.countByMagazine('edition-inconnue')).toBe(0);
-  });
-});
-
-describe('collectionRepository.listByMagazine', () => {
-  it('liste du plus recent au plus ancien', async () => {
-    await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
-       VALUES (?, ?, NULL, ?)`,
-      'copy-1',
-      magazineId,
-      '2026-01-01T10:00:00Z',
-    );
-    await testDb.runAsync(
-      `INSERT INTO collection_items (id, magazine_id, notes, date_added)
-       VALUES (?, ?, NULL, ?)`,
-      'copy-2',
-      magazineId,
-      '2026-09-01T10:00:00Z',
-    );
-
-    const copies = await repo.listByMagazine(magazineId);
-
-    expect(copies.map((c) => c.id)).toEqual(['copy-2', 'copy-1']);
-  });
-});
-
-describe('collectionRepository.deleteCopy', () => {
-  it('supprime un exemplaire', async () => {
-    const copy = await repo.addCopy(magazineId);
-
-    await repo.deleteCopy(copy.id);
-
-    expect(await repo.countByMagazine(magazineId)).toBe(0);
   });
 });
 

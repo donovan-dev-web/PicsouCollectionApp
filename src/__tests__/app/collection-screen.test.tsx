@@ -73,7 +73,6 @@ describe('CollectionScreen', () => {
       loading: false,
       error: null,
       load: jest.fn(),
-      loadRecent: jest.fn(),
     });
   });
 
@@ -246,7 +245,6 @@ describe('CollectionScreen (pagination)', () => {
       loading: false,
       error: null,
       load: jest.fn(),
-      loadRecent: jest.fn(),
     });
   });
 

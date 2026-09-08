@@ -23,7 +23,6 @@ export const Colors = {
     /** Fond teinté pour bandeaux d'erreur (M10-09/11). */
     dangerBg: '#FDE8E8',
     success: '#1B7F3B',
-    onSuccess: '#FFFFFF',
     /** Badges statut — Possédé = vert positif, Absent = neutre (M10-07, sémantique inversée). */
     ownedBg: '#E6F4EA',
     ownedText: '#1B7F3B',
@@ -43,7 +42,6 @@ export const Colors = {
     onDanger: '#410002',
     dangerBg: '#3A1A18',
     success: '#7BC67E',
-    onSuccess: '#062B0A',
     ownedBg: '#1E3A2A',
     ownedText: '#7BC67E',
     absentBg: '#26334A',
@@ -54,25 +52,11 @@ export const Colors = {
 export type ThemeColors = { [K in keyof (typeof Colors)['light']]: string };
 
 export const Spacing = {
-  zero: 0,
   one: 4,
   two: 8,
-  twoHalf: 12,
   three: 16,
   four: 24,
   five: 32,
-} as const;
-
-export type SpacingScale = typeof Spacing;
-
-/** Échelle typographique minimale (M10-01) — 13px min en UI, jamais 12px. */
-export const Typography = {
-  display: { fontSize: 48, lineHeight: 56, fontWeight: '800' },
-  headline: { fontSize: 24, lineHeight: 32, fontWeight: '700' },
-  title: { fontSize: 20, lineHeight: 28, fontWeight: '700' },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodySm: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
-  label: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
 } as const;
 
 /** Cible tactile minimale (M10-02/M10-10). */

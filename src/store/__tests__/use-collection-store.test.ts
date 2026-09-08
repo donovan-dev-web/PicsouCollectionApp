@@ -4,14 +4,12 @@ import type { MagazineListItem } from '@/types';
 const mockList = jest.fn();
 const mockCreate = jest.fn();
 const mockDelete = jest.fn();
-const mockFindByBarcode = jest.fn();
 const mockFindById = jest.fn();
 const mockUpdate = jest.fn();
 const mockMagazineRepo = {
   list: mockList,
   create: mockCreate,
   delete: mockDelete,
-  findByBarcode: mockFindByBarcode,
   findById: mockFindById,
   update: mockUpdate,
 };
@@ -23,9 +21,6 @@ const mockCollectionRepo = {
   listRecentCopies: mockListRecentCopies,
   countAllCopies: mockCountAllCopies,
   addCopy: mockAddCopy,
-  countByMagazine: jest.fn(),
-  listByMagazine: jest.fn(),
-  deleteCopy: jest.fn(),
 };
 
 jest.mock('@/dependencies', () => ({
@@ -117,25 +112,6 @@ describe('useCollectionStore', () => {
     expect(state.totalCopies).toBe(0);
   });
 
-  it('charge les derniers exemplaires ajoutes', async () => {
-    mockListRecentCopies.mockResolvedValue([
-      {
-        copy: {
-          id: 'c1',
-          magazineId: 'mag-1',
-          notes: null,
-          dateAdded: '2026-09-01T10:00:00Z',
-        },
-        magazine: { id: 'mag-1', publication: 'Picsou Magazine', issueNumber: 547 },
-      },
-    ]);
-
-    await useCollectionStore.getState().loadRecent();
-
-    expect(useCollectionStore.getState().recentCopies).toHaveLength(1);
-    expect(mockListRecentCopies).toHaveBeenCalledWith(5);
-  });
-
   it('charge un resume leger (compteur + recents) sans lister les editions', async () => {
     mockCountAllCopies.mockResolvedValue(7);
     mockListRecentCopies.mockResolvedValue([
@@ -192,14 +168,6 @@ describe('useCollectionStore', () => {
     expect(detail).toBeNull();
     expect(useCollectionStore.getState().error).toBe('detail indisponible');
     expect(useCollectionStore.getState().detailLoading).toBe(false);
-  });
-
-  it('efface le detail a la sortie de la fiche', () => {
-    useCollectionStore.setState({ detail: { ...magazine, copies: [] } });
-
-    useCollectionStore.getState().clearDetail();
-
-    expect(useCollectionStore.getState().detail).toBeNull();
   });
 
   it('modifie une edition et rafraichit la liste et le detail', async () => {
@@ -265,14 +233,6 @@ describe('useCollectionStore', () => {
     expect(state.detail?.copies).toEqual([copy]);
   });
 
-  it('signale un echec de chargement des derniers exemplaires', async () => {
-    mockListRecentCopies.mockRejectedValue(new Error('base indisponible'));
-
-    await useCollectionStore.getState().loadRecent();
-
-    expect(useCollectionStore.getState().error).toBe('base indisponible');
-  });
-
   it('traduit une erreur inconnue en message générique', async () => {
     mockList.mockRejectedValue('panne');
 
@@ -326,14 +286,6 @@ describe('useCollectionStore', () => {
     const state = useCollectionStore.getState();
     expect(state.magazines).toHaveLength(1);
     expect(state.totalCopies).toBe(4);
-  });
-
-  it('traduit une erreur inconnue lors du chargement des recents', async () => {
-    mockListRecentCopies.mockRejectedValue('panne');
-
-    await useCollectionStore.getState().loadRecent();
-
-    expect(useCollectionStore.getState().error).toBe('Erreur inconnue');
   });
 
   it('traduit une erreur inconnue lors du chargement du resume', async () => {

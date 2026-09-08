@@ -53,12 +53,24 @@ describe('migrate', () => {
 
   it('migre depuis une base dont la version est indisponible', async () => {
     const db = {
-      getFirstAsync: jest.fn().mockResolvedValue(undefined),
+      getFirstAsync: jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValue({ user_version: getSchemaVersion() }),
       execAsync: jest.fn().mockResolvedValue(undefined),
     } as unknown as Database;
 
     await migrate(db);
 
     expect(db.execAsync).toHaveBeenCalledWith(MIGRATION_001);
+  });
+
+  it('signale une migration incomplète si la version finale est fausse', async () => {
+    const db = {
+      getFirstAsync: jest.fn().mockResolvedValue(undefined),
+      execAsync: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Database;
+
+    await expect(migrate(db)).rejects.toThrow(/Migration incomplète/);
   });
 });

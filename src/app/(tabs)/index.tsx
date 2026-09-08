@@ -8,20 +8,7 @@ import { useThemeColors } from '@/hooks/use-theme';
 import { AppHeader } from '@/components/app-header';
 import { Screen } from '@/components/screen';
 import { useCollectionStore } from '@/store/use-collection-store';
-
-const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-function formatDate(iso: string): string {
-  const time = Date.parse(iso);
-  if (Number.isNaN(time)) {
-    return iso.slice(0, 10);
-  }
-  return dateFormatter.format(new Date(time));
-}
+import { formatDateLong } from '@/lib/date';
 
 /**
  * Accueil cockpit brocante (M10-04) : un seul CTA primaire Scanner,
@@ -129,7 +116,7 @@ export default function HomeScreen() {
                     {magazine.publication}
                     {magazine.issueNumber != null ? ` n°${magazine.issueNumber}` : ''}
                   </Text>
-                  <Text style={styles.recentItemDate}>{formatDate(copy.dateAdded)}</Text>
+                  <Text style={styles.recentItemDate}>{formatDateLong(copy.dateAdded)}</Text>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.textSecondary} />
               </Pressable>

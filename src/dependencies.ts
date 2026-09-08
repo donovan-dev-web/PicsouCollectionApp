@@ -7,6 +7,8 @@ import { SettingsRepository } from '@/database/repositories/settings-repository'
 import { IdentificationService } from '@/identification/identificationService';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
 import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
+import { NoopOcrEngine } from '@/identification/ocr/ocrEngine';
+import { Platform } from 'react-native';
 import { BackupService } from '@/backup/backup-service';
 import { NativeFileGateway } from '@/backup/native-file-gateway';
 import type { FileGateway } from '@/backup/file-gateway';
@@ -43,9 +45,13 @@ export async function initialize(): Promise<Dependencies> {
   }
   const db = await dbPromise;
   if (!deps) {
-    // Moteur OCR natif (ML Kit via expo-mlkit-ocr). Sur CI / hors Dev Build,
-    // l'import est paresseux dans `recognize` : il ne casse pas les tests.
-    const ocrEngine: OcrEngine = new MlKitOcrEngine();
+    // Moteur OCR natif (ML Kit via expo-mlkit-ocr) sur Android/iOS ; sur le web
+    // (aucun module natif) on utilise un moteur inerte : le flux caméra reste
+    // câblé et la CI démarre sans blocage.
+    const ocrEngine: OcrEngine =
+      Platform.OS === 'android' || Platform.OS === 'ios'
+        ? new MlKitOcrEngine()
+        : new NoopOcrEngine();
     const magazineRepository = new MagazineRepository(db);
     deps = {
       magazineRepository,

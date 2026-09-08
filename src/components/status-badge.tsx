@@ -12,7 +12,7 @@ type Props = {
 /**
  * Badge Possédé / Absent — M10-01/M10-07 : sémantique inversée validée.
  * Possédé = vert positif (+ check), Absent = neutre. Thématisé clair/sombre,
- * `accessibilityRole="summary"`, 13px min (M10-10).
+ * 13px min (M10-10).
  */
 export function StatusBadge({ owned, quantity = 0 }: Props) {
   const colors = useThemeColors();
@@ -21,7 +21,6 @@ export function StatusBadge({ owned, quantity = 0 }: Props) {
     <View
       style={[styles.badge, { backgroundColor: colors.ownedBg }]}
       testID="status-owned"
-      accessibilityRole="summary"
       accessibilityLabel={quantity > 0 ? `Possédé, ${quantity} exemplaires` : 'Possédé'}>
       <Feather name="check-circle" size={14} color={colors.ownedText} />
       <Text style={[styles.text, { color: colors.ownedText }]}>
@@ -32,7 +31,6 @@ export function StatusBadge({ owned, quantity = 0 }: Props) {
     <View
       style={[styles.badge, { backgroundColor: colors.absentBg }]}
       testID="status-absent"
-      accessibilityRole="summary"
       accessibilityLabel="Absent de la collection">
       <Feather name="x-circle" size={14} color={colors.absentText} />
       <Text style={[styles.text, { color: colors.absentText }]}>Absent</Text>

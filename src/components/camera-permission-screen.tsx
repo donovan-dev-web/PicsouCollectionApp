@@ -71,7 +71,8 @@ export function CameraPermissionScreen({
           style={({ pressed }) => [styles.cancelButton, pressed && styles.pressed]}
           onPress={onCancel}
           testID="permission-cancel"
-          accessibilityRole="button">
+          accessibilityRole="button"
+          accessibilityLabel="Retour">
           <Text style={styles.cancelButtonText}>Retour</Text>
         </Pressable>
       </View>

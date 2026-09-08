@@ -19,6 +19,7 @@ import { Spacing, type ThemeColors } from '@/constants/theme';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
 import { OcrTextStabilizer } from '@/identification/ocr/ocrTextStabilizer';
+import { MIN_CONFIDENCE } from '@/identification/ocr/ocrTextParser';
 
 /** Intervalle d'analyse OCR : quelques frames / seconde max (pas toutes). */
 const ANALYSIS_INTERVAL_MS = 500;
@@ -566,7 +567,7 @@ function confidenceLabel(confidence: number): string {
   if (confidence >= 0.8) {
     return 'élevée';
   }
-  if (confidence >= 0.5) {
+  if (confidence >= MIN_CONFIDENCE) {
     return 'moyenne';
   }
   return 'faible';
