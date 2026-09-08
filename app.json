@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Mag Collection",
+    "name": "Mag Collector",
     "slug": "PicsouCollection",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "picsoucollection",
