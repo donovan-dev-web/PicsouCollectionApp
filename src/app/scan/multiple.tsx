@@ -157,18 +157,6 @@ function makeStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       textAlign: 'center',
     },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      marginTop: Spacing.four,
-    },
-    error: {
-      fontSize: 15,
-      color: colors.danger,
-      textAlign: 'center',
-      marginTop: Spacing.four,
-    },
     list: {
       gap: Spacing.two,
     },

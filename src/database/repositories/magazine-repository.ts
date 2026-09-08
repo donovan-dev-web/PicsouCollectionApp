@@ -251,7 +251,8 @@ export class MagazineRepository {
     await this.db.runAsync(
       `UPDATE magazines
        SET publication = ?, issue_number = ?, edition = ?, language = ?,
-           condition = ?, publication_date = ?, barcode = ?, updated_at = ?
+           condition = ?, publication_date = ?, barcode = ?, notes = ?,
+           ocr_text = COALESCE(?, ocr_text), updated_at = ?
        WHERE id = ?`,
       publication,
       input.issueNumber ?? null,
@@ -260,6 +261,8 @@ export class MagazineRepository {
       input.condition ?? null,
       input.publicationDate ?? null,
       input.barcode ?? null,
+      input.notes ?? null,
+      input.ocrText ?? null,
       updatedAt,
       id,
     );
@@ -273,6 +276,8 @@ export class MagazineRepository {
       condition: input.condition ?? null,
       publicationDate: input.publicationDate ?? null,
       barcode: input.barcode ?? null,
+      notes: input.notes ?? null,
+      ocrText: input.ocrText ?? current.ocr_text,
       updatedAt,
     };
   }

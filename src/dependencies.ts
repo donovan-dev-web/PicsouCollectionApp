@@ -46,11 +46,12 @@ export async function initialize(): Promise<Dependencies> {
     // Moteur OCR natif (ML Kit via expo-mlkit-ocr). Sur CI / hors Dev Build,
     // l'import est paresseux dans `recognize` : il ne casse pas les tests.
     const ocrEngine: OcrEngine = new MlKitOcrEngine();
+    const magazineRepository = new MagazineRepository(db);
     deps = {
-      magazineRepository: new MagazineRepository(db),
+      magazineRepository,
       collectionRepository: new CollectionRepository(db),
       settingsRepository: new SettingsRepository(db),
-      identificationService: new IdentificationService(new MagazineRepository(db)),
+      identificationService: new IdentificationService(magazineRepository),
       ocrEngine,
       backupService: new BackupService(db),
       fileGateway: new NativeFileGateway(),

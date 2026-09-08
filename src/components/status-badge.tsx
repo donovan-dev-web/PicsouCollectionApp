@@ -12,7 +12,7 @@ type Props = {
 /**
  * Badge Possédé / Absent — M10-01/M10-07 : sémantique inversée validée.
  * Possédé = vert positif (+ check), Absent = neutre. Thématisé clair/sombre,
- * `accessibilityRole="status"`, 13px min (M10-10).
+ * `accessibilityRole="summary"`, 13px min (M10-10).
  */
 export function StatusBadge({ owned, quantity = 0 }: Props) {
   const colors = useThemeColors();

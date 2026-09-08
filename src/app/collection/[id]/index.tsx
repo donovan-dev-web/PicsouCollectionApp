@@ -229,12 +229,6 @@ function makeStyles(colors: ThemeColors) {
       padding: Spacing.four,
       gap: Spacing.three,
     },
-    center: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: Spacing.four,
-    },
     publication: {
       fontSize: 24,
       lineHeight: 32,

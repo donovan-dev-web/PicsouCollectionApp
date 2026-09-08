@@ -469,7 +469,7 @@ describe('magazineRepository.update', () => {
     expect(updated?.createdAt).toBe(created.createdAt);
   });
 
-  it('preserve notes et ocr_text lors de la modification', async () => {
+  it('met à jour les notes et préserve l’ocr_text lors de la modification', async () => {
     const created = await repo.create({
       publication: 'Mickey Parade',
       issueNumber: 2,
@@ -477,15 +477,18 @@ describe('magazineRepository.update', () => {
       ocrText: 'raw',
     });
 
-    const updated = await repo.update(created.id, { publication: 'Mickey Parade' });
+    const updated = await repo.update(created.id, {
+      publication: 'Mickey Parade',
+      notes: 'annotations modifiées',
+    });
 
-    expect(updated?.notes).toBe('annotation');
+    expect(updated?.notes).toBe('annotations modifiées');
     expect(updated?.ocrText).toBe('raw');
     const row = await testDb.getFirstAsync<{ notes: string; ocr_text: string }>(
       'SELECT notes, ocr_text FROM magazines WHERE id = ?',
       created.id,
     );
-    expect(row?.notes).toBe('annotation');
+    expect(row?.notes).toBe('annotations modifiées');
     expect(row?.ocr_text).toBe('raw');
   });
 
