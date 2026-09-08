@@ -84,7 +84,9 @@ export default function ScanResultScreen() {
             <Text style={styles.magazine} testID="result-magazine">
               {params.publication ?? 'Magazine'}
             </Text>
-            {params.issueNumber ? <Text style={styles.issue}>N° {params.issueNumber}</Text> : null}
+            {params.issueNumber != null && params.issueNumber !== '' ? (
+              <Text style={styles.issue}>N° {params.issueNumber}</Text>
+            ) : null}
             {resolved ? (
               <Text
                 style={owned ? styles.ownedText : styles.absentText}

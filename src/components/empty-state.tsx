@@ -30,7 +30,7 @@ export function EmptyState({
   const colors = useThemeColors();
   const styles = makeStyles(colors);
   return (
-    <View style={styles.wrap} testID={testID} accessibilityRole="summary">
+    <View style={styles.wrap} testID={testID}>
       <Feather name={icon} size={40} color={colors.textSecondary} />
       <Text style={styles.title}>{title}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
