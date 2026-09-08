@@ -1,17 +1,19 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
+import { useScanResult } from '@/hooks/use-scan-result';
+import { makeSearchResultStyles } from '@/components/scan-search-views';
 import { Screen } from '@/components/screen';
-import { toast } from '@/lib/toast';
 import { useCollectionStore } from '@/store/use-collection-store';
 
 export default function ScanResultScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
+  const statusTextStyles = makeSearchResultStyles(colors);
   const params = useLocalSearchParams<{
     id?: string;
     publication?: string;
@@ -22,7 +24,6 @@ export default function ScanResultScreen() {
   const loadDetail = useCollectionStore((s) => s.loadDetail);
   const detail = useCollectionStore((s) => s.detail);
   const detailLoading = useCollectionStore((s) => s.detailLoading);
-  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
 
   const id = params.id ?? '';
   const exists = id !== '';
@@ -36,34 +37,7 @@ export default function ScanResultScreen() {
     }, [id, loadDetail]),
   );
 
-  const resolved = detail != null && detail.id === id;
-  const owned = resolved && detail.copies.length > 0;
-  const ownedCount = resolved ? detail.copies.length : 0;
-
-  const handleAddCopy = () => {
-    if (!id) {
-      return;
-    }
-    const alreadyOwned = owned;
-
-    const perform = async () => {
-      await addExistingCopy(id);
-      toast(alreadyOwned ? 'Exemplaire ajouté à la collection' : 'Ajouté à la collection');
-    };
-
-    if (alreadyOwned) {
-      Alert.alert(
-        'Vous possédez déjà ce magazine',
-        `Exemplaires actuels : ${ownedCount}\nVoulez-vous ajouter un deuxième exemplaire ?`,
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Ajouter quand même', style: 'destructive', onPress: perform },
-        ],
-      );
-    } else {
-      perform();
-    }
-  };
+  const { resolved, owned, ownedCount, handleAddCopy } = useScanResult(detail, exists ? id : null);
 
   const handleManual = () => {
     router.replace({
@@ -89,7 +63,7 @@ export default function ScanResultScreen() {
             ) : null}
             {resolved ? (
               <Text
-                style={owned ? styles.ownedText : styles.absentText}
+                style={owned ? statusTextStyles.ownedText : statusTextStyles.absentText}
                 testID={`result-status-${owned ? 'owned' : 'absent'}`}>
                 {owned ? `✓ Possédé (${ownedCount})` : '○ Absent'}
               </Text>
@@ -198,26 +172,6 @@ function makeStyles(colors: ThemeColors) {
     issue: {
       fontSize: 16,
       color: colors.textSecondary,
-    },
-    ownedText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.ownedText,
-      backgroundColor: colors.ownedBg,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.two,
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
-    absentText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.absentText,
-      backgroundColor: colors.absentBg,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.two,
-      borderRadius: 8,
-      overflow: 'hidden',
     },
     message: {
       fontSize: 16,

@@ -1,5 +1,7 @@
 import type { BackupFormat } from './backup-types';
 import type { FileGateway } from './file-gateway';
+import { InvalidBackupError } from './backup-parsers';
+import { MAX_IMPORT_BYTES } from './backup-service';
 
 const DEFAULT_FILENAME_PREFIX = 'picsou-collection';
 
@@ -67,6 +69,11 @@ export class NativeFileGateway implements FileGateway {
     }
 
     const asset = result.assets[0];
+    if (asset.size != null && asset.size > MAX_IMPORT_BYTES) {
+      throw new InvalidBackupError(
+        `Fichier invalide : import dépassant la taille maximale de ${MAX_IMPORT_BYTES} octets.`,
+      );
+    }
     return { name: asset.name, content: await new File(asset.uri).text() };
   }
 }

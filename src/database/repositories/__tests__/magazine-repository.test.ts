@@ -104,6 +104,33 @@ describe('magazineRepository.create', () => {
   });
 });
 
+describe('magazineRepository.createWithCopy', () => {
+  it('cree l’edition et son premier exemplaire dans une seule transaction', async () => {
+    const result = await repo.createWithCopy({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+    });
+
+    expect(result.magazine.publication).toBe('Picsou Magazine');
+    expect(result.magazine.issueNumber).toBe(547);
+    expect(result.copyId).toBeTruthy();
+
+    const copy = await testDb.getFirstAsync<{
+      id: string;
+      magazine_id: string;
+      notes: string | null;
+    }>('SELECT id, magazine_id, notes FROM collection_items WHERE id = ?', result.copyId);
+    expect(copy?.magazine_id).toBe(result.magazine.id);
+    expect(copy?.notes).toBeNull();
+  });
+
+  it('refuse une publication vide', async () => {
+    await expect(repo.createWithCopy({ publication: '   ' })).rejects.toThrow(
+      'La publication est obligatoire.',
+    );
+  });
+});
+
 describe('magazineRepository.findManyByBarcode', () => {
   it('retourne toutes les editions partageant le meme code-barres', async () => {
     const first = await repo.create({
@@ -191,6 +218,17 @@ describe('magazineRepository.findByPublicationAndIssue', () => {
     expect(await repo.findByPublicationAndIssue('Picsou Magazine', null)).toBeNull();
     expect(await repo.findByPublicationAndIssue('  ', 547)).toBeNull();
   });
+
+  it('choisit toujours la plus ancienne édition quand plusieurs existent (déterministe)', async () => {
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547, edition: 'BE' });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 547, edition: 'FR' });
+
+    const first = await repo.findByPublicationAndIssue('Picsou Magazine', 547);
+    const second = await repo.findByPublicationAndIssue('Picsou Magazine', 547);
+
+    expect(first?.edition).toBe('BE');
+    expect(second?.id).toBe(first?.id);
+  });
 });
 
 describe('magazineRepository.list', () => {
@@ -208,6 +246,16 @@ describe('magazineRepository.list', () => {
       'Picsou Magazine/20',
       'Picsou Magazine/100',
     ]);
+  });
+
+  it('trie sans tenir compte de la casse ni des accents', async () => {
+    await repo.create({ publication: 'Échos Vacances', issueNumber: 1 });
+    await repo.create({ publication: 'etu-SORCIER', issueNumber: 1 });
+    await repo.create({ publication: 'Espiègle', issueNumber: 1 });
+
+    const list = await repo.list();
+
+    expect(list.map((m) => m.publication)).toEqual(['Échos Vacances', 'Espiègle', 'etu-SORCIER']);
   });
 
   it('compte le nombre dexemplaires possedes', async () => {
@@ -319,6 +367,24 @@ describe('magazineRepository.search', () => {
     const results = await repo.search('Picsou');
 
     expect(results[0].quantity).toBe(1);
+  });
+
+  it('traite % et _ comme des caracteres litteraux', async () => {
+    await repo.create({ publication: 'Picsou 100%', issueNumber: 1 });
+    await repo.create({ publication: 'Picsou_20', issueNumber: 2 });
+    await repo.create({ publication: 'Picsou Magazine', issueNumber: 3 });
+
+    expect((await repo.search('100%')).map((m) => m.publication)).toEqual(['Picsou 100%']);
+    expect((await repo.search('Picsou_20')).map((m) => m.publication)).toEqual(['Picsou_20']);
+    expect((await repo.search('%')).map((m) => m.publication)).toEqual(['Picsou 100%']);
+    expect((await repo.search('_')).map((m) => m.publication)).toEqual(['Picsou_20']);
+  });
+
+  it('ignore les accents et la casse dans les deux sens', async () => {
+    await repo.create({ publication: 'Super Picsou Géant', issueNumber: 30 });
+
+    expect((await repo.search('geant')).map((m) => m.publication)).toEqual(['Super Picsou Géant']);
+    expect((await repo.search('ÉAN')).map((m) => m.publication)).toEqual(['Super Picsou Géant']);
   });
 });
 

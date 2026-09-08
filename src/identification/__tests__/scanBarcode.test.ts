@@ -48,6 +48,28 @@ describe('validateBarcode', () => {
     });
   });
 
+  it('rejette un ISBN-10 invalide et n’accepte X qu’en position de checksum', () => {
+    expect(validateBarcode('0096059077')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: '0096059077',
+    });
+    // Un X en position interne n’est jamais validé comme ISBN-10 (retombe en GENERIC).
+    const middleX = validateBarcode('08044X957X');
+    expect(middleX.valid).toBe(true);
+    if (middleX.valid) {
+      expect(middleX.type).toBe('GENERIC');
+    }
+  });
+
+  it('replie en GENERIC un code de 10 chiffres au checksum ISBN-10 invalide', () => {
+    expect(validateBarcode('1234567890')).toEqual({
+      valid: true,
+      type: 'GENERIC',
+      normalized: '1234567890',
+    });
+  });
+
   it('rejette un code vide', () => {
     expect(validateBarcode('')).toEqual({
       valid: false,

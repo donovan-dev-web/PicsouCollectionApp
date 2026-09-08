@@ -119,7 +119,15 @@ describe('BackupService.importCollection', () => {
     const before = await service.exportCollection();
 
     const file = await service.exportCollection();
-    file.magazines.push({ ...file.magazines[0], id: 'edition-soumise-a-echec' });
+    const duplicate = {
+      ...file.magazines[0],
+      id: 'edition-soumise-a-echec',
+      copies: file.magazines[0].copies.map((copy) => ({
+        ...copy,
+        id: `copie-${copy.id}`,
+      })),
+    };
+    file.magazines.push(duplicate);
 
     // On force un échec déterministe lors de la 2e insertion d'édition, sans
     // dépendre du comportement de la contrainte de clé primaire (flaky en CI).
@@ -142,6 +150,20 @@ describe('BackupService.importCollection', () => {
     const after = await service.exportCollection();
     expect(after.magazines).toEqual(before.magazines);
     expect(after.magazines[0].copies).toEqual(before.magazines[0].copies);
+  });
+
+  it('préserve l’historique (createdAt/updatedAt) au round-trip', async () => {
+    await seedCollection();
+    const source = await service.exportCollection();
+    const original = source.magazines[0];
+    original.createdAt = '2020-03-01T10:00:00.000Z';
+    original.updatedAt = '2021-05-10T10:00:00.000Z';
+
+    await service.importCollection(service.toJson(source));
+
+    const after = await service.exportCollection();
+    expect(after.magazines[0].createdAt).toBe('2020-03-01T10:00:00.000Z');
+    expect(after.magazines[0].updatedAt).toBe('2021-05-10T10:00:00.000Z');
   });
 });
 
@@ -189,6 +211,88 @@ describe('BackupService.importCollection — fichier invalide (US-BK-03)', () =>
     const after = await service.exportCollection();
     expect(after.magazines).toEqual(before.magazines);
   });
+
+  it('rejette des identifiants d’édition dupliqués', async () => {
+    const raw = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      magazines: [
+        { id: 'dup', publication: 'P', issueNumber: 1, copies: [] },
+        { id: 'dup', publication: 'P', issueNumber: 2, copies: [] },
+      ],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow(
+      'Fichier invalide : des identifiants d’édition sont dupliqués.',
+    );
+  });
+
+  it('rejette des identifiants d’exemplaire dupliqués', async () => {
+    const raw = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      magazines: [
+        {
+          id: 'a',
+          publication: 'P',
+          copies: [{ id: 'c', notes: null, dateAdded: '2026-09-01T00:00:00Z' }],
+        },
+        {
+          id: 'b',
+          publication: 'P',
+          copies: [{ id: 'c', notes: null, dateAdded: '2026-09-01T00:00:00Z' }],
+        },
+      ],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow(
+      'Fichier invalide : des identifiants d’exemplaire sont dupliqués.',
+    );
+  });
+
+  it('rejette un numéro d’édition fractionnaire', async () => {
+    const raw = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      magazines: [{ id: 'a', publication: 'P', issueNumber: 1.5, copies: [] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow(
+      'Fichier invalide : le numéro d’édition doit être un entier',
+    );
+  });
+
+  it('rejette une date d’exemplaire ou d’export non conforme', async () => {
+    const badDate = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      exportedAt: '2026-09-01T00:00:00Z',
+      magazines: [
+        {
+          id: 'a',
+          publication: 'P',
+          copies: [{ id: 'c', notes: null, dateAdded: 'pas-une-date' }],
+        },
+      ],
+    });
+    await expect(service.importCollection(badDate)).rejects.toBeInstanceOf(InvalidBackupError);
+
+    const badExportedAt = JSON.stringify({
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      exportedAt: 'hier',
+      magazines: [],
+    });
+    await expect(service.importCollection(badExportedAt)).rejects.toBeInstanceOf(
+      InvalidBackupError,
+    );
+  });
+
+  it('rejette un import dépassant la borne de taille', async () => {
+    const oversized = new BackupService(testDb, 100);
+    const raw = `publication,issueNumber,copyNotes,dateAdded\nPicsou,${'1'.repeat(200)},,\n`;
+
+    await expect(oversized.importCollection(raw, 'csv')).rejects.toThrow(
+      'Fichier invalide : import dépassant la taille maximale de 100 octets.',
+    );
+  });
 });
 
 describe('BackupService.exportCollection.toCsv', () => {
@@ -200,7 +304,7 @@ describe('BackupService.exportCollection.toCsv', () => {
 
     const lines = csv.trim().split('\n');
     expect(lines[0]).toBe(
-      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded',
+      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded,createdAt,updatedAt',
     );
     expect(lines).toHaveLength(3);
     expect(lines[1]).toContain('Picsou Magazine,547,standard,FR,good,2023-03,3271234567890');
@@ -228,6 +332,20 @@ describe('BackupService.exportCollection.toCsv', () => {
     expect(lines).toHaveLength(2);
     expect(lines[1]).toContain('Vacances,12,');
     expect(lines[1]).toContain(',,,,');
+  });
+
+  it('round-trip CSV : une édition sans copie n’est pas réimportée en exemplaire fantôme', async () => {
+    await magazineRepo.create({ publication: 'Vacances', issueNumber: 12 });
+
+    const file = await service.exportCollection();
+    const summary = await service.importCollection(service.toCsv(file), 'csv');
+
+    expect(summary).toEqual({ magazines: 1, copies: 0 });
+
+    const after = await service.exportCollection();
+    expect(after.magazines).toHaveLength(1);
+    expect(after.magazines[0].publication).toBe('Vacances');
+    expect(after.magazines[0].copies).toHaveLength(0);
   });
 });
 
@@ -285,6 +403,37 @@ describe('BackupService CSV import (US-BK-05)', () => {
     expect(after.magazines[0].publication).toBe('Picsou, le Tocard');
     expect(after.magazines[0].notes).toBe('note, suite \n ligne 2');
     expect(after.magazines[0].copies[0].notes).toBe('Acheté 0,50 €');
+  });
+
+  it('préserve un CRLF à l’intérieur d’un champ entre guillemets', async () => {
+    const header =
+      'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded';
+    const row = [
+      '"Retour\nChamp"',
+      '5',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '"note\r\nmulti"',
+      '2026-09-01T00:00:00Z',
+    ].join(',');
+    const csv = `${header}\n${row}\n`;
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines[0].publication).toBe('Retour\nChamp');
+    expect(after.magazines[0].copies[0].notes).toBe('note\r\nmulti');
+  });
+
+  it('gère des retours chariot nus (\r) comme séparateurs de ligne', async () => {
+    const csv =
+      `publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\r` +
+      `Picsou,5,,,,,,,,,2026-09-01T00:00:00Z\rDoublon,6,,,,,,,,,2026-09-02T00:00:00Z\r`;
+    const summary = await service.importCollection(csv, 'csv');
+    expect(summary).toEqual({ magazines: 2, copies: 2 });
   });
 });
 
@@ -346,7 +495,10 @@ describe('BackupService — CSV cas limites', () => {
   });
 
   it('ignore les lignes vides en fin de fichier', async () => {
-    const summary = await service.validateCollection(`${headers}\nPicsou,5,,,,,,,,,\n\n\n`, 'csv');
+    const summary = await service.validateCollection(
+      `${headers}\nPicsou,5,,,,,,,,,2026-09-01T00:00:00Z\n\n\n`,
+      'csv',
+    );
     expect(summary).toEqual({ magazines: 1, copies: 1 });
   });
 
@@ -357,22 +509,35 @@ describe('BackupService — CSV cas limites', () => {
     expect(after.magazines[0].copies[0].notes).toBe('il a dit "OK"');
   });
 
-  it('préserve les espaces autour des champs texte non vides', async () => {
+  it('normalise les espaces autour des champs texte', async () => {
     const csv = `${headers}\nPicsou,5, edition , FR ,,2020-01,,, ,,\n`;
     await service.importCollection(csv, 'csv');
     const after = await service.exportCollection();
-    expect(after.magazines[0].edition).toBe(' edition ');
-    expect(after.magazines[0].language).toBe(' FR ');
+    expect(after.magazines[0].edition).toBe('edition');
+    expect(after.magazines[0].language).toBe('FR');
     expect(after.magazines[0].notes).toBeNull();
+    expect(after.magazines[0].copies).toHaveLength(0);
   });
 
-  it('assigne un statut et une date par défaut aux champs exemplaire vides', async () => {
+  it('n’importe pas d’exemplaire fantôme pour une ligne aux champs exemplaire vides', async () => {
     const csv = `${headers}\nPicsou,5,,,,,,,,,\n`;
     await service.importCollection(csv, 'csv');
     const after = await service.exportCollection();
+    expect(after.magazines).toHaveLength(1);
+    expect(after.magazines[0].copies).toHaveLength(0);
+  });
+
+  it('préserve les variantes d’édition (edition/language/condition) à l’import CSV', async () => {
+    const csv =
+      `${headers}\nPicsou,5,FR,,,,,,,,2026-09-01T00:00:00Z\n` +
+      `Picsou,5,BE,,,,,,,,2026-09-01T00:00:00Z\n`;
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines).toHaveLength(2);
+    const editions = after.magazines.map((m) => m.edition).sort();
+    expect(editions).toEqual(['BE', 'FR']);
     expect(after.magazines[0].copies).toHaveLength(1);
-    expect(after.magazines[0].copies[0].notes).toBeNull();
-    expect(after.magazines[0].copies[0].dateAdded).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(after.magazines[1].copies).toHaveLength(1);
   });
 });
 
