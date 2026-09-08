@@ -287,3 +287,112 @@ describe('BackupService CSV import (US-BK-05)', () => {
     expect(after.magazines[0].copies[0].notes).toBe('Acheté 0,50 €');
   });
 });
+
+describe('BackupService — validation de structure (JSON)', () => {
+  const base = { format: BACKUP_FORMAT, version: BACKUP_VERSION };
+
+  it('rejette une valeur de texte non conforme', async () => {
+    const raw = JSON.stringify({
+      ...base,
+      magazines: [{ id: 'x', publication: 'P', edition: 42, copies: [] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow(
+      'certaines valeurs de texte sont mal formées',
+    );
+  });
+
+  it('rejette une valeur numérique non conforme', async () => {
+    const raw = JSON.stringify({
+      ...base,
+      magazines: [{ id: 'x', publication: 'P', issueNumber: '547', copies: [] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow(
+      'certaines valeurs numériques sont mal formées',
+    );
+  });
+
+  it('rejette une édition mal formée', async () => {
+    const raw = JSON.stringify({ ...base, magazines: [null] });
+    await expect(service.importCollection(raw)).rejects.toThrow('une édition est mal formée');
+  });
+
+  it('rejette un exemplaire mal formé', async () => {
+    const raw = JSON.stringify({
+      ...base,
+      magazines: [{ id: 'x', publication: 'P', copies: [null] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow('un exemplaire est mal formé');
+  });
+
+  it('rejette un exemplaire sans identifiant', async () => {
+    const raw = JSON.stringify({
+      ...base,
+      magazines: [{ id: 'x', publication: 'P', copies: [{ id: '', notes: null }] }],
+    });
+    await expect(service.importCollection(raw)).rejects.toThrow('identifiant d’exemplaire');
+  });
+});
+
+describe('BackupService — CSV cas limites', () => {
+  const headers =
+    'publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded';
+
+  it('accepte les fins de ligne Windows (CRLF)', async () => {
+    const summary = await service.validateCollection(
+      `${headers}\r\nPicsou,5,,,,,,,,,2026-09-01T00:00:00Z\r\n`,
+      'csv',
+    );
+    expect(summary).toEqual({ magazines: 1, copies: 1 });
+  });
+
+  it('ignore les lignes vides en fin de fichier', async () => {
+    const summary = await service.validateCollection(`${headers}\nPicsou,5,,,,,,,,,\n\n\n`, 'csv');
+    expect(summary).toEqual({ magazines: 1, copies: 1 });
+  });
+
+  it('déchiffre les guillemets doublés à l’intérieur d’un champ', async () => {
+    const csv = `${headers}\nPicsou,,,,,,,,,"il a dit ""OK""",\n`;
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines[0].copies[0].notes).toBe('il a dit "OK"');
+  });
+
+  it('préserve les espaces autour des champs texte non vides', async () => {
+    const csv = `${headers}\nPicsou,5, edition , FR ,,2020-01,,, ,,\n`;
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines[0].edition).toBe(' edition ');
+    expect(after.magazines[0].language).toBe(' FR ');
+    expect(after.magazines[0].notes).toBeNull();
+  });
+
+  it('assigne un statut et une date par défaut aux champs exemplaire vides', async () => {
+    const csv = `${headers}\nPicsou,5,,,,,,,,,\n`;
+    await service.importCollection(csv, 'csv');
+    const after = await service.exportCollection();
+    expect(after.magazines[0].copies).toHaveLength(1);
+    expect(after.magazines[0].copies[0].notes).toBeNull();
+    expect(after.magazines[0].copies[0].dateAdded).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+});
+
+describe('BackupService.importCollection — rollback', () => {
+  it('renvoie l’erreur d’origine même si le rollback échoue', async () => {
+    await seedCollection();
+    const originalExec = testDb.execAsync;
+    testDb.execAsync = jest.fn(async (sql: string) => {
+      if (sql === 'DELETE FROM magazines') {
+        throw new Error('Échec suppression');
+      }
+      if (sql === 'ROLLBACK') {
+        throw new Error('Échec rollback');
+      }
+      return originalExec(sql);
+    });
+
+    const file = await service.exportCollection();
+    await expect(service.importCollection(service.toJson(file))).rejects.toThrow(
+      'Échec suppression',
+    );
+  });
+});

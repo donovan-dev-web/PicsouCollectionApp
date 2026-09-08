@@ -158,6 +158,15 @@ describe('collectionRepository.listRecentCopies', () => {
   it('respecte la limite et retourne une liste vide si aucun exemplaire', async () => {
     expect(await repo.listRecentCopies(5)).toEqual([]);
   });
+
+  it('utilise la limite par défaut de 5 quand aucune n est fournie', async () => {
+    await repo.addCopy(magazineId);
+
+    const recent = await repo.listRecentCopies();
+
+    expect(recent).toHaveLength(1);
+    expect(recent[0].copy.id).toBeDefined();
+  });
 });
 
 describe('collectionRepository.countAllCopies', () => {
@@ -173,5 +182,25 @@ describe('collectionRepository.countAllCopies', () => {
     await repo.addCopy(otherMagazine.id);
 
     expect(await repo.countAllCopies()).toBe(3);
+  });
+});
+
+describe('compteurs sans résultat renvoyé', () => {
+  it('traite un compteur absent comme zéro', async () => {
+    const originalGet = testDb.getFirstAsync;
+    const spy = jest.spyOn(testDb, 'getFirstAsync').mockImplementation((async (
+      sql: string,
+      ...args: unknown[]
+    ) => {
+      if (String(sql).includes('COUNT(*)')) {
+        return undefined;
+      }
+      return originalGet(sql, ...args);
+    }) as never);
+
+    expect(await repo.countByMagazine(magazineId)).toBe(0);
+    expect(await repo.countAllCopies()).toBe(0);
+
+    spy.mockRestore();
   });
 });

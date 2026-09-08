@@ -5,6 +5,8 @@ const setColorSchemeMock = jest.fn().mockResolvedValue(undefined);
 const getColorSchemeMock = jest.fn().mockResolvedValue('system');
 const getOnboardingDoneMock = jest.fn().mockResolvedValue(false);
 const setOnboardingDoneMock = jest.fn().mockResolvedValue(undefined);
+const getReducedMotionMock = jest.fn().mockResolvedValue(false);
+const setReducedMotionMock = jest.fn().mockResolvedValue(undefined);
 
 function stubDeps(): Dependencies {
   return {
@@ -19,6 +21,8 @@ function stubDeps(): Dependencies {
       setColorScheme: setColorSchemeMock,
       getOnboardingDone: getOnboardingDoneMock,
       setOnboardingDone: setOnboardingDoneMock,
+      getReducedMotion: getReducedMotionMock,
+      setReducedMotion: setReducedMotionMock,
     } as unknown as Dependencies['settingsRepository'],
   };
 }
@@ -34,6 +38,10 @@ describe('useSettingsStore', () => {
     getOnboardingDoneMock.mockResolvedValue(false);
     setOnboardingDoneMock.mockClear();
     setOnboardingDoneMock.mockResolvedValue(undefined);
+    getReducedMotionMock.mockClear();
+    getReducedMotionMock.mockResolvedValue(false);
+    setReducedMotionMock.mockClear();
+    setReducedMotionMock.mockResolvedValue(undefined);
   });
 
   it('initialise le colorScheme sur system', () => {
@@ -95,6 +103,56 @@ describe('useSettingsStore', () => {
   it('marque l onboarding sans dependances initialisees', () => {
     useSettingsStore.getState().markOnboardingDone();
     expect(useSettingsStore.getState().onboardingDone).toBe(true);
+  });
+
+  it('met à jour reducedMotion via setReducedMotion et persiste', () => {
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setReducedMotion(true);
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+    expect(setReducedMotionMock).toHaveBeenCalledWith(true);
+  });
+
+  it('met à jour reducedMotion sans dépendances initialisées', () => {
+    useSettingsStore.getState().setReducedMotion(true);
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('charge le flag reducedMotion via loadReducedMotion', async () => {
+    getReducedMotionMock.mockResolvedValue(true);
+    setDepsForTest(stubDeps());
+
+    await useSettingsStore.getState().loadReducedMotion();
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('ignore un echec de persistance du colorScheme', async () => {
+    setColorSchemeMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setColorScheme('dark');
+
+    expect(useSettingsStore.getState().colorScheme).toBe('dark');
+  });
+
+  it('ignore un echec de persistance du flag onboarding', async () => {
+    setOnboardingDoneMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().markOnboardingDone();
+
+    expect(useSettingsStore.getState().onboardingDone).toBe(true);
+  });
+
+  it('ignore un echec de persistance de reducedMotion', async () => {
+    setReducedMotionMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setReducedMotion(true);
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
   });
 
   afterEach(() => {

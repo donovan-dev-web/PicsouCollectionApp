@@ -169,6 +169,11 @@ Les tests peuvent également être co-localisés au niveau du fichier couvert (c
 
 ### 8.1 Seuils (Jest `coverageThreshold` — config dans `package.json`)
 
+> **Sémantique :** Jest applique `coverageThreshold` **fichier par fichier** : chaque
+> fichier d'une zone doit atteindre les seuils de la zone sur *chacune* des quatre
+> métriques (`branches`, `functions`, `lines`, `statements`). Un fichier isolé sous
+> le seuil fait échouer la CI même si la moyenne de la zone est au-dessus.
+
 ```json
 "coverageThreshold": {
   "global": {
@@ -176,23 +181,39 @@ Les tests peuvent également être co-localisés au niveau du fichier couvert (c
     "functions": 80,
     "lines": 80,
     "statements": 80
-  }
+  },
+  "src/backup/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/database/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/identification/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/lib/**": { "branches": 80, "functions": 80, "lines": 80, "statements": 80 },
+  "src/store/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/components/**": { "branches": 70, "functions": 70, "lines": 70, "statements": 70 }
 }
 ```
 
-| Zone | Couverture actuelle | Couverture cible |
+| Zone | Couverture mesurée (M-11 copie 2) | Couverture cible |
 |---|---|---|
-| Global | **87,38 %** (statements, seuil CI ≥ 80 %) | ≥ 80 % |
-| Services / repositories | consolidée (M-02) | ≥ 85 % |
-| Composants critiques | consolidée (M-03) | ≥ 70 % |
+| Global | **98,35 %** (statements), lines **97,84 %**, functions **96,83 %**, branches **92,99 %** | ≥ 80 % |
+| Services / repositories (`src/backup`, `src/database`, `src/store`) | ≥ 90 % sur les 4 métriques (100 % pour database & store) | ≥ 85 % |
+| Bibliothèque (`src/lib`) | 100 % lignes, 90 % functions | ≥ 80 % |
+| OCR (`src/identification`) | **96,82 %** branches, 100 % functions | ≥ 85 % |
+| Composants critiques (`src/components`) | **90,47 %** branches, 94,41 % lines | ≥ 70 % |
 
-> État M-11 : **339 tests / 40 suites**, couverture globale — statements **87,38 %**, branches **80,78 %**, functions **85,21 %**, lines **87,77 %** (seuil global CI ≥ 80 %). État mesuré en M-08 : 270 tests / 33 suites, statements 90,24 %, branches 85,86 %.
+> État M-11 (2e passe) : **416 tests / 46 suites**, couverture globale — statements
+> **98,35 %**, branches **92,99 %**, functions **96,83 %**, lines **97,84 %**
+> (seuil global CI ≥ 80 %). État M-11 (1re passe) : 346 tests / 40 suites et
+> statements 87,40 % — état mesuré en M-08 : 270 tests / 33 suites, statements
+> 90,24 %, branches 85,86 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
 - fichiers de configuration ;
 - code purement de démarrage (entry points) ;
-- types uniquement.
+- types uniquement ;
+- **couche plateforme native** (`src/backup/native-file-gateway.ts`,
+  `src/identification/ocr/mlKitOcrEngine.ts`) : ponts dépendant d'un
+  Development Build / matériel physique (tests manuels ou tests physiques
+  prévus au §7), non exécutables sous Jest (import dynamique natif).
 
 ---
 

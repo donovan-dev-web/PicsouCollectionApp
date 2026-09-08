@@ -53,4 +53,39 @@ describe('AppHeader', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/scan');
   });
+
+  it('remplace le bouton menu par l’élément leading fourni', () => {
+    renderWithDrawer(
+      <AppHeader title="Sous-écran" leading={<Text testID="header-retour">Retour</Text>} />,
+    );
+
+    expect(screen.getByTestId('header-retour')).toBeTruthy();
+    expect(screen.queryByTestId('header-menu')).toBeNull();
+  });
+
+  it('affiche l’élément trailing fourni', () => {
+    renderWithDrawer(<AppHeader title="Accueil" trailing={<Text testID="header-extra">✚</Text>} />);
+
+    expect(screen.getByTestId('header-extra')).toBeTruthy();
+  });
+
+  it('applique l’état pressé sur les boutons menu et scan', () => {
+    renderWithDrawer(<AppHeader title="Accueil" />);
+    const fakeEvent = () => ({
+      persist: jest.fn(),
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+      nativeEvent: {},
+    });
+
+    const menu = screen.getByTestId('header-menu');
+    fireEvent(menu, 'responderGrant', fakeEvent());
+    expect(menu).toHaveStyle({ opacity: 0.6 });
+    fireEvent(menu, 'responderRelease', fakeEvent());
+
+    const scan = screen.getByTestId('header-scan');
+    fireEvent(scan, 'responderGrant', fakeEvent());
+    expect(scan).toHaveStyle({ opacity: 0.6 });
+    fireEvent(scan, 'responderRelease', fakeEvent());
+  });
 });

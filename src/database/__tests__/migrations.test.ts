@@ -1,5 +1,7 @@
 import { createTestDatabase } from '@/test-utils/test-db';
 import { migrate, getSchemaVersion } from '@/database/migrations';
+import { MIGRATION_001 } from '@/database/schema';
+import type { Database } from '@/database/types';
 
 let testDb: ReturnType<typeof createTestDatabase>;
 
@@ -47,5 +49,16 @@ describe('migrate', () => {
 
     const row = await testDb.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
     expect(row?.user_version).toBe(getSchemaVersion());
+  });
+
+  it('migre depuis une base dont la version est indisponible', async () => {
+    const db = {
+      getFirstAsync: jest.fn().mockResolvedValue(undefined),
+      execAsync: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Database;
+
+    await migrate(db);
+
+    expect(db.execAsync).toHaveBeenCalledWith(MIGRATION_001);
   });
 });
