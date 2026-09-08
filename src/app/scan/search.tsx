@@ -1,14 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { AutocompleteInput } from '@/components/autocomplete-input';
@@ -22,7 +14,7 @@ import {
 } from '@/components/scan-search-views';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
-import { toast } from '@/lib/toast';
+import { useScanResult } from '@/hooks/use-scan-result';
 import { useCollectionStore } from '@/store/use-collection-store';
 import type { OcrLookupResult } from '@/identification/identificationService';
 
@@ -35,7 +27,6 @@ export default function ScanSearchScreen() {
   const magazines = useCollectionStore((s) => s.magazines);
   const loadDetail = useCollectionStore((s) => s.loadDetail);
   const detail = useCollectionStore((s) => s.detail);
-  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
 
   const [publication, setPublication] = useState('');
   const [issueNumber, setIssueNumber] = useState(EMPTY_ISSUE);
@@ -56,6 +47,8 @@ export default function ScanSearchScreen() {
       }
     }, [foundId, loadDetail]),
   );
+
+  const { resolved, owned, ownedCount, handleAddCopy } = useScanResult(detail, foundId);
 
   const issue = issueNumber.replace(/[^0-9]/g, '');
   const canSearch = publication.trim().length > 0 && issue.length > 0 && !searching;
@@ -85,38 +78,11 @@ export default function ScanSearchScreen() {
     setIssueNumber(EMPTY_ISSUE);
   };
 
-  const resolved = detail != null && detail.id === foundId;
-  const owned = resolved && detail.copies.length > 0;
-  const ownedCount = resolved ? detail.copies.length : 0;
-
   const handleCancel = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
       router.replace('/');
-    }
-  };
-
-  const handleAddCopy = () => {
-    if (!foundId) {
-      return;
-    }
-    const alreadyOwned = owned;
-    const perform = async () => {
-      await addExistingCopy(foundId);
-      toast(alreadyOwned ? 'Exemplaire ajouté à la collection' : 'Ajouté à la collection');
-    };
-    if (alreadyOwned) {
-      Alert.alert(
-        'Vous possédez déjà ce magazine',
-        `Exemplaires actuels : ${ownedCount}\nVoulez-vous ajouter un deuxième exemplaire ?`,
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Ajouter quand même', style: 'destructive', onPress: perform },
-        ],
-      );
-    } else {
-      perform();
     }
   };
 

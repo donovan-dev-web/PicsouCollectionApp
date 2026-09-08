@@ -67,13 +67,17 @@ export function validateBarcode(raw: string): BarcodeValidation {
     return { valid: false, reason: 'Aucun chiffre détecté.' };
   }
 
-  // ISBN-10 (longueur exacte, peut contenir un 'X' en fin de checksum)
+  // ISBN-10 (longueur exacte, peut contenir un 'X' en position de checksum uniquement)
   const trimmedIsbn = s.toUpperCase();
-  if (trimmedIsbn.length === ISBN_10_LENGTH && /^[0-9X]{10}$/.test(trimmedIsbn)) {
+  if (trimmedIsbn.length === ISBN_10_LENGTH && /^[0-9]{9}[0-9X]$/.test(trimmedIsbn)) {
     if (isValidIsbn10(trimmedIsbn)) {
       return { valid: true, type: 'ISBN-10', normalized: trimmedIsbn };
     }
-    return { valid: false, reason: 'ISBN-10 invalide (checksum).' };
+    if (!/^\d{10}$/.test(trimmedIsbn)) {
+      return { valid: false, reason: 'ISBN-10 invalide (checksum).' };
+    }
+    // 10 chiffres dont la somme de contrôle ne valide pas l'ISBN-10 : ce peut
+    // être un codage non standard (CODE39/ITF…) — on tente GENERIC plus bas.
   }
 
   // EAN-13 / ISBN-13 (13 chiffres, éventuellement groupés par séparateurs)
