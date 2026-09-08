@@ -104,52 +104,6 @@ describe('magazineRepository.create', () => {
   });
 });
 
-describe('magazineRepository.findByBarcode', () => {
-  it('retrouve ledition depuis un code-barres connu', async () => {
-    const created = await repo.create({
-      publication: 'Picsou Magazine',
-      issueNumber: 547,
-      language: 'FR',
-      barcode: '3271234567890',
-    });
-
-    const found = await repo.findByBarcode('3271234567890');
-
-    expect(found).toEqual(
-      expect.objectContaining({
-        id: created.id,
-        publication: 'Picsou Magazine',
-        issueNumber: 547,
-        language: 'FR',
-        barcode: '3271234567890',
-        notes: null,
-        ocrText: null,
-      }),
-    );
-  });
-
-  it('renvoie null pour un code-barres inconnu', async () => {
-    const found = await repo.findByBarcode('9999999999999');
-
-    expect(found).toBeNull();
-  });
-
-  it('ne charge pas les champs lourds notes/ocr_text', async () => {
-    await repo.create({
-      publication: 'Super Picsou Géant',
-      issueNumber: 30,
-      notes: 'coffret specifique',
-      ocrText: 'Super Picsou Géant n°30',
-      barcode: '3271234000011',
-    });
-
-    const found = await repo.findByBarcode('3271234000011');
-
-    expect(found?.notes).toBeNull();
-    expect(found?.ocrText).toBeNull();
-  });
-});
-
 describe('magazineRepository.findManyByBarcode', () => {
   it('retourne toutes les editions partageant le meme code-barres', async () => {
     const first = await repo.create({

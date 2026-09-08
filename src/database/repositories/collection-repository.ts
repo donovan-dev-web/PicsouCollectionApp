@@ -2,22 +2,6 @@ import type { Database } from '@/database/types';
 import type { CollectionItem, CreateCollectionItemInput, RecentCopy } from '@/types';
 import { generateId } from '@/utils/id';
 
-type CollectionItemRow = {
-  id: string;
-  magazine_id: string;
-  notes: string | null;
-  date_added: string;
-};
-
-function toCollectionItem(row: CollectionItemRow): CollectionItem {
-  return {
-    id: row.id,
-    magazineId: row.magazine_id,
-    notes: row.notes,
-    dateAdded: row.date_added,
-  };
-}
-
 export class CollectionRepository {
   constructor(private readonly db: Database) {}
 
@@ -59,22 +43,6 @@ export class CollectionRepository {
     );
 
     return Number(row?.quantity ?? 0);
-  }
-
-  async listByMagazine(magazineId: string): Promise<CollectionItem[]> {
-    const rows = await this.db.getAllAsync<CollectionItemRow>(
-      `SELECT id, magazine_id, notes, date_added
-       FROM collection_items
-       WHERE magazine_id = ?
-       ORDER BY date_added DESC`,
-      magazineId,
-    );
-
-    return rows.map(toCollectionItem);
-  }
-
-  async deleteCopy(id: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM collection_items WHERE id = ?', id);
   }
 
   async listRecentCopies(limit = 5): Promise<RecentCopy[]> {

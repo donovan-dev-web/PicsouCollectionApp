@@ -55,18 +55,6 @@ function toMagazine(
 export class MagazineRepository {
   constructor(private readonly db: Database) {}
 
-  async findByBarcode(barcode: string): Promise<Magazine | null> {
-    const row = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
-              barcode, created_at, updated_at
-       FROM magazines
-       WHERE barcode = ?`,
-      barcode,
-    );
-
-    return row ? toMagazine(row) : null;
-  }
-
   async findManyByBarcode(barcode: string): Promise<MagazineListItem[]> {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }

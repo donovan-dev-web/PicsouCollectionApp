@@ -50,7 +50,7 @@ describe('AppearanceScreen', () => {
   beforeEach(() => {
     setColorSchemeMock.mockClear();
     setColorSchemeMock.mockResolvedValue(undefined);
-    useSettingsStore.setState({ colorScheme: 'system', loaded: false });
+    useSettingsStore.setState({ colorScheme: 'system' });
     setDepsForTest(stubDeps());
   });
 

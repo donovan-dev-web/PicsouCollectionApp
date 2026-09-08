@@ -29,7 +29,7 @@ function stubDeps(): Dependencies {
 
 describe('useSettingsStore', () => {
   beforeEach(() => {
-    useSettingsStore.setState({ colorScheme: 'system', loaded: false });
+    useSettingsStore.setState({ colorScheme: 'system' });
     setColorSchemeMock.mockClear();
     setColorSchemeMock.mockResolvedValue(undefined);
     getColorSchemeMock.mockClear();
@@ -72,7 +72,6 @@ describe('useSettingsStore', () => {
     await useSettingsStore.getState().loadColorScheme();
 
     expect(useSettingsStore.getState().colorScheme).toBe('dark');
-    expect(useSettingsStore.getState().loaded).toBe(true);
   });
 
   it('accepte le retour à system', () => {

@@ -1,12 +1,10 @@
 import { create } from 'zustand';
 
 import { getDeps } from '@/dependencies';
-
-export type ColorSchemeSetting = 'light' | 'dark' | 'system';
+import type { ColorSchemeSetting } from '@/database/repositories/settings-repository';
 
 interface SettingsState {
   colorScheme: ColorSchemeSetting;
-  loaded: boolean;
   onboardingDone: boolean;
   onboardingLoaded: boolean;
   reducedMotion: boolean;
@@ -20,7 +18,6 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   colorScheme: 'system',
-  loaded: false,
   onboardingDone: false,
   onboardingLoaded: false,
   reducedMotion: false,
@@ -38,7 +35,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   loadColorScheme: async () => {
     const colorScheme = await getDeps().settingsRepository.getColorScheme();
-    set({ colorScheme, loaded: true });
+    set({ colorScheme });
   },
 
   loadOnboardingDone: async () => {

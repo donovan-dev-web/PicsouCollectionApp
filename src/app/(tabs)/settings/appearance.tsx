@@ -6,7 +6,8 @@ import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { AppHeader } from '@/components/app-header';
 import { Screen } from '@/components/screen';
-import { useSettingsStore, type ColorSchemeSetting } from '@/store/use-settings-store';
+import type { ColorSchemeSetting } from '@/database/repositories/settings-repository';
+import { useSettingsStore } from '@/store/use-settings-store';
 
 const THEME_OPTIONS: { value: ColorSchemeSetting; label: string; description: string }[] = [
   { value: 'system', label: 'Système', description: 'Suivre le thème de l’appareil' },

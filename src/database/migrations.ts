@@ -29,6 +29,13 @@ export async function migrate(db: Database): Promise<void> {
       await db.execAsync(`PRAGMA user_version = ${migration.version}`);
     }
   }
+
+  const finalRow = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  if ((finalRow?.user_version ?? 0) !== getSchemaVersion()) {
+    throw new Error(
+      `Migration incomplète : version ${finalRow?.user_version ?? 0} au lieu de ${getSchemaVersion()}.`,
+    );
+  }
 }
 
 export function getSchemaVersion(): number {

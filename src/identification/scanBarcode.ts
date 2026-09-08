@@ -17,7 +17,6 @@ export type BarcodeValidation =
 
 const EAN_13_LENGTH = 13;
 const ISBN_10_LENGTH = 10;
-const ISBN_13_LENGTH = 13;
 
 /** Longueur minimale acceptable pour un code-barres au format non standard. */
 const GENERIC_MIN_LENGTH = 6;
@@ -48,16 +47,6 @@ function isValidIsbn10(isbn: string): boolean {
     sum += value * (10 - i);
   }
   return sum % 11 === 0;
-}
-
-function normalizeIsbn13(raw: string): string {
-  // ISBN-13 scanné : on enlève le préfixe "978" ou "979" et on garde 10 chiffres
-  if (raw.length === ISBN_13_LENGTH && (raw.startsWith('978') || raw.startsWith('979'))) {
-    // Retirer le préfixe + le checksum ISBN-13 resérialisé en ISBN-10 est complexe ;
-    // on conserve ici la forme ISBN-13 complète, canonique pour la recherche.
-    return raw;
-  }
-  return raw;
 }
 
 /**
@@ -95,7 +84,7 @@ export function validateBarcode(raw: string): BarcodeValidation {
       return {
         valid: true,
         type: isIsbn ? 'ISBN-13' : 'EAN-13',
-        normalized: normalizeIsbn13(digits),
+        normalized: digits,
       };
     }
     return { valid: false, reason: 'EAN-13 invalide (checksum).' };
