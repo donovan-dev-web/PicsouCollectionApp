@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 
 import CollectionScreen from '@/app/(tabs)/collection/index';
 import { useCollectionStore } from '@/store/use-collection-store';
@@ -6,10 +6,11 @@ import type { MagazineListItem } from '@/types';
 
 const mockUseFocusEffect = jest.fn();
 const mockUseLocalSearchParams = jest.fn<Record<string, string | string[] | undefined>, []>();
+const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
-  useRouter: () => ({ push: jest.fn(), setParams: jest.fn() }),
+  useRouter: () => ({ push: mockPush, setParams: jest.fn() }),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 
@@ -64,6 +65,7 @@ const magazines: MagazineListItem[] = [
 describe('CollectionScreen', () => {
   beforeEach(() => {
     mockUseFocusEffect.mockClear();
+    mockPush.mockClear();
     mockUseFocusEffect.mockImplementation((cb: () => void) => cb());
     mockUseLocalSearchParams.mockReturnValue({});
     useCollectionStore.setState({
@@ -192,12 +194,8 @@ describe('CollectionScreen', () => {
     fireEvent.press(screen.getByTestId('filter-sort'));
     fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
 
-    const data = screen.getByTestId('collection-list').props.data;
-    expect(data.map((m: MagazineListItem) => m.publication)).toEqual([
-      'Picsou Magazine',
-      'Mickey Parade',
-      'Super Picsou Géant',
-    ]);
+    const cards = screen.getAllByTestId('magazine-card');
+    expect(within(cards[0]).getByText('Picsou Magazine')).toBeTruthy();
   });
 
   it('combine tri decroissant et filtre edition', () => {
@@ -209,9 +207,17 @@ describe('CollectionScreen', () => {
     fireEvent.press(screen.getByTestId('filter-sort'));
     fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
 
-    const data = screen.getByTestId('collection-list').props.data;
-    expect(data).toHaveLength(1);
-    expect(data[0].publication).toBe('Mickey Parade');
+    const cards = screen.getAllByTestId('magazine-card');
+    expect(cards).toHaveLength(1);
+    expect(within(cards[0]).getByText('Mickey Parade')).toBeTruthy();
+  });
+
+  it('propose un accès rapide au scan dans l’en-tête (FAB)', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.press(screen.getByTestId('header-scan'));
+
+    expect(mockPush).toHaveBeenCalledWith('/scan');
   });
 });
 

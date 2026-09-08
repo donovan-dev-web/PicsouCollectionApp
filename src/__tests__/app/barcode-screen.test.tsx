@@ -119,7 +119,7 @@ describe('BarcodeScreen', () => {
     expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('ne lance la recherche qu’après stabilisation de la lecture (3 lectures identiques)', async () => {
+  it('ne cherche le magazine qu’après plusieurs lectures identiques du même code', async () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(
       stubDeps({

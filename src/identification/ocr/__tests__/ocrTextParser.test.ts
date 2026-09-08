@@ -142,7 +142,7 @@ describe('parseOcrText — M10R2-09 exclusions renforcées', () => {
 });
 
 describe('isConfident', () => {
-  it('exige nom + numéro pour déclencher la recherche (US-ID-08)', () => {
+  it('exige à la fois publication et numéro pour déclencher la recherche', () => {
     const publicationOnly = parseOcrText('Picsou Magazine');
     const numberOnly = parseOcrText('547');
     const complete = parseOcrText('Picsou Magazine\nN° 547');

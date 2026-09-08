@@ -56,7 +56,7 @@ describe('MagazineDetailScreen', () => {
     mockLoadDetail.mockResolvedValue(detail);
   });
 
-  it('charge le detail au focus', () => {
+  it('charge les données de la fiche à son ouverture', () => {
     render(<MagazineDetailScreen />);
 
     expect(mockLoadDetail).toHaveBeenCalledWith('mag-1');

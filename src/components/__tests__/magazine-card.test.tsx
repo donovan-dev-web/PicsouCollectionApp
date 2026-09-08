@@ -40,4 +40,20 @@ describe('MagazineCard', () => {
     expect(screen.getByTestId('status-absent')).toBeTruthy();
     expect(screen.getByText('Absent')).toBeTruthy();
   });
+
+  it('annonce le statut possédé au lecteur d’écran', () => {
+    render(<MagazineCard magazine={{ ...base, quantity: 2 }} />);
+
+    expect(screen.getByRole('button')).toHaveAccessibleName(
+      'Picsou Magazine numéro 547, possédé 2 fois',
+    );
+  });
+
+  it('annonce l’absence au lecteur d’écran', () => {
+    render(<MagazineCard magazine={{ ...base, quantity: 0 }} />);
+
+    expect(screen.getByRole('button')).toHaveAccessibleName(
+      'Picsou Magazine numéro 547, absent de la collection',
+    );
+  });
 });

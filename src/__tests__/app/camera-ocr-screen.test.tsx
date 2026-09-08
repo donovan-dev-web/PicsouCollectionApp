@@ -167,7 +167,7 @@ describe('CameraOcrScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-547');
   });
 
-  it('maintient l’analyse en lecture partielle et affiche les champs détectés en surcouche (US-ID-08)', async () => {
+  it('quand seul le nom est détecté, affiche les champs trouvés et oriente vers le numéro', async () => {
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -194,7 +194,7 @@ describe('CameraOcrScreen', () => {
     expect(screen.getByTestId('ocr-barcode')).toBeTruthy();
   });
 
-  it('relance la recherche dès que nom + numéro sont détectés à la frame suivante', async () => {
+  it('affiche la fiche dès que publication et numéro sont tous deux reconnus', async () => {
     const magazine = makeMagazine();
     const identity = jest
       .fn()
