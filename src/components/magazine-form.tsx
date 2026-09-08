@@ -19,9 +19,27 @@ import type { CreateMagazineInput, Magazine } from '@/types';
 import { makeMagazineFormStyles } from './magazine-form-styles';
 import { useMagazineForm, type FormValues, type MagazineFormHandle } from './use-magazine-form';
 
-export { publicationDateFrom, buildMagazineInput, initialFormValues, MagazineFormHandle } from './use-magazine-form';
+export {
+  publicationDateFrom,
+  buildMagazineInput,
+  initialFormValues,
+  MagazineFormHandle,
+} from './use-magazine-form';
 
-const MONTHS_OPTIONS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const;
+const MONTHS_OPTIONS = [
+  '01',
+  '02',
+  '03',
+  '04',
+  '05',
+  '06',
+  '07',
+  '08',
+  '09',
+  '10',
+  '11',
+  '12',
+] as const;
 
 /** Années dynamiques : année courante → -39 ans (M10-08, fini `2025` en dur). */
 const YEARS = Array.from({ length: 40 }, (_, i) => String(new Date().getFullYear() - i));
