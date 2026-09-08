@@ -76,7 +76,8 @@ export function SelectField<T extends string>({
                   ]}
                   onPress={() => handleSelect(isNone ? null : item)}
                   testID={`${testID}-option-${item}`}
-                  accessibilityRole="button">
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}>
                   <Text style={selected ? styles.optionTextSelected : styles.optionText}>
                     {item}
                   </Text>

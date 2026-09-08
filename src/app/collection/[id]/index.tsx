@@ -13,15 +13,9 @@ import { useThemeColors } from '@/hooks/use-theme';
 import { slug } from '@/lib/slug';
 import { toast } from '@/lib/toast';
 import { useCollectionStore } from '@/store/use-collection-store';
+import { formatDateShort } from '@/lib/date';
 
 type StyleSheetType = ReturnType<typeof makeStyles>;
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return 'Inconnue';
-  }
-  return new Date(iso).toLocaleDateString('fr-FR');
-}
 
 export default function MagazineDetailScreen() {
   const router = useRouter();
@@ -131,9 +125,9 @@ export default function MagazineDetailScreen() {
           <InfoRow styles={styles} label="Édition" value={detail.edition?.trim() || '—'} />
           <InfoRow styles={styles} label="Langue" value={detail.language?.trim() || '—'} />
           <InfoRow styles={styles} label="État" value={detail.condition?.trim() || '—'} />
-          <InfoRow styles={styles} label="Date" value={formatDate(detail.publicationDate)} />
+          <InfoRow styles={styles} label="Date" value={formatDateShort(detail.publicationDate)} />
           <InfoRow styles={styles} label="Code-barres" value={detail.barcode?.trim() || '—'} />
-          <InfoRow styles={styles} label="Ajouté le" value={formatDate(detail.createdAt)} />
+          <InfoRow styles={styles} label="Ajouté le" value={formatDateShort(detail.createdAt)} />
         </View>
 
         {detail.notes ? (
@@ -152,7 +146,7 @@ export default function MagazineDetailScreen() {
           detail.copies.map((copy, index) => (
             <View style={styles.copyRow} key={copy.id} testID="detail-copy">
               <Text style={styles.copyIndex}>#{index + 1}</Text>
-              <Text style={styles.copyDate}>{formatDate(copy.dateAdded)}</Text>
+              <Text style={styles.copyDate}>{formatDateShort(copy.dateAdded)}</Text>
             </View>
           ))
         )}
