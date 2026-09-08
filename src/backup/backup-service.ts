@@ -1,6 +1,6 @@
 import type { Database } from '@/database/types';
 import { APP_VERSION } from '@/utils/app-version';
-import { parseJsonBackup } from './backup-parsers';
+import { parseJsonBackup, InvalidBackupError } from './backup-parsers';
 import { parseCsvBackup, toCsv as toCsvFn } from './backup-csv';
 import {
   BACKUP_FORMAT,
@@ -13,6 +13,9 @@ import {
 
 export { InvalidBackupError } from './backup-parsers';
 export { BACKUP_CSV_HEADERS, escapeCsvField, parseCsv, toCsv } from './backup-csv';
+
+/** Taille maximale d'un fichier d'import (octets), pour borner la mémoire utilisée. */
+export const MAX_IMPORT_BYTES = 25 * 1024 * 1024;
 
 type MagazineRow = {
   id: string;
@@ -37,7 +40,10 @@ type CopyRow = {
 };
 
 export class BackupService {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly maxImportBytes: number = MAX_IMPORT_BYTES,
+  ) {}
 
   async exportCollection(): Promise<BackupFile> {
     const magazineRows = await this.db.getAllAsync<MagazineRow>(
@@ -79,6 +85,8 @@ export class BackupService {
       notes: row.notes,
       ocrText: row.ocr_text,
       copies: copiesByMagazine.get(row.id) ?? [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     }));
 
     return {
@@ -99,6 +107,11 @@ export class BackupService {
   }
 
   private parseBackupRaw(raw: string, format: BackupFormat): BackupFile {
+    if (raw.length > this.maxImportBytes) {
+      throw new InvalidBackupError(
+        `Fichier invalide : import dépassant la taille maximale de ${this.maxImportBytes} octets.`,
+      );
+    }
     if (format === 'csv') {
       return parseCsvBackup(raw);
     }
@@ -137,8 +150,8 @@ export class BackupService {
           magazine.barcode,
           magazine.notes,
           magazine.ocrText,
-          new Date().toISOString(),
-          new Date().toISOString(),
+          magazine.createdAt ?? new Date().toISOString(),
+          magazine.updatedAt ?? new Date().toISOString(),
         );
 
         for (const copy of magazine.copies) {

@@ -22,6 +22,8 @@ export type BackupMagazine = {
   notes: string | null;
   ocrText: string | null;
   copies: BackupCopy[];
+  createdAt: string | null;
+  updatedAt: string | null;
 };
 
 export type BackupFile = {

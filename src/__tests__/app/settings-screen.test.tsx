@@ -170,7 +170,7 @@ describe('BackupScreen — Sauvegarde', () => {
     await waitFor(() => expect(writeExport).toHaveBeenCalledTimes(1));
     expect(writeExport.mock.calls[0][1]).toBe('csv');
     expect(writeExport.mock.calls[0][0]).toMatch(
-      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded\n/,
+      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded,createdAt,updatedAt\n/,
     );
   });
 

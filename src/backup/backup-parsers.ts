@@ -35,6 +35,28 @@ function asNullableNumber(value: unknown): number | null {
   return value;
 }
 
+function asNullableInteger(value: unknown): number | null {
+  const number = asNullableNumber(value);
+  if (number !== null && !Number.isInteger(number)) {
+    throw new InvalidBackupError(
+      'Fichier invalide : le numéro d’édition doit être un entier (reçu : ' + `${number}).`,
+    );
+  }
+  return number;
+}
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+
+function asNullableIsoDate(value: unknown): string | null {
+  const date = asNullableString(value);
+  if (date !== null && !ISO_DATE_RE.test(date)) {
+    throw new InvalidBackupError(
+      `Fichier invalide : la date « ${date} » n’est pas au format ISO-8601 attendu.`,
+    );
+  }
+  return date;
+}
+
 function asNonEmptyString(value: unknown, field: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new InvalidBackupError(`Fichier invalide : le champ « ${field} » est manquant ou vide.`);
@@ -66,6 +88,8 @@ export function parseBackupFile(raw: unknown): BackupFile {
   }
 
   const magazines: BackupMagazine[] = [];
+  const seenMagazineIds = new Set<string>();
+  const seenCopyIds = new Set<string>();
   for (const entry of root['magazines']) {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
       throw new InvalidBackupError('Fichier invalide : une édition est mal formée.');
@@ -74,6 +98,10 @@ export function parseBackupFile(raw: unknown): BackupFile {
     const magazine = entry as Record<string, unknown>;
 
     const id = asNonEmptyString(magazine['id'], 'identifiant d’édition');
+    if (seenMagazineIds.has(id)) {
+      throw new InvalidBackupError('Fichier invalide : des identifiants d’édition sont dupliqués.');
+    }
+    seenMagazineIds.add(id);
 
     if (!Array.isArray(magazine['copies'])) {
       throw new InvalidBackupError('Fichier invalide : la liste des exemplaires est absente.');
@@ -85,17 +113,24 @@ export function parseBackupFile(raw: unknown): BackupFile {
         throw new InvalidBackupError('Fichier invalide : un exemplaire est mal formé.');
       }
       const copy = copyEntry as Record<string, unknown>;
+      const copyId = asNonEmptyString(copy['id'], 'identifiant d’exemplaire');
+      if (seenCopyIds.has(copyId)) {
+        throw new InvalidBackupError(
+          'Fichier invalide : des identifiants d’exemplaire sont dupliqués.',
+        );
+      }
+      seenCopyIds.add(copyId);
       copies.push({
-        id: asNonEmptyString(copy['id'], 'identifiant d’exemplaire'),
+        id: copyId,
         notes: asNullableString(copy['notes']),
-        dateAdded: asNullableString(copy['dateAdded']) ?? '',
+        dateAdded: asNullableIsoDate(copy['dateAdded']) ?? '',
       });
     }
 
     magazines.push({
       id,
       publication: asNonEmptyString(magazine['publication'], 'publication'),
-      issueNumber: asNullableNumber(magazine['issueNumber']),
+      issueNumber: asNullableInteger(magazine['issueNumber']),
       edition: asNullableString(magazine['edition']),
       language: asNullableString(magazine['language']),
       condition: asNullableString(magazine['condition']),
@@ -104,13 +139,15 @@ export function parseBackupFile(raw: unknown): BackupFile {
       notes: asNullableString(magazine['notes']),
       ocrText: asNullableString(magazine['ocrText']),
       copies,
+      createdAt: asNullableIsoDate(magazine['createdAt']),
+      updatedAt: asNullableIsoDate(magazine['updatedAt']),
     });
   }
 
   return {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
-    exportedAt: asNullableString(root['exportedAt']) ?? new Date().toISOString(),
+    exportedAt: asNullableIsoDate(root['exportedAt']) ?? new Date().toISOString(),
     appVersion: asNullableString(root['appVersion']) ?? APP_VERSION,
     magazines,
   };

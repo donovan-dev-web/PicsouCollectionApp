@@ -65,16 +65,16 @@ export function parseCsv(raw: string): string[][] {
       index += 1;
       continue;
     }
-    if (char === '\n') {
+    if (char === '\n' || char === '\r') {
       row.push(field);
       rows.push(row);
       row = [];
       field = '';
       index += 1;
-      continue;
-    }
-    if (char === '\r') {
-      index += 1;
+      // '\r\n' (Windows), '\r' seul (Mac), '\n' seul : tous terminent une ligne.
+      if (char === '\r' && text[index] === '\n') {
+        index += 1;
+      }
       continue;
     }
     field += char;
@@ -89,7 +89,7 @@ export function parseCsv(raw: string): string[][] {
 
 function asCsvString(value: string | undefined): string | null {
   const trimmed = (value ?? '').trim();
-  return trimmed.length > 0 ? (value ?? '') : null;
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 export function parseCsvBackup(raw: string): BackupFile {
@@ -131,21 +131,31 @@ export function parseCsvBackup(raw: string): BackupFile {
       issueNumber = Number(issueRaw);
     }
 
-    const key = `${publication}::${issueNumber ?? ''}`;
+    const edition = asCsvString(at('edition'));
+    const language = asCsvString(at('language'));
+    const condition = asCsvString(at('condition'));
+
+    // Clé d'édition complète : deux lignes ne définissent la même édition que si
+    // tous les champs métier coïncident. Préserve les variantes (FR vs BE,
+    // numéros à `issueNumber` null distincts par état/édition) au lieu de
+    // collapse la 1ère ligne seulement.
+    const key = `${publication}::${issueNumber ?? ''}::${edition ?? ''}::${language ?? ''}::${condition ?? ''}`;
     let magazine = byKey.get(key);
     if (!magazine) {
       magazine = {
         id: generateId(),
         publication,
         issueNumber,
-        edition: asCsvString(at('edition')),
-        language: asCsvString(at('language')),
-        condition: asCsvString(at('condition')),
+        edition,
+        language,
+        condition,
         publicationDate: asCsvString(at('publicationDate')),
         barcode: asCsvString(at('barcode')),
         notes: asCsvString(at('notes')),
         ocrText: asCsvString(at('ocrText')),
         copies: [],
+        createdAt: asCsvString(at('createdAt')),
+        updatedAt: asCsvString(at('updatedAt')),
       };
       byKey.set(key, magazine);
       magazines.push(magazine);
@@ -153,6 +163,12 @@ export function parseCsvBackup(raw: string): BackupFile {
 
     const copyNotes = at('copyNotes').trim();
     const dateAdded = at('dateAdded').trim();
+    // Une ligne aux champs exemplaire vides désigne une édition **sans copie**
+    // (l'export `toCsv` émet une telle ligne pour la conserver). Ne pas la
+    // réimporter comme un exemplaire fantôme daté d'aujourd'hui.
+    if (copyNotes.length === 0 && dateAdded.length === 0) {
+      continue;
+    }
     const copy: BackupCopy = {
       id: generateId(),
       notes: copyNotes.length > 0 ? copyNotes : null,
@@ -171,7 +187,7 @@ export function parseCsvBackup(raw: string): BackupFile {
 }
 
 export function toCsv(file: BackupFile): string {
-  const header = BACKUP_CSV_HEADERS.join(',');
+  const header = [...BACKUP_CSV_HEADERS, 'createdAt', 'updatedAt'].join(',');
   const lines: string[] = [];
   for (const magazine of file.magazines) {
     const base = [
@@ -191,7 +207,13 @@ export function toCsv(file: BackupFile): string {
         : [{ id: magazine.id, notes: null, dateAdded: '' }];
     for (const copy of copies) {
       lines.push(
-        [...base, escapeCsvField(copy.notes ?? ''), escapeCsvField(copy.dateAdded)].join(','),
+        [
+          ...base,
+          escapeCsvField(copy.notes ?? ''),
+          escapeCsvField(copy.dateAdded),
+          escapeCsvField(magazine.createdAt ?? ''),
+          escapeCsvField(magazine.updatedAt ?? ''),
+        ].join(','),
       );
     }
   }
