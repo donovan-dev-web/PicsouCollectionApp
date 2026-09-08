@@ -264,4 +264,110 @@ describe('useCollectionStore', () => {
     const state = useCollectionStore.getState();
     expect(state.detail?.copies).toEqual([copy]);
   });
+
+  it('signale un echec de chargement des derniers exemplaires', async () => {
+    mockListRecentCopies.mockRejectedValue(new Error('base indisponible'));
+
+    await useCollectionStore.getState().loadRecent();
+
+    expect(useCollectionStore.getState().error).toBe('base indisponible');
+  });
+
+  it('traduit une erreur inconnue en message générique', async () => {
+    mockList.mockRejectedValue('panne');
+
+    await useCollectionStore.getState().load();
+
+    expect(useCollectionStore.getState().error).toBe('Erreur inconnue');
+  });
+
+  it('relance l’erreur quand l’ajout d’une edition échoue', async () => {
+    mockCreate.mockRejectedValue(new Error('Code-barres déjà enregistré.'));
+
+    await expect(
+      useCollectionStore.getState().addMagazine({ publication: 'Picsou Magazine' }),
+    ).rejects.toThrow('Code-barres déjà enregistré.');
+  });
+
+  it('incrémente le compteur sans toucher aux autres editions ni au detail', async () => {
+    mockAddCopy.mockResolvedValue({ id: 'c3', magazineId: 'mag-x', notes: null, dateAdded: 'x' });
+    useCollectionStore.setState({
+      magazines: [magazine],
+      totalCopies: 4,
+      detail: { ...magazine, copies: [] },
+    });
+
+    await useCollectionStore.getState().addExistingCopy('mag-x');
+
+    const state = useCollectionStore.getState();
+    expect(state.magazines[0].quantity).toBe(4);
+    expect(state.totalCopies).toBe(5);
+    expect(state.detail?.id).toBe('mag-1');
+  });
+
+  it('conserve le detail d’une autre edition lors d’une modification', async () => {
+    mockUpdate.mockResolvedValue({ ...magazine, publication: 'Mickey Parade' });
+    useCollectionStore.setState({
+      magazines: [magazine],
+      detail: { ...magazine, copies: [], id: 'mag-9' },
+    });
+
+    await useCollectionStore.getState().updateMagazine('mag-1', { publication: 'Mickey Parade' });
+
+    expect(useCollectionStore.getState().detail?.id).toBe('mag-9');
+  });
+
+  it('ne change pas le compteur si l’edition à supprimer est introuvable', async () => {
+    mockDelete.mockResolvedValue(undefined);
+    useCollectionStore.setState({ magazines: [magazine], totalCopies: 4 });
+
+    await useCollectionStore.getState().removeMagazine('inconnue');
+
+    const state = useCollectionStore.getState();
+    expect(state.magazines).toHaveLength(1);
+    expect(state.totalCopies).toBe(4);
+  });
+
+  it('traduit une erreur inconnue lors du chargement des recents', async () => {
+    mockListRecentCopies.mockRejectedValue('panne');
+
+    await useCollectionStore.getState().loadRecent();
+
+    expect(useCollectionStore.getState().error).toBe('Erreur inconnue');
+  });
+
+  it('traduit une erreur inconnue lors du chargement du resume', async () => {
+    mockCountAllCopies.mockRejectedValue('panne');
+
+    await useCollectionStore.getState().loadSummary();
+
+    expect(useCollectionStore.getState().error).toBe('Erreur inconnue');
+  });
+
+  it('traduit une erreur inconnue lors du chargement du detail', async () => {
+    mockFindById.mockRejectedValue('panne');
+
+    const detail = await useCollectionStore.getState().loadDetail('mag-1');
+
+    expect(detail).toBeNull();
+    expect(useCollectionStore.getState().error).toBe('Erreur inconnue');
+  });
+
+  it('ne modifie que le detail quand l’edition est absente de la liste', async () => {
+    mockUpdate.mockResolvedValue({ ...magazine, publication: 'Mickey Parade' });
+    useCollectionStore.setState({
+      magazines: [magazine],
+      detail: { ...magazine, copies: [], id: 'mag-2' },
+    });
+
+    await useCollectionStore.getState().updateMagazine('mag-2', {
+      publication: 'Mickey Parade',
+    });
+
+    const state = useCollectionStore.getState();
+    expect(state.magazines).toHaveLength(1);
+    expect(state.magazines[0].id).toBe('mag-1');
+    expect(state.magazines[0].publication).toBe(magazine.publication);
+    expect(state.detail?.publication).toBe('Mickey Parade');
+  });
 });

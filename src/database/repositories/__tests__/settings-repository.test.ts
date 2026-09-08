@@ -71,3 +71,25 @@ describe('settingsRepository onboarding (M10R2-05)', () => {
     expect(rows).toHaveLength(1);
   });
 });
+
+describe('settingsRepository reduced motion (M10R2-06)', () => {
+  it('retourne false par défaut avant activation', async () => {
+    await expect(repo.getReducedMotion()).resolves.toBe(false);
+  });
+
+  it('persiste l’activation', async () => {
+    await repo.setReducedMotion(true);
+    await expect(repo.getReducedMotion()).resolves.toBe(true);
+  });
+
+  it('peut désactiver le réglage', async () => {
+    await repo.setReducedMotion(true);
+    await repo.setReducedMotion(false);
+    await expect(repo.getReducedMotion()).resolves.toBe(false);
+
+    const rows = await testDb.getAllAsync<{ key: string }>(
+      "SELECT key FROM settings WHERE key = 'reduced_motion'",
+    );
+    expect(rows).toHaveLength(1);
+  });
+});

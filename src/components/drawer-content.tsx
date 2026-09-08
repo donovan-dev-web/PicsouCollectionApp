@@ -21,6 +21,16 @@ import { useSettingsStore } from '@/store/use-settings-store';
 const DRAWER_WIDTH = 300;
 const CLOSE_MS = 250;
 
+/** Un glissement ouvre le panneau au-delà de 40 % de sa largeur. */
+export function isOpenGesture(dx: number): boolean {
+  return dx > DRAWER_WIDTH * 0.4;
+}
+
+/** Un glissement n'est pris en compte que s'il débute sur le bord gauche. */
+export function isLeftEdgeGesture(dx: number, x0: number): boolean {
+  return dx > 10 && x0 < 30;
+}
+
 type DrawerItemProps = {
   icon: React.ComponentProps<typeof Feather>['name'];
   label: string;
@@ -177,14 +187,14 @@ export function DrawerMenu({
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onMoveShouldSetPanResponder: (_, g) => g.dx > 10 && g.x0 < 30,
+        onMoveShouldSetPanResponder: (_, g) => isLeftEdgeGesture(g.dx, g.x0),
         onPanResponderMove: (_, g) => {
           if (g.dx > 0 && g.dx < DRAWER_WIDTH) {
             translateX.setValue(g.dx - DRAWER_WIDTH);
           }
         },
         onPanResponderRelease: (_, g) => {
-          if (g.dx > DRAWER_WIDTH * 0.4) {
+          if (isOpenGesture(g.dx)) {
             open();
           } else {
             close();
