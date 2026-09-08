@@ -71,12 +71,9 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
     }
   },
 
-  clearDetail: () => set({ detail: null }),
-
   addMagazine: async (input) => {
-    const { magazineRepository, collectionRepository } = getDeps();
-    const magazine = await magazineRepository.create(input);
-    await collectionRepository.addCopy(magazine.id);
+    const { magazineRepository } = getDeps();
+    const { magazine } = await magazineRepository.createWithCopy(input);
     const item: MagazineListItem = { ...magazine, quantity: 1 };
     set((state) => ({
       magazines: [item, ...state.magazines],

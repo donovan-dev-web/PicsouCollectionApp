@@ -52,6 +52,35 @@ function toMagazine(
   };
 }
 
+/**
+ * Tri stable, insensible à la casse et aux accents (collation française) :
+ * le `ORDER BY` SQLite utilise la collation BINARY et `lower()` est ASCII-only.
+ */
+function compareByPublication(
+  a: Pick<MagazineListItem, 'publication' | 'issueNumber' | 'id'>,
+  b: Pick<MagazineListItem, 'publication' | 'issueNumber' | 'id'>,
+): number {
+  const byPublication = a.publication.localeCompare(b.publication, 'fr', {
+    sensitivity: 'base',
+  });
+  if (byPublication !== 0) {
+    return byPublication;
+  }
+  const byIssue = (a.issueNumber ?? Infinity) - (b.issueNumber ?? Infinity);
+  if (byIssue !== 0) {
+    return byIssue;
+  }
+  return a.id.localeCompare(b.id);
+}
+
+/** Normalise une chaîne : casse + accents (prétraitement en JS, SQLite est ASCII-only). */
+function normalizeText(value: string): string {
+  return value
+    .toLocaleLowerCase('fr')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 export class MagazineRepository {
   constructor(private readonly db: Database) {}
 
@@ -99,17 +128,16 @@ export class MagazineRepository {
   async list(): Promise<MagazineListItem[]> {
     const rows = await this.db.getAllAsync<
       Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
-    >(
-      `${LIST_SELECT}
-       GROUP BY m.id
-       ORDER BY m.publication, m.issue_number`,
-    );
+    >(`${LIST_SELECT}
+       GROUP BY m.id`);
 
-    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+    return rows
+      .map((row) => ({ ...toMagazine(row), quantity: row.quantity }))
+      .sort(compareByPublication);
   }
 
   async search(query: string): Promise<MagazineListItem[]> {
-    const term = query.trim();
+    const term = normalizeText(query.trim());
     if (!term) {
       return this.list();
     }
@@ -117,20 +145,14 @@ export class MagazineRepository {
     const numeric = Number(term);
     const isNumeric = Number.isFinite(numeric);
 
-    const rows = await this.db.getAllAsync<
-      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
-    >(
-      `${LIST_SELECT}
-       WHERE m.publication LIKE '%' || ? || '%'
-          OR (? = 1 AND m.issue_number = ?)
-       GROUP BY m.id
-       ORDER BY m.publication, m.issue_number`,
-      term,
-      isNumeric ? 1 : 0,
-      isNumeric ? numeric : 0,
-    );
-
-    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+    const all = await this.list();
+    return all
+      .filter(
+        (magazine) =>
+          (isNumeric && magazine.issueNumber === numeric) ||
+          normalizeText(magazine.publication).includes(term),
+      )
+      .sort(compareByPublication);
   }
 
   async findById(id: string): Promise<MagazineDetail | null> {
@@ -217,6 +239,75 @@ export class MagazineRepository {
     return magazine;
   }
 
+  /**
+   * Crée une édition **et** son premier exemplaire dans une seule transaction
+   * (US-COL : l'ajout d'une nouveauté produit toujours un exemplaire). Un échec
+   * de l'un des deux INSERT annule l'ensemble : pas d'édition orpheline.
+   */
+  async createWithCopy(
+    input: CreateMagazineInput,
+  ): Promise<{ magazine: Magazine; copyId: string }> {
+    const publication = input.publication.trim();
+    if (!publication) {
+      throw new Error('La publication est obligatoire.');
+    }
+
+    const now = new Date().toISOString();
+    const magazine: Magazine = {
+      id: generateId(),
+      publication,
+      issueNumber: input.issueNumber ?? null,
+      edition: input.edition ?? null,
+      language: input.language ?? null,
+      condition: input.condition ?? null,
+      publicationDate: input.publicationDate ?? null,
+      barcode: input.barcode ?? null,
+      notes: input.notes ?? null,
+      ocrText: input.ocrText ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const copyId = generateId();
+
+    await this.db.execAsync('BEGIN');
+    try {
+      await this.db.runAsync(
+        `INSERT INTO magazines
+          (id, publication, issue_number, edition, language, condition, publication_date,
+           barcode, notes, ocr_text, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        magazine.id,
+        magazine.publication,
+        magazine.issueNumber,
+        magazine.edition,
+        magazine.language,
+        magazine.condition,
+        magazine.publicationDate,
+        magazine.barcode,
+        magazine.notes,
+        magazine.ocrText,
+        magazine.createdAt,
+        magazine.updatedAt,
+      );
+      await this.db.runAsync(
+        `INSERT INTO collection_items (id, magazine_id, notes, date_added)
+         VALUES (?, ?, NULL, ?)`,
+        copyId,
+        magazine.id,
+        now,
+      );
+      await this.db.execAsync('COMMIT');
+    } catch (error) {
+      try {
+        await this.db.execAsync('ROLLBACK');
+      } catch {
+        // Ignorer l'échec du rollback : on renvoie l'erreur d'origine.
+      }
+      throw error;
+    }
+
+    return { magazine, copyId };
+  }
   async update(id: string, input: CreateMagazineInput): Promise<Magazine | null> {
     const current = await this.db.getFirstAsync<MagazineRow>(
       `SELECT id, publication, issue_number, edition, language, condition, publication_date,

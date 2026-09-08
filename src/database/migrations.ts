@@ -25,8 +25,22 @@ export async function migrate(db: Database): Promise<void> {
 
   for (const migration of MIGRATIONS) {
     if (migration.version > current) {
-      await migration.up(db);
-      await db.execAsync(`PRAGMA user_version = ${migration.version}`);
+      // Chaque migration dans une transaction : un échec partiel annule le DDL
+      // déjà appliqué, évitant une base « mi-figée » avec un `user_version`
+      // inchangé qui bloquerait toute relance.
+      await db.execAsync('BEGIN');
+      try {
+        await migration.up(db);
+        await db.execAsync(`PRAGMA user_version = ${migration.version}`);
+        await db.execAsync('COMMIT');
+      } catch (error) {
+        try {
+          await db.execAsync('ROLLBACK');
+        } catch {
+          // Ignorer l'échec du rollback : on renvoie l'erreur d'origine.
+        }
+        throw error;
+      }
     }
   }
 

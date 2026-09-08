@@ -65,6 +65,46 @@ describe('migrate', () => {
     expect(db.execAsync).toHaveBeenCalledWith(MIGRATION_001);
   });
 
+  it('enveloppe chaque migration dans BEGIN/COMMIT avec mise à jour de user_version', async () => {
+    const db = {
+      getFirstAsync: jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValue({ user_version: getSchemaVersion() }),
+      execAsync: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Database;
+
+    await migrate(db);
+
+    const calls = (db.execAsync as jest.Mock).mock.calls.map((call) => call[0]);
+    expect(calls[0]).toBe('BEGIN');
+    expect(calls).toContain(MIGRATION_001);
+    expect(calls).toContain(`PRAGMA user_version = ${getSchemaVersion()}`);
+    expect(calls[calls.length - 1]).toBe('COMMIT');
+  });
+
+  it('annule la migration (ROLLBACK) et relance l’erreur en cas d’échec', async () => {
+    const db = {
+      getFirstAsync: jest.fn().mockResolvedValue({ user_version: 0 }),
+      execAsync: jest.fn().mockImplementation((sql: string) => {
+        if (sql === 'PRAGMA user_version = 4') {
+          throw new Error('Échec forcé');
+        }
+        return Promise.resolve(undefined);
+      }),
+    } as unknown as Database;
+
+    await expect(migrate(db)).rejects.toThrow('Échec forcé');
+
+    const calls = (db.execAsync as jest.Mock).mock.calls.map((call) => call[0]);
+    expect(calls[0]).toBe('BEGIN');
+    // La migration n°4 a échoué → ROLLBACK final (les migrations 1-3 ont COMMIT).
+    expect(calls[calls.length - 1]).toBe('ROLLBACK');
+    expect(calls.filter((sql) => sql === 'ROLLBACK')).toHaveLength(1);
+    // user_version inchangé : la base reste cohérente pour une relance.
+    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 0 });
+  });
+
   it('signale une migration incomplète si la version finale est fausse', async () => {
     const db = {
       getFirstAsync: jest.fn().mockResolvedValue(undefined),

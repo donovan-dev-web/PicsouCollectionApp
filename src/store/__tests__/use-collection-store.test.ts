@@ -3,12 +3,14 @@ import type { MagazineListItem } from '@/types';
 
 const mockList = jest.fn();
 const mockCreate = jest.fn();
+const mockCreateWithCopy = jest.fn();
 const mockDelete = jest.fn();
 const mockFindById = jest.fn();
 const mockUpdate = jest.fn();
 const mockMagazineRepo = {
   list: mockList,
   create: mockCreate,
+  createWithCopy: mockCreateWithCopy,
   delete: mockDelete,
   findById: mockFindById,
   update: mockUpdate,
@@ -81,15 +83,9 @@ describe('useCollectionStore', () => {
     expect(state.loaded).toBe(false);
   });
 
-  it('ajoute une edition et un exemplaire, puis incremente le compteur', async () => {
+  it('ajoute une edition et un exemplaire dans une transaction, puis incremente le compteur', async () => {
     const created = { ...magazine, quantity: 1 };
-    mockCreate.mockResolvedValue(created);
-    mockAddCopy.mockResolvedValue({
-      id: 'c1',
-      magazineId: 'mag-1',
-      notes: null,
-      dateAdded: 'x',
-    });
+    mockCreateWithCopy.mockResolvedValue({ magazine: created, copyId: 'c1' });
 
     await useCollectionStore
       .getState()
@@ -98,7 +94,10 @@ describe('useCollectionStore', () => {
     const state = useCollectionStore.getState();
     expect(state.magazines).toHaveLength(1);
     expect(state.totalCopies).toBe(1);
-    expect(mockAddCopy).toHaveBeenCalledWith('mag-1');
+    expect(mockCreateWithCopy).toHaveBeenCalledWith({
+      publication: 'Picsou Magazine',
+      issueNumber: 547,
+    });
   });
 
   it('supprime une edition et decremente le compteur', async () => {
@@ -242,7 +241,7 @@ describe('useCollectionStore', () => {
   });
 
   it('relance l’erreur quand l’ajout d’une edition échoue', async () => {
-    mockCreate.mockRejectedValue(new Error('Code-barres déjà enregistré.'));
+    mockCreateWithCopy.mockRejectedValue(new Error('Code-barres déjà enregistré.'));
 
     await expect(
       useCollectionStore.getState().addMagazine({ publication: 'Picsou Magazine' }),
