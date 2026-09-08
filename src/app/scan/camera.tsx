@@ -1,255 +1,37 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { CameraView as CameraViewType } from 'expo-camera';
 
 import { CameraPermissionScreen } from '@/components/camera-permission-screen';
-import { Spacing, type ThemeColors } from '@/constants/theme';
-import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
-import { OcrTextStabilizer } from '@/identification/ocr/ocrTextStabilizer';
-import { MIN_CONFIDENCE } from '@/identification/ocr/ocrTextParser';
-
-/** Intervalle d'analyse OCR : quelques frames / seconde max (pas toutes). */
-const ANALYSIS_INTERVAL_MS = 500;
-
-/**
- * Lectures OCR identiques requises avant de conclure une identification
- * (M10R2-09 — vote multi-frames conservateur, une lecture isolée pouvant être
- * erronée sur des textes stylisés / à encres faibles).
- */
-const OCR_STABLE_READS = 2;
-
-/**
- * Informations détectées par l'OCR, affichées en surcouche caméra (US-ID-08)
- * et proposées à la validation / correction (US-ID-09).
- */
-type DetectedInfo = {
-  publication: string | null;
-  issueNumber: number | null;
-  date: string | null;
-};
-
-const EMPTY_DETECTED: DetectedInfo = { publication: null, issueNumber: null, date: null };
-
-type OcrUiState =
-  | { status: 'analyzing'; detected: DetectedInfo }
-  | { status: 'confirm'; detected: DetectedInfo }
-  | {
-      status: 'found';
-      id: string;
-      publication: string;
-      issueNumber: number | null;
-      date: string | null;
-      confidence: number;
-    }
-  | {
-      status: 'unknown';
-      publication: string;
-      issueNumber: number | null;
-      date: string | null;
-      confidence: number;
-    };
-
-function hasAnyDetected(detected: DetectedInfo): boolean {
-  return detected.publication !== null || detected.issueNumber !== null || detected.date !== null;
-}
+import { OcrAnalyzingOverlay } from '@/components/scan/ocr-analyzing-overlay';
+import { OcrConfirmOverlay } from '@/components/scan/ocr-confirm-overlay';
+import { OcrResultOverlay } from '@/components/scan/ocr-result-overlay';
+import { makeCameraOcrStyles } from '@/components/scan/camera-ocr-styles';
+import { useOcrAnalysis } from '@/components/scan/use-ocr-analysis';
 
 export default function CameraOcrScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const styles = makeStyles(colors, insets);
-
-  const [permission, requestPermission] = useCameraPermissions();
-  const [state, setState] = useState<OcrUiState>({
-    status: 'analyzing',
-    detected: EMPTY_DETECTED,
-  });
-  const [draft, setDraft] = useState<DetectedInfo>(EMPTY_DETECTED);
-  const [torchOn, setTorchOn] = useState(false);
-  const [weakCycles, setWeakCycles] = useState(0);
-  const inFlight = useRef(false);
-  const cameraRef = useRef<CameraViewType>(null);
-  const ocrStabilizer = useRef(new OcrTextStabilizer(OCR_STABLE_READS));
-
-  useEffect(() => {
-    if (!permission?.granted) {
-      return;
-    }
-    if (state.status !== 'analyzing') {
-      return;
-    }
-
-    const { ocrEngine, identificationService } = getDeps();
-    const interval = setInterval(async () => {
-      if (inFlight.current) {
-        return;
-      }
-      inFlight.current = true;
-      try {
-        // Capture éphémère d'une photo (aucune image persistée) → URI.
-        // Haute résolution (M10R2-09) : préserve les petites encres des textes stylisés.
-        const photo = await cameraRef.current?.takePictureAsync?.({
-          quality: 1,
-          skipProcessing: false,
-        });
-        const uri = photo?.uri ?? null;
-        const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
-        if (!frame) {
-          return;
-        }
-        const result = await identificationService.identifyByOCR(frame.text);
-
-        if (result.status === 'no-text') {
-          return;
-        }
-
-        if (result.status === 'weak') {
-          // US-ID-08 : on ne conclut plus en échec dès la première lecture partielle.
-          // On met en surcouche les champs détectés et on continue d'analyser
-          // (le pointeur guide l'utilisateur vers le champ manquant).
-          setWeakCycles((c) => c + 1);
-          setState((prev) =>
-            prev.status === 'analyzing'
-              ? {
-                  status: 'analyzing',
-                  detected: {
-                    publication:
-                      result.publication === 'Publication inconnue' ? null : result.publication,
-                    issueNumber: result.issueNumber,
-                    date: result.date,
-                  },
-                }
-              : prev,
-          );
-          return;
-        }
-
-        // Vote multi-frames (M10R2-09) : on ne conclut pas sur une lecture
-        // isolée, une frame suivante identique est requise (textes stylisés).
-        const key = [
-          result.publication ?? '',
-          result.issueNumber != null ? String(result.issueNumber) : '',
-          result.date ?? '',
-        ].join('|');
-        if (!ocrStabilizer.current.push(key)) {
-          return;
-        }
-        ocrStabilizer.current.reset();
-
-        if (result.status === 'unknown') {
-          setState({
-            status: 'unknown',
-            publication: result.publication,
-            issueNumber: result.issueNumber,
-            date: result.date,
-            confidence: result.confidence,
-          });
-          return;
-        }
-
-        setState({
-          status: 'found',
-          id: result.magazine.id,
-          publication: result.publication,
-          issueNumber: result.issueNumber,
-          date: result.date,
-          confidence: result.confidence,
-        });
-      } finally {
-        inFlight.current = false;
-      }
-    }, ANALYSIS_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [permission?.granted, state.status]);
-
-  const stopAndRetry = () => {
-    ocrStabilizer.current.reset();
-    setWeakCycles(0);
-    setState({ status: 'analyzing', detected: EMPTY_DETECTED });
-  };
-
-  const openConfirm = () => {
-    const detected =
-      state.status === 'analyzing' || state.status === 'confirm' ? state.detected : EMPTY_DETECTED;
-    setDraft(detected);
-    setState({ status: 'confirm', detected });
-  };
-
-  const buildManualParams = (detected: Partial<DetectedInfo>): Record<string, string> => {
-    const params: Record<string, string> = {};
-    if (detected.publication) {
-      params.publication = detected.publication;
-    }
-    if (detected.issueNumber != null) {
-      params.issueNumber = String(detected.issueNumber);
-    }
-    if (detected.date) {
-      params.year = detected.date;
-    }
-    return params;
-  };
-
-  const goManual = (detected: Partial<DetectedInfo>) => {
-    router.replace({ pathname: '/scan/manual', params: buildManualParams(detected) });
-  };
-
-  const goBarcode = () => {
-    router.replace('/scan/barcode');
-  };
-
-  /** US-ID-09 : recherche en outrepassant la confiance (champs validés/corrigés). */
-  const searchFromDraft = async () => {
-    const publication = draft.publication?.trim() ?? '';
-    const rawNumber = draft.issueNumber?.toString().trim() ?? '';
-    const issueNumber = rawNumber ? Number(rawNumber) : null;
-    const date = draft.date?.trim() || null;
-
-    if (!publication || issueNumber === null || !Number.isFinite(issueNumber)) {
-      // Impossible de rechercher : on oriente vers la saisie manuelle pré-remplie.
-      goManual({ publication: publication || undefined, issueNumber, date });
-      return;
-    }
-
-    const { identificationService } = getDeps();
-    const result = await identificationService.searchByOcrFields(publication, issueNumber, date);
-
-    if (result.status === 'weak' || result.status === 'no-text') {
-      goManual({ publication, issueNumber, date });
-      return;
-    }
-    if (result.status === 'unknown') {
-      setState({
-        status: 'unknown',
-        publication: result.publication,
-        issueNumber: result.issueNumber,
-        date: result.date,
-        confidence: result.confidence,
-      });
-      return;
-    }
-    setState({
-      status: 'found',
-      id: result.magazine.id,
-      publication: result.publication,
-      issueNumber: result.issueNumber,
-      date: result.date,
-      confidence: result.confidence,
-    });
-  };
+  const styles = makeCameraOcrStyles(colors, insets);
+  const {
+    cameraRef,
+    permission,
+    requestPermission,
+    state,
+    draft,
+    torchOn,
+    weakCycles,
+    setTorchOn,
+    setDraft,
+    stopAndRetry,
+    openConfirm,
+    goManual,
+    goBarcode,
+    searchFromDraft,
+  } = useOcrAnalysis();
 
   if (!permission || !permission.granted) {
     return (
@@ -286,546 +68,61 @@ export default function CameraOcrScreen() {
       />
 
       {isAnalyzing && (
-        <>
-          <View style={styles.overlay}>
-            <View style={styles.reticle} />
-            <Text style={styles.scanHint} testID="ocr-hint">
-              {hint}
-            </Text>
-            <View style={styles.processingPill}>
-              <ActivityIndicator color={colors.accent} />
-              <Text style={styles.processingText}>Lecture…</Text>
-            </View>
-
-            {/* Surcouche US-ID-08 : champs détectés en direct. */}
-            <View style={styles.detectedBoard} testID="ocr-detected-board">
-              <View style={styles.detectedRow}>
-                <Text style={styles.detectedLabel}>Nom</Text>
-                <Text
-                  style={[
-                    styles.detectedValue,
-                    state.detected.publication === null && styles.detectedValueEmpty,
-                  ]}
-                  testID="ocr-field-publication">
-                  {state.detected.publication ?? '…'}
-                </Text>
-              </View>
-              <View style={styles.detectedRow}>
-                <Text style={styles.detectedLabel}>Numéro</Text>
-                <Text
-                  style={[
-                    styles.detectedValue,
-                    state.detected.issueNumber === null && styles.detectedValueEmpty,
-                  ]}
-                  testID="ocr-field-issue">
-                  {state.detected.issueNumber?.toString() ?? '…'}
-                </Text>
-              </View>
-              <View style={styles.detectedRow}>
-                <Text style={styles.detectedLabel}>Édition / date</Text>
-                <Text
-                  style={[
-                    styles.detectedValue,
-                    state.detected.date === null && styles.detectedValueEmpty,
-                  ]}
-                  testID="ocr-field-date">
-                  {state.detected.date ?? '…'}
-                </Text>
-              </View>
-            </View>
-
-            {hasAnyDetected(state.detected) && (
-              <Pressable
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-                onPress={openConfirm}
-                testID="ocr-confirm-detected"
-                accessibilityRole="button">
-                <Text style={styles.primaryButtonText}>Valider ces informations détectées</Text>
-              </Pressable>
-            )}
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-            onPress={goBarcode}
-            testID="ocr-barcode"
-            accessibilityRole="button">
-            <Text style={styles.secondaryButtonText}>Scanner le code-barres</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}
-            onPress={() => router.back()}
-            testID="ocr-back"
-            accessibilityRole="button"
-            accessibilityLabel="Annuler">
-            <Feather name="x" size={22} color="#FFFFFF" />
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
-            onPress={() => setTorchOn((t) => !t)}
-            testID="ocr-torch"
-            accessibilityRole="button"
-            accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
-            <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
-          </Pressable>
-
-          {weakCycles > 3 && detected?.publication && detected?.issueNumber === null && (
-            <View style={styles.guidanceCard} testID="ocr-guidance-card">
-              <Feather name="alert-circle" size={16} color={colors.accent} />
-              <Text style={styles.guidanceText}>
-                Le texte stylisé est difficile à lire automatiquement.
-              </Text>
-              <View style={styles.guidanceActions}>
-                <Pressable
-                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
-                  onPress={goBarcode}
-                  testID="ocr-guidance-barcode"
-                  accessibilityRole="button">
-                  <Text style={styles.guidanceButtonText}>Code-barres</Text>
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [styles.guidanceButton, pressed && styles.buttonPressed]}
-                  onPress={() => goManual(detected)}
-                  testID="ocr-guidance-manual"
-                  accessibilityRole="button">
-                  <Text style={styles.guidanceButtonText}>Saisie manuelle</Text>
-                </Pressable>
-              </View>
-            </View>
-          )}
-        </>
+        <OcrAnalyzingOverlay
+          styles={styles}
+          detected={state.detected}
+          hint={hint}
+          weakCycles={weakCycles}
+          torchOn={torchOn}
+          onOpenConfirm={openConfirm}
+          onGoBarcode={goBarcode}
+          onGoManual={goManual}
+          onBack={() => router.back()}
+          onToggleTorch={() => setTorchOn((t) => !t)}
+        />
       )}
 
       {isConfirming && (
-        <View style={styles.overlay}>
-          <View style={styles.resultCard} testID="ocr-override-panel">
-            <Text style={styles.mutedTitle}>Vérifier les informations</Text>
-            <Text style={styles.message}>
-              Corrigez les informations détectées puis validez la recherche, même si la confiance
-              était insuffisante.
-            </Text>
-
-            <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Nom</Text>
-              <TextInput
-                style={styles.input}
-                value={draft.publication ?? ''}
-                onChangeText={(t) => setDraft((d) => ({ ...d, publication: t }))}
-                placeholder="Publication du magazine"
-                placeholderTextColor={colors.textSecondary}
-                testID="ocr-override-publication"
-              />
-            </View>
-
-            <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Numéro</Text>
-              <TextInput
-                style={styles.input}
-                value={draft.issueNumber?.toString() ?? ''}
-                onChangeText={(t) => {
-                  const digits = t.replace(/[^0-9]/g, '');
-                  setDraft((d) => ({ ...d, issueNumber: digits ? Number(digits) : null }));
-                }}
-                placeholder="N° du magazine"
-                keyboardType="number-pad"
-                returnKeyType="done"
-                placeholderTextColor={colors.textSecondary}
-                testID="ocr-override-issue"
-                accessibilityLabel="Numéro du magazine (chiffres uniquement)"
-              />
-            </View>
-
-            <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Année</Text>
-              <TextInput
-                style={styles.input}
-                value={draft.date ?? ''}
-                onChangeText={(t) => setDraft((d) => ({ ...d, date: t }))}
-                placeholder="Année / date (optionnel)"
-                keyboardType="default"
-                placeholderTextColor={colors.textSecondary}
-                testID="ocr-override-date"
-              />
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={searchFromDraft}
-              testID="ocr-override-search"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Rechercher</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={() => goManual(draft)}
-              testID="ocr-override-manual"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Saisir manuellement</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
-              onPress={stopAndRetry}
-              testID="ocr-override-back"
-              accessibilityRole="button">
-              <Text style={styles.cancelButtonText}>Retour à la caméra</Text>
-            </Pressable>
-          </View>
-        </View>
+        <OcrConfirmOverlay
+          styles={styles}
+          draft={draft}
+          onDraftChange={setDraft}
+          onSearch={searchFromDraft}
+          onGoManual={() => goManual(draft)}
+          onBack={stopAndRetry}
+        />
       )}
 
       {state.status === 'found' && (
-        <View style={styles.overlay}>
-          <ScrollView
-            style={styles.resultCard}
-            contentContainerStyle={styles.resultCardContent}
-            testID="ocr-found">
-            <Text style={styles.mutedTitle}>Couverture reconnue</Text>
-            <Text style={styles.magazine} testID="ocr-publication">
-              {state.publication}
-            </Text>
-            {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
-            {state.date && <Text style={styles.date}>{state.date}</Text>}
-            <Text style={styles.confidence} testID="ocr-confidence">
-              Confiance : {confidenceLabel(state.confidence)}
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={() => router.replace(`/collection/${state.id}`)}
-              testID="ocr-confirm"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Confirmer</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={stopAndRetry}
-              testID="ocr-retry"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Réessayer</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={() =>
-                goManual({
-                  publication: state.publication,
-                  issueNumber: state.issueNumber,
-                  date: state.date,
-                })
-              }
-              testID="ocr-manual"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Saisie manuelle</Text>
-            </Pressable>
-          </ScrollView>
-        </View>
+        <OcrResultOverlay
+          styles={styles}
+          state={state}
+          onConfirm={() => router.replace(`/collection/${state.id}`)}
+          onRetry={stopAndRetry}
+          onGoManual={() =>
+            goManual({
+              publication: state.publication,
+              issueNumber: state.issueNumber,
+              date: state.date,
+            })
+          }
+        />
       )}
 
       {state.status === 'unknown' && (
-        <View style={styles.overlay}>
-          <ScrollView
-            style={styles.resultCard}
-            contentContainerStyle={styles.resultCardContent}
-            testID="ocr-unknown">
-            <Text style={styles.mutedTitle}>Non trouvé en collection</Text>
-            <Text style={styles.magazine}>{state.publication}</Text>
-            {state.issueNumber != null && <Text style={styles.issue}>N° {state.issueNumber}</Text>}
-            <Text style={styles.message}>
-              {state.publication} n&apos;est pas encore référencé. Vous pouvez le saisir
-              manuellement pour le créer.
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={() =>
-                goManual({
-                  publication: state.publication,
-                  issueNumber: state.issueNumber,
-                  date: state.date,
-                })
-              }
-              testID="ocr-manual"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Saisir manuellement</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-              onPress={stopAndRetry}
-              testID="ocr-retry"
-              accessibilityRole="button">
-              <Text style={styles.secondaryButtonText}>Réessayer avec la caméra</Text>
-            </Pressable>
-          </ScrollView>
-        </View>
+        <OcrResultOverlay
+          styles={styles}
+          state={state}
+          onRetry={stopAndRetry}
+          onGoManual={() =>
+            goManual({
+              publication: state.publication,
+              issueNumber: state.issueNumber,
+              date: state.date,
+            })
+          }
+        />
       )}
     </View>
   );
-}
-
-function confidenceLabel(confidence: number): string {
-  if (confidence >= 0.8) {
-    return 'élevée';
-  }
-  if (confidence >= MIN_CONFIDENCE) {
-    return 'moyenne';
-  }
-  return 'faible';
-}
-
-function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: Spacing.four,
-    },
-    camera: {
-      flex: 1,
-    },
-    reticle: {
-      width: 220,
-      height: 220,
-      borderWidth: 3,
-      borderColor: colors.accent,
-      borderRadius: 16,
-      backgroundColor: 'transparent',
-    },
-    scanHint: {
-      marginTop: Spacing.three,
-      fontSize: 14,
-      color: '#FFFFFF',
-      textAlign: 'center',
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
-    processingPill: {
-      marginTop: Spacing.two,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 20,
-    },
-    processingText: {
-      fontSize: 14,
-      color: '#FFFFFF',
-    },
-    detectedBoard: {
-      alignSelf: 'stretch',
-      marginTop: Spacing.three,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      borderRadius: 12,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      gap: 6,
-    },
-    detectedRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: Spacing.two,
-    },
-    detectedLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    detectedValue: {
-      fontSize: 14,
-      lineHeight: 20,
-      fontWeight: '600',
-      color: colors.accent,
-    },
-    detectedValueEmpty: {
-      color: 'rgba(255,255,255,0.75)',
-      fontWeight: '400',
-    },
-    resultCard: {
-      alignSelf: 'stretch',
-      marginHorizontal: Spacing.four,
-      marginTop: insets.top + Spacing.three,
-      marginBottom: insets.bottom + Spacing.three,
-      maxHeight: '85%',
-      backgroundColor: colors.backgroundElement,
-      borderRadius: 16,
-      padding: Spacing.four,
-    },
-    resultCardContent: {
-      alignItems: 'center',
-      gap: Spacing.three,
-    },
-    mutedTitle: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-    },
-    magazine: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    issue: {
-      fontSize: 16,
-      color: colors.text,
-    },
-    date: {
-      fontSize: 14,
-      color: colors.textSecondary,
-    },
-    confidence: {
-      fontSize: 14,
-      color: colors.textSecondary,
-    },
-    message: {
-      fontSize: 15,
-      color: colors.text,
-      textAlign: 'center',
-      lineHeight: 22,
-    },
-    fieldWrap: {
-      alignSelf: 'stretch',
-      gap: 6,
-    },
-    fieldLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    input: {
-      alignSelf: 'stretch',
-      backgroundColor: colors.background,
-      borderRadius: 10,
-      paddingVertical: Spacing.three,
-      paddingHorizontal: Spacing.three,
-      fontSize: 16,
-      color: colors.text,
-    },
-    primaryButton: {
-      alignSelf: 'stretch',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.accent,
-      paddingVertical: Spacing.three,
-      borderRadius: 12,
-      marginTop: Spacing.two,
-    },
-    primaryButtonText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: colors.accentText,
-      textAlign: 'center',
-    },
-    secondaryButton: {
-      alignSelf: 'stretch',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.backgroundElement,
-      paddingVertical: Spacing.three,
-      borderRadius: 12,
-      marginHorizontal: Spacing.four,
-      marginTop: Spacing.two,
-      marginBottom: insets.bottom + Spacing.three,
-    },
-    secondaryButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    buttonPressed: {
-      opacity: 0.8,
-    },
-    cancelButton: {
-      marginTop: Spacing.three,
-      alignSelf: 'center',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-    },
-    cancelButtonText: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    backButton: {
-      position: 'absolute',
-      top: insets.top + 12,
-      left: Spacing.three,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    torchButton: {
-      position: 'absolute',
-      top: insets.top + 12,
-      right: Spacing.three,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    guidanceCard: {
-      position: 'absolute',
-      left: Spacing.four,
-      right: Spacing.four,
-      bottom: insets.bottom + Spacing.three,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      gap: Spacing.two,
-      backgroundColor: 'rgba(0,0,0,0.75)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 12,
-    },
-    guidanceText: {
-      flex: 1,
-      fontSize: 13,
-      color: '#FFFFFF',
-      lineHeight: 18,
-    },
-    guidanceActions: {
-      flexDirection: 'row',
-      gap: Spacing.two,
-      width: '100%',
-    },
-    guidanceButton: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.accent,
-      paddingVertical: Spacing.two,
-      borderRadius: 8,
-    },
-    guidanceButtonText: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.accentText,
-    },
-  });
 }
