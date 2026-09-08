@@ -133,7 +133,7 @@ describe('BackupScreen — Sauvegarde', () => {
     expect(screen.getByTestId('backup-import')).toBeTruthy();
   });
 
-  it('exporte la collection en JSON au tap du bouton (US-BK-04)', async () => {
+  it('exporte la collection en JSON quand je choisis le format JSON', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     writeExport.mockResolvedValue({
       uri: 'file:///d/backup.json',
@@ -151,7 +151,7 @@ describe('BackupScreen — Sauvegarde', () => {
     expect(screen.getByTestId('backup-message')).toBeTruthy();
   });
 
-  it('exporte la collection en CSV au tap du bouton (US-BK-04)', async () => {
+  it('exporte la collection en CSV quand je choisis le format CSV', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     writeExport.mockResolvedValue({
       uri: 'file:///d/backup.csv',
@@ -174,7 +174,7 @@ describe('BackupScreen — Sauvegarde', () => {
     );
   });
 
-  it('demande le format puis rejette un fichier JSON invalide (US-BK-03)', async () => {
+  it('rejette un fichier invalide et affiche une erreur sans toucher à la collection', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     pickFile.mockResolvedValue({
       name: 'faux.json',
@@ -190,7 +190,7 @@ describe('BackupScreen — Sauvegarde', () => {
     expect(screen.getByTestId('backup-error').props.children).toContain('Fichier invalide');
   });
 
-  it('confirme l’import CSV avant de remplacer la collection (US-BK-05)', async () => {
+  it('demande confirmation puis remplace la collection par l’import CSV', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const magazineRepo = new MagazineRepository(testDb);
     const collectionRepo = new CollectionRepository(testDb);

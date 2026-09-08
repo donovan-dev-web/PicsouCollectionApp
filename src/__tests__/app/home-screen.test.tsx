@@ -161,12 +161,22 @@ describe('HomeScreen (ajouts recents)', () => {
     expect(mockPush).toHaveBeenCalledWith('/scan');
   });
 
-  it('affiche l erreur du store dans le compteur', () => {
+  it('affiche un message quand la base ne répond pas', () => {
     useCollectionStore.setState({ loading: false, loaded: true, error: 'Base inaccessible' });
 
     render(<HomeScreen />);
 
     expect(screen.getByTestId('counter-error')).toBeTruthy();
     expect(screen.getByText('Base inaccessible')).toBeTruthy();
+  });
+
+  it('propose un accès rapide au scan dans l’en-tête (FAB)', () => {
+    useCollectionStore.setState({ loading: false, loaded: true });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByTestId('header-scan'));
+
+    expect(mockPush).toHaveBeenCalledWith('/scan');
   });
 });

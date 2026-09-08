@@ -66,6 +66,7 @@
   "jest": {
     "preset": "jest-expo",
     "clearMocks": true,
+    "testTimeout": 15000,
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ],

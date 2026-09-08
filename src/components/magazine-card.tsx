@@ -22,11 +22,7 @@ export function MagazineCard({ magazine, onPress }: Props) {
       onPress={onPress}
       testID="magazine-card"
       accessibilityRole="button"
-      accessibilityLabel={
-        magazine.issueNumber != null
-          ? `${magazine.publication} numéro ${magazine.issueNumber}`
-          : magazine.publication
-      }
+      accessibilityLabel={`${magazine.publication}${magazine.issueNumber != null ? ` numéro ${magazine.issueNumber}` : ''}${owned ? `, possédé ${magazine.quantity} fois` : ', absent de la collection'}`}
       accessibilityHint="Voir la fiche de l'édition"
       android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
       <View style={styles.header}>
