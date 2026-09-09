@@ -8,19 +8,25 @@ import type { Magazine } from '@/types';
 
 const mockReplace = jest.fn();
 const mockBack = jest.fn();
+const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: mockBack, replace: mockReplace }),
+  useRouter: () => ({ back: mockBack, replace: mockReplace, push: mockPush }),
 }));
 
 const mockRequestPermission = jest.fn();
+const mockTakePicture = jest.fn();
 
 jest.mock('expo-camera', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require('react-native');
-  const MockCameraView = (props: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react');
+  const MockCameraView = React.forwardRef((props: any, ref: any) => {
+    React.useImperativeHandle(ref, () => ({ takePictureAsync: mockTakePicture }));
     return <View testID="ocr-camera-view" {...props} />;
-  };
+  });
+  MockCameraView.displayName = 'CameraView';
   return {
     useCameraPermissions: () => [
       { granted: true, canAskAgain: true, status: 'granted' },
@@ -28,6 +34,12 @@ jest.mock('expo-camera', () => {
     ],
     CameraView: MockCameraView,
   };
+});
+
+mockTakePicture.mockResolvedValue({
+  uri: 'file:///capture.jpg',
+  width: 1000,
+  height: 1400,
 });
 
 function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
@@ -79,6 +91,7 @@ describe('CameraOcrScreen', () => {
   beforeEach(() => {
     mockReplace.mockClear();
     mockBack.mockClear();
+    mockPush.mockClear();
     useSettingsStore.setState({ ocrDebug: false });
     setDepsForTest(stubDeps());
   });
@@ -291,6 +304,7 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
   beforeEach(() => {
     mockReplace.mockClear();
     mockBack.mockClear();
+    mockPush.mockClear();
     useSettingsStore.setState({ ocrDebug: false });
   });
 
@@ -385,6 +399,7 @@ describe('CameraOcrScreen — debug OCR (paramètres avancés)', () => {
   beforeEach(() => {
     mockReplace.mockClear();
     mockBack.mockClear();
+    mockPush.mockClear();
     useSettingsStore.setState({ ocrDebug: true });
   });
 
@@ -430,5 +445,69 @@ describe('CameraOcrScreen — debug OCR (paramètres avancés)', () => {
     render(<CameraOcrScreen />);
 
     expect(screen.queryByTestId('ocr-debug-panel')).toBeNull();
+  });
+});
+
+describe('CameraOcrScreen — M-12 revue photo interactive (US-OCR-05)', () => {
+  beforeEach(() => {
+    mockReplace.mockClear();
+    mockBack.mockClear();
+    mockPush.mockClear();
+    useSettingsStore.setState({ ocrDebug: false });
+  });
+
+  const zones = [
+    { id: 'b0-l0', text: 'Picsou Magazine', boundingBox: { x: 40, y: 60, width: 500, height: 40 } },
+    { id: 'b0-l1', text: 'N° 547', boundingBox: { x: 50, y: 110, width: 200, height: 30 } },
+  ];
+
+  it('ouvre la revue photo quand la lecture est faible et les zones connues', async () => {
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByOCR: jest.fn().mockResolvedValue({
+            status: 'weak',
+            publication: 'Picsou Magazine',
+            issueNumber: null,
+            date: null,
+            confidence: 0.5,
+          }),
+        } as unknown as Dependencies['identificationService'],
+        ocrEngine: {
+          recognize: jest.fn().mockResolvedValue({ text: 'Picsou Magazine N° 547', zones }),
+        } as unknown as OcrEngine,
+      }),
+    );
+
+    render(<CameraOcrScreen />);
+    await shoot();
+
+    expect(mockPush).toHaveBeenCalledWith('/scan/ocr-review');
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('garde la surcouche faible quand aucune zone n’est disponible', async () => {
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByOCR: jest.fn().mockResolvedValue({
+            status: 'weak',
+            publication: 'Picsou Magazine',
+            issueNumber: null,
+            date: null,
+            confidence: 0.5,
+          }),
+        } as unknown as Dependencies['identificationService'],
+        ocrEngine: {
+          recognize: jest.fn().mockResolvedValue({ text: 'Picsou Magazine' }),
+        } as unknown as OcrEngine,
+      }),
+    );
+
+    render(<CameraOcrScreen />);
+    await shoot();
+
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByTestId('ocr-detected-board')).toBeTruthy();
   });
 });
