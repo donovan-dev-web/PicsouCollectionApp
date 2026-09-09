@@ -116,7 +116,6 @@ src/
 │   ├── types.ts                  # Types SQLite / rows
 │   └── repositories/
 │       ├── magazine-repository.ts
-│       ├── collection-repository.ts
 │       └── settings-repository.ts
 │
 ├── identification/
@@ -124,11 +123,13 @@ src/
 │   ├── scanBarcode.ts            # Nettoyage / validation EAN-13, ISBN
 │   ├── identificationService.ts  # Orchestration scan + recherche
 │   └── ocr/
-│       ├── ocrTypes.ts          # Interface OcrEngine + OcrFrameResult
+│       ├── ocrTypes.ts          # Interface OcrEngine + OcrFrameResult (+ zones, M-12)
 │       ├── ocrTextParser.ts     # Extraction publication / numéro / date
 │       ├── ocrTextStabilizer.ts # Vote multi-frames (2 lectures concordantes)
 │       ├── ocrEngine.ts         # NoopOcrEngine (repli CI-safe)
-│       └── mlKitOcrEngine.ts    # Moteur natif Google ML Kit (par défaut)
+│       ├── mlKitOcrEngine.ts    # Moteur natif Google ML Kit (par défaut)
+│       ├── ocrImagePreprocessor.ts # Prétraitement éphémère (M-12, M12-01)
+│       └── ocrCandidateAnalyzer.ts # Candidats par champ + confiance (M-12, M12-03)
 │
 ├── backup/
 │   ├── backup-service.ts         # Export / import JSON + CSV
@@ -288,6 +289,19 @@ moteur est `MlKitOcrEngine` : il capture une photo via `expo-camera`
 module natif est **paresseux** (dans `recognize`) : sur CI / hors Development Build il
 retourne `null` sans bloquer les tests. `NoopOcrEngine` reste disponible comme repli.
 <b>La reconnaissance brute se valide sur téléphone physique</b> (Development Build).
+
+**Évolution M-12 — OCR interactif & fiabilisation (à venir, US-OCR-01..08)** :
+- `OcrFrameResult` ({ text }) évolue vers un résultat avec **zones** (`blocks` /
+  `lines` / `elements` + `boundingBox`) — gap à confirmer dans `expo-mlkit-ocr`
+  (issue M12-02 #206) ;
+- `ocrImagePreprocessor` (prétraitement éphémère : redimensionnement + contraste)
+  branché avant `recognize` (issue M12-01 #205) ;
+- `ocrCandidateAnalyzer` produit des **candidats par champ** avec score de
+  confiance (règles métier : pages/prix/année/numéro) (issue M12-03 #207) ;
+- nouvel écran `/scan/ocr-review` : overlay photo + zones cliquables + conversion
+  de coordonnées image→écran (issues M12-05 ../09) ;
+- intégration des valeurs validées à `identificationService.searchByOcrFields`
+  (issue M12-07 #211).
 
 **Qualité lecture (M10R2-09, US-UX-21)** — textes stylisés / encres faibles :
 - Capture **haute résolution** (`takePictureAsync({ quality: 1, skipProcessing: false })`)

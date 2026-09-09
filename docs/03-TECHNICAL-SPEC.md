@@ -137,6 +137,42 @@ Un **niveau de confiance** (0..1) est calculé. En cas de confiance insuffisante
 
 > **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est **branché par défaut** (`MlKitOcrEngine`) via `expo-mlkit-ocr` (Google ML Kit Text Recognition, on-device, hors ligne) : `dependencies.initialize()` l'utilise, l'écran `/scan/camera` capture une photo via `expo-camera` (`takePictureAsync`) puis appelle `recognizeText(uri)`. L'import du module natif est **paresseux** pour ne pas bloquer la CI. `expo-build-properties` force le iOS `deploymentTarget` à 16.4 (exigence ML Kit). La reconnaissance a été **validée sur téléphone physique** (v0.5.0) ; hors bibliothèque native, `recognize` retourne `null` (repli `NoopOcrEngine`).
 
+### 5.5 Flux OCR v2 interactif & fiabilisation (M-12 → v1.1.0)
+
+Évolution cible du pipeline (voir `04-FONCTIONAL-SPEC.md` §5.6, US-OCR-01..08) :
+
+```
+Photo (takePictureAsync)
+   → Prétraitement image (redimensionnement + contraste, éphémère)     [M12-01]
+   → reconnaître : texte + bounding boxes (blocks/lines/elements)      [M12-02]
+   → analyser des candidats par champ (titre, numéro/tome, année, …)
+     avec score de confiance (règles métier + positions spatiales)     [M12-03]
+   → seuiller les propositions automatiques                            [M12-04]
+   → écran intermédiaire : overlay photo + zones cliquables
+     (conversion coordonnées image → écran)                            [M12-05]
+   → associer une zone à un champ / corriger rapidement                [M12-06]
+   → intégrer à findByPublicationAndIssue / saisie pré-remplie         [M12-07]
+   → fiabiliser sur jeu de couvertures réelles (mesure des erreurs)    [M12-08]
+```
+
+**Décisions structurantes (à confirmer en implémentation, M12-02/03)** :
+- **Données** : faire évoluer `OcrFrameResult` (actuellement `{ text }`) vers un
+  résultat avec zones `{ blocks, lines, elements }`, chacune avec sa
+  `boundingBox` (gap à vérifier dans `expo-mlkit-ocr` — un wrapper natif ou un
+  changement de module peut être nécessaire) ;
+- **Prétraitement** : évaluer `expo-image-manipulator` (candidat, §9) pour le
+  redimensionnement/contraste ; traitement en mémoire, jamais enregistré (R14.2) ;
+- **Analyse** : le classifier `ocrTextParser.ts` évolue vers un module de
+  **candidats** (une liste par champ) + règles de discrimination
+  (`192 PAGES`, `€8,50`, `2026`, `TOME 12` / `N° 125`) ;
+- **Seuils** : un score de confiance ≥ seuil ⇒ proposition automatique ; scores
+  proches ⇒ validation utilisateur ;
+- **Écran** : nouvelle route (`/scan/ocr-review`) ; conversion des coordonnées
+  OCR (référentiel photo, `W×H` capturé) vers l'écran (proportions, `resizeMode`) ;
+- **Perf** (§8) : traitement borné hors bandeau UI, import paresseux conservé.
+
+> **Statut M-12 : à venir (backlog)** — issues M12-01..08 (#205-#212).
+
 ---
 
 ## 6. Scan code-barres
@@ -255,6 +291,10 @@ Priorités :
 }
 ```
 Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.
+
+> **M-12 (à l'étude)** : `expo-image-manipulator` (prétraitement, M12-01) et —
+> selon les données exposées par `expo-mlkit-ocr` — un wrapper natif pour les
+> **bounding boxes** (M12-02). Non ajouté tant que les issues ne sont pas engagées.
 
 ---
 

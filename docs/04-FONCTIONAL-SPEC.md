@@ -228,6 +228,50 @@ En cas de confiance insuffisante, les informations détectées (**publication, n
 
 Le message « confiance insuffisante » est donc toujours accompagné d'une possibilité de **valider / corriger**, en plus de réessayer.
 
+### 5.6 Flux OCR v2 interactif & fiabilisation (M-12 → v1.1.0, US-OCR-01..08)
+
+Évolution des §5.1-5.5 pour rendre l'identification fiable quelle que soit la
+couverture (magazines, BD, comics, textes stylisés). Workflow cible :
+
+```
+Photo (takePictureAsync)
+        │
+        ▼
+Prétraitement (redimensionnement, contraste)        ← US-OCR-01
+        │
+        ▼
+OCR local ML Kit : texte + bounding boxes           ← US-OCR-02
+        │
+        ▼
+Analyse de candidats par champ
+(titre, numéro/tome/issue, année/date, éditeur,
+ pages, prix…) avec score de confiance              ← US-OCR-03
+        │
+        ├─ Confiance élevée ──► Proposition automatique
+        │      (ex. Titre ✓ VOGUE · Numéro ✓ 125 · Année ✓ 2026)  ← US-OCR-04
+        └─ Confiance faible / ambiguë ──► Sélection utilisateur
+               ▶ écran intermédiaire : photo + zones OCR cliquables
+               ▶ toucher la zone → assigner Titre / Numéro / Année   ← US-OCR-05/06
+        │
+        ▼
+Valeurs validées → recherche (si suffisant)          ← US-OCR-07
+      └─ insuffisant / non trouvé → saisie manuelle pré-remplie
+```
+
+**Règles** :
+- **prétraitement** appliqué avant la reconnaissance ; aucune image n'est enregistrée (R14.2) ;
+- l'OCR fournit le texte **et** la position des zones ; l'overlay suit fidèlement la photo quel que soit l'écran (conversion des coordonnées) ;
+- **règles métier** de discrimination : `192 PAGES` → pages (pas un numéro), `€8,50` → prix, `2026` → année, `TOME 12` / `N° 125` → numéro ;
+- **proposition automatique** uniquement au-dessus d'un seuil de confiance ; à confiances proches, l'utilisateur valide ;
+- toute proposition reste **corrigeable en 2-3 gestes** (autre zone ou saisie directe), jamais de ressaisie complète ;
+- les champs non identifiés restent vides (pas de blocage) ;
+- l'application **ne présente jamais** une identification comme certaine ;
+- la fiabilisation est **mesurée** sur un jeu de couvertures réelles (jeu de données + taux d'erreurs, cf. `12-TESTING.md`).
+
+> **Statut M-12 : à venir (backlog)** — issues M12-01..08 (#205-#212), user
+> stories US-OCR-01..08 (`08-USER-STORIES.md` §11). Voir aussi
+> `03-TECHNICAL-SPEC.md` §5.5.
+
 ---
 
 ## 6. Flux saisie manuelle
@@ -512,6 +556,7 @@ L'application vérifie, **selon le format choisi dans la popup** :
 | Caméra / OCR | ✅ |
 | — Surcouche de scan ciblé | ✅ (v0.7.1, US-ID-08) |
 | — Validation / correction des infos détectées | ✅ (v0.7.1, US-ID-09) |
+| — OCR v2 interactif & fiabilisation | 🚧 (v1.1.0, M-12 — §5.6, US-OCR-01..08) |
 | Saisie manuelle | ✅ |
 | Résultat Possédé / Absent | ✅ |
 | Gestion des doublons | ✅ |
