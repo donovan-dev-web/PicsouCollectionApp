@@ -149,7 +149,7 @@ function extractIssueNumber(raw: string): number | null {
  * même quand il est déjà présent dans le texte scanné. Ordre : plus long d'abord
  * pour éviter des correspondances partielles.
  */
-const PUBLICATION_ALIASES: readonly { alias: string; canonical: string }[] = [
+export const PUBLICATION_ALIASES: readonly { alias: string; canonical: string }[] = [
   { alias: 'picsou magazine', canonical: 'Picsou Magazine' },
   { alias: 'le journal de mickey', canonical: 'Le Journal de Mickey' },
   { alias: 'journal de mickey', canonical: 'Le Journal de Mickey' },
