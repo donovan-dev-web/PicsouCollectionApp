@@ -50,7 +50,7 @@ export default function BackupScreen() {
       }
       Alert.alert(
         'Remplacer la collection ?',
-        `L’import remplacera la collection actuelle par celle du fichier.\n\nFichier : ${summary.magazines} édition(s), ${summary.copies} exemplaire(s).`,
+        `L’import remplacera la collection actuelle par celle du fichier.\n\nFichier : ${summary.magazines} édition(s).`,
         [
           { text: 'Annuler', style: 'cancel' },
           {

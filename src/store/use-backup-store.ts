@@ -97,7 +97,7 @@ export const useBackupStore = create<BackupState>((set, get) => ({
         importing: false,
         pendingRaw: null,
         pendingFormat: null,
-        message: `Collection importée : ${summary.magazines} édition(s), ${summary.copies} exemplaire(s).`,
+        message: `Collection importée : ${summary.magazines} édition(s).`,
       });
       return summary;
     } catch (err) {
