@@ -8,6 +8,7 @@ import { IdentificationService } from '@/identification/identificationService';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
 import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
 import { NoopOcrEngine } from '@/identification/ocr/ocrEngine';
+import { ExpoImagePreprocessor } from '@/identification/ocr/ocrImagePreprocessor';
 import { Platform } from 'react-native';
 import { BackupService } from '@/backup/backup-service';
 import { NativeFileGateway } from '@/backup/native-file-gateway';
@@ -44,12 +45,13 @@ export async function initialize(): Promise<Dependencies> {
   }
   const db = await dbPromise;
   if (!deps) {
-    // Moteur OCR natif (ML Kit via expo-mlkit-ocr) sur Android/iOS ; sur le web
+    // Moteur OCR natif (ML Kit via expo-mlkit-ocr) sur Android/iOS, avec
+    // prétraitement M-12 (redimensionnement + ré-encodage) ; sur le web
     // (aucun module natif) on utilise un moteur inerte : le flux caméra reste
     // câblé et la CI démarre sans blocage.
     const ocrEngine: OcrEngine =
       Platform.OS === 'android' || Platform.OS === 'ios'
-        ? new MlKitOcrEngine()
+        ? new MlKitOcrEngine(new ExpoImagePreprocessor())
         : new NoopOcrEngine();
     const magazineRepository = new MagazineRepository(db);
     deps = {

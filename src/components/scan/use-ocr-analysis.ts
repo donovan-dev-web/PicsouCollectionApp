@@ -5,6 +5,9 @@ import { useRef, useState } from 'react';
 
 import { getDeps } from '@/dependencies';
 import { useSettingsStore } from '@/store/use-settings-store';
+import { analyzeOcrFrame } from '@/identification/ocr/ocrCandidateAnalyzer';
+import { buildOcrProposals } from '@/identification/ocr/ocrProposals';
+import { setPendingOcrReview } from '@/lib/ocr-pending';
 import {
   buildManualParams,
   EMPTY_DETECTED,
@@ -58,7 +61,11 @@ export function useOcrAnalysis() {
         shutterSound: false,
       });
       const uri = photo?.uri ?? null;
-      const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
+      const frame = await ocrEngine.recognize({
+        native: uri,
+        width: photo?.width ?? 0,
+        height: photo?.height ?? 0,
+      });
       const text = frame?.text ?? '';
       if (!frame) {
         voteCountRef.current = 0;
@@ -96,6 +103,21 @@ export function useOcrAnalysis() {
       }
 
       if (result.status === 'weak') {
+        // M-12 (US-OCR-05) : la lecture est faible mais les zones sont connues →
+        // on ouvre la revue photo interactive (propositions + correction rapide).
+        if ((frame.zones?.length ?? 0) > 0 && uri) {
+          const analysis = analyzeOcrFrame(frame);
+          setPendingOcrReview({
+            uri,
+            width: photo?.width ?? 0,
+            height: photo?.height ?? 0,
+            zones: frame.zones,
+            analysis,
+            proposals: buildOcrProposals(analysis),
+          });
+          router.push('/scan/ocr-review');
+          return;
+        }
         // Confiance partielle : on met en surcouche les champs détectés et on
         // laisse l'utilisateur reprendre une photo ou valider (US-ID-08).
         setWeakCycles((c) => c + 1);

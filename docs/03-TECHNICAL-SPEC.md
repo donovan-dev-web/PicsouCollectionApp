@@ -292,9 +292,10 @@ Priorités :
 ```
 Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.
 
-> **M-12 (à l'étude)** : `expo-image-manipulator` (prétraitement, M12-01) et —
-> selon les données exposées par `expo-mlkit-ocr` — un wrapper natif pour les
-> **bounding boxes** (M12-02). Non ajouté tant que les issues ne sont pas engagées.
+> **M-12 (engagé)** : `expo-image-manipulator` **installé** (prétraitement, M12-01 —
+> redimensionnement ≤ 2600 px + ré-encodage JPEG 0.85) ; les **bounding boxes**
+> sont exposées nativement par `expo-mlkit-ocr` (niveau *ligne*, M12-02), sans
+> wrapper : `mapRecognitionResult` les projette en `OcrTextZone`.
 
 ---
 
