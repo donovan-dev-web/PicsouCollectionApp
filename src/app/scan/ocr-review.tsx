@@ -5,10 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
 import { getDeps } from '@/dependencies';
-import {
-  extractFieldValue,
-  type OcrField,
-} from '@/identification/ocr/ocrCandidateAnalyzer';
+import { extractFieldValue, type OcrField } from '@/identification/ocr/ocrCandidateAnalyzer';
 import type { OcrProposals } from '@/identification/ocr/ocrProposals';
 import { buildManualParams } from '@/components/scan/ocr-analysis';
 import { mapBoxToViewRect } from '@/components/scan/ocr-coords';
@@ -54,7 +51,13 @@ export default function OcrReviewScreen() {
   const params = useLocalSearchParams<{ back?: string }>();
   const [payload] = useState<OcrReviewPayload | null>(() => consumePendingOcrReview());
   const [fields, setFields] = useState<FieldsState>(() =>
-    payload ? initialFields(payload) : { title: { value: '', source: 'manual', confidence: null }, issueNumber: { value: '', source: 'manual', confidence: null }, year: { value: '', source: 'manual', confidence: null } },
+    payload
+      ? initialFields(payload)
+      : {
+          title: { value: '', source: 'manual', confidence: null },
+          issueNumber: { value: '', source: 'manual', confidence: null },
+          year: { value: '', source: 'manual', confidence: null },
+        },
   );
   const [activeField, setActiveField] = useState<OcrField | null>(null);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
@@ -142,7 +145,10 @@ export default function OcrReviewScreen() {
       if (result.status === 'unknown') {
         router.replace({
           pathname: '/scan/result',
-          params: { publication: result.publication, issueNumber: String(result.issueNumber ?? '') },
+          params: {
+            publication: result.publication,
+            issueNumber: String(result.issueNumber ?? ''),
+          },
         });
         return;
       }
@@ -152,7 +158,11 @@ export default function OcrReviewScreen() {
     }
   };
 
-  const goManual = (detected: { publication?: string; issueNumber?: number | null; date?: string | null }) => {
+  const goManual = (detected: {
+    publication?: string;
+    issueNumber?: number | null;
+    date?: string | null;
+  }) => {
     router.replace({ pathname: '/scan/manual', params: buildManualParams(detected) });
   };
 
@@ -257,7 +267,11 @@ export default function OcrReviewScreen() {
               <View key={field} style={styles.fieldWrap}>
                 <View style={styles.fieldHeader}>
                   <Text style={styles.fieldLabel}>{label}</Text>
-                  {f.source === 'auto' && <Text style={styles.autoBadge}>✓ {Math.round((f.confidence ?? 0) * 100)} %</Text>}
+                  {f.source === 'auto' && (
+                    <Text style={styles.autoBadge}>
+                      ✓ {Math.round((f.confidence ?? 0) * 100)} %
+                    </Text>
+                  )}
                   {f.source === 'zone' && <Text style={styles.zoneBadge}>✓ photo</Text>}
                 </View>
                 <View style={styles.fieldRow}>
@@ -315,7 +329,9 @@ export default function OcrReviewScreen() {
           onPress={() =>
             goManual({
               publication: fields.title.value.trim() || undefined,
-              issueNumber: fields.issueNumber.value ? Number(fields.issueNumber.value.replace(/[^0-9]/g, '')) : null,
+              issueNumber: fields.issueNumber.value
+                ? Number(fields.issueNumber.value.replace(/[^0-9]/g, ''))
+                : null,
               date: fields.year.value.trim() || null,
             })
           }
@@ -345,9 +361,20 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       justifyContent: 'center' as const,
     },
     pressed: { opacity: 0.7 },
-    title: { flex: 1, fontSize: 22, lineHeight: 30, fontWeight: '700' as const, color: colors.text },
+    title: {
+      flex: 1,
+      fontSize: 22,
+      lineHeight: 30,
+      fontWeight: '700' as const,
+      color: colors.text,
+    },
     scrollContent: { padding: Spacing.four, paddingBottom: insets.bottom + Spacing.five },
-    help: { fontSize: 14, lineHeight: 20, color: colors.textSecondary, marginBottom: Spacing.three },
+    help: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: colors.textSecondary,
+      marginBottom: Spacing.three,
+    },
     photoFrame: {
       width: '100%' as const,
       backgroundColor: colors.backgroundElement,
@@ -428,7 +455,13 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       justifyContent: 'center' as const,
     },
     secondaryButtonText: { color: colors.text, fontSize: 16, fontWeight: '600' as const },
-    empty: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, padding: Spacing.four, gap: Spacing.three },
+    empty: {
+      flex: 1,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      padding: Spacing.four,
+      gap: Spacing.three,
+    },
     emptyText: { color: colors.textSecondary, textAlign: 'center' as const },
   };
 }

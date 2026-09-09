@@ -13,8 +13,6 @@
  * wrapper natif le permet, sans changer le contrat d'interface ci-dessous.
  */
 
-
-
 /** Dimension maximale (côté le plus long, en pixels) de la photo envoyée à ML Kit. */
 export const OCR_MAX_DIMENSION = 2600;
 
@@ -66,7 +64,8 @@ export class ExpoImagePreprocessor implements OcrImagePreprocessor {
     try {
       // Import paresseux : le module natif n'existe que sur le Development Build.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { manipulateAsync, SaveFormat } = require('expo-image-manipulator') as typeof import('expo-image-manipulator');
+      const { manipulateAsync, SaveFormat } =
+        require('expo-image-manipulator') as typeof import('expo-image-manipulator');
       const resize = planOcrResize(input.width, input.height, OCR_MAX_DIMENSION);
       const actions = resize ? [{ resize }] : [];
       const { uri } = await manipulateAsync(input.uri, actions, {

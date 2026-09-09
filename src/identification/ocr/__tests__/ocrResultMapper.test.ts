@@ -1,7 +1,9 @@
 import { mapRecognitionResult } from '@/identification/ocr/ocrResultMapper';
 import type { RecognitionResult } from 'expo-mlkit-ocr';
 
-function makeResult(lines: { text?: string; box?: { x: number; y: number; width: number; height: number } }[]): RecognitionResult {
+function makeResult(
+  lines: { text?: string; box?: { x: number; y: number; width: number; height: number } }[],
+): RecognitionResult {
   return {
     text: lines.map((l) => l.text ?? '').join('\n'),
     blocks: [

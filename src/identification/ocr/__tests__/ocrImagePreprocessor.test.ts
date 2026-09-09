@@ -63,7 +63,11 @@ describe('ExpoImagePreprocessor — prétraitement natif (M12-01)', () => {
   it('ré-encode en JPEG via manipulateAsync et renvoie la nouvelle URI', async () => {
     manipulateAsync.mockResolvedValue({ uri: 'file:///tmp/processed.jpg' });
 
-    const result = await processor.preprocess({ uri: 'file:///tmp/raw.jpg', width: 1000, height: 1400 });
+    const result = await processor.preprocess({
+      uri: 'file:///tmp/raw.jpg',
+      width: 1000,
+      height: 1400,
+    });
 
     expect(result).toBe('file:///tmp/processed.jpg');
     expect(manipulateAsync).toHaveBeenCalledWith('file:///tmp/raw.jpg', [], {
@@ -87,7 +91,9 @@ describe('ExpoImagePreprocessor — prétraitement natif (M12-01)', () => {
   it('retombe sur null si la manipulation échoue (image d’origine)', async () => {
     manipulateAsync.mockRejectedValue(new Error('module natif absent'));
 
-    await expect(processor.preprocess({ uri: 'file:///x.jpg', width: 10, height: 10 })).resolves.toBeNull();
+    await expect(
+      processor.preprocess({ uri: 'file:///x.jpg', width: 10, height: 10 }),
+    ).resolves.toBeNull();
   });
 
   it('n’appelle rien pour une URI vide', async () => {

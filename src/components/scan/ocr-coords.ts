@@ -23,12 +23,7 @@ export function containFit(
   viewWidth: number,
   viewHeight: number,
 ): ContainFit | null {
-  if (
-    imageWidth <= 0 ||
-    imageHeight <= 0 ||
-    viewWidth <= 0 ||
-    viewHeight <= 0
-  ) {
+  if (imageWidth <= 0 || imageHeight <= 0 || viewWidth <= 0 || viewHeight <= 0) {
     return null;
   }
   const scale = Math.min(viewWidth / imageWidth, viewHeight / imageHeight);

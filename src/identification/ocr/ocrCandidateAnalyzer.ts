@@ -33,16 +33,15 @@ export type OcrAnalysis = {
 export const MIN_ZONE_TEXT_LENGTH = 4;
 
 const IS_YEAR = /^(19|20)\d{2}$/;
-const PRICE_RE = /(?:[€$£]\s*\d+(?:[\s.,]\d+)?|\d+\s*[€$£]|\d+\s*(?:euros?|eur)\b|\bprix\s*:?\s*\d+)/i;
+const PRICE_RE =
+  /(?:[€$£]\s*\d+(?:[\s.,]\d+)?|\d+\s*[€$£]|\d+\s*(?:euros?|eur)\b|\bprix\s*:?\s*\d+)/i;
 const PAGE_RE =
   /\d+\s*(?:pages?|pp?\.?|seiten|paginas?)\b|\b(?:pages?|pp?\.?|seiten|paginas?)\s*(?:[:]?\s*\d+)\b/i;
 const MONTH_YEAR_RE =
   /\b((janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s*)((19|20)\d{2})\b/i;
-const ISSUE_PREFIX_RE =
-  /\b(?:[n°º#]|no|numéro|numero|número|issue|numb|tome|t\.?)\s*(\d{1,4})\b/i;
+const ISSUE_PREFIX_RE = /\b(?:[n°º#]|no|numéro|numero|número|issue|numb|tome|t\.?)\s*(\d{1,4})\b/i;
 /** Préfixe « numéro » franc (N° / nº / numéro / no / # / issue) : signal fort. */
-const NUM_PREFIX_RE =
-  /\b(?:[n°º#]|no|numéro|numero|número|issue|numb)\s*(\d{1,4})\b/i;
+const NUM_PREFIX_RE = /\b(?:[n°º#]|no|numéro|numero|número|issue|numb)\s*(\d{1,4})\b/i;
 /** Préfixe « tome » (TOME 12 / T. 12) : variant de collection, signal moyen. */
 const TOME_PREFIX_RE = /\b(?:tome|t\.?)\s*(\d{1,4})\b/i;
 

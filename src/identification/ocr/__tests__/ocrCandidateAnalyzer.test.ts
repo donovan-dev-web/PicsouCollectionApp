@@ -38,11 +38,7 @@ describe('analyzeOcrFrame — candidats titre (M-12, US-OCR-03)', () => {
 describe('analyzeOcrFrame — règles de discrimination des nombres (M12-08)', () => {
   it('ne retient jamais un nombre de pages comme numéro', () => {
     const analysis = analyzeOcrFrame(
-      frame([
-        zone('t', 'Picsou Magazine'),
-        zone('p', '52 pages'),
-        zone('n', 'N° 547'),
-      ]),
+      frame([zone('t', 'Picsou Magazine'), zone('p', '52 pages'), zone('n', 'N° 547')]),
     );
     const candidates = analysis.candidates.issueNumber ?? [];
     expect(candidates.map((c) => c.value)).toEqual(['547']);
@@ -65,9 +61,7 @@ describe('analyzeOcrFrame — règles de discrimination des nombres (M12-08)', (
   });
 
   it('extrait l’année d’une date mois-année et la garde comme candidat année', () => {
-    const analysis = analyzeOcrFrame(
-      frame([zone('t', 'Picsou Magazine'), zone('d', 'Mars 2023')]),
-    );
+    const analysis = analyzeOcrFrame(frame([zone('t', 'Picsou Magazine'), zone('d', 'Mars 2023')]));
     const years = analysis.candidates.year ?? [];
     expect(years[0]?.value).toBe('2023');
     expect(years[0]?.confidence).toBeGreaterThanOrEqual(0.9);
@@ -85,31 +79,35 @@ describe('analyzeOcrFrame — règles de discrimination des nombres (M12-08)', (
 });
 
 describe('analyzeOcrFrame — matrices M12-08 (jeu de test réel)', () => {
-  const cases: { name: string; zones: OcrTextZone[]; expectPublication?: string; expectIssue?: string }[] =
-    [
-      {
-        name: 'lecture propre',
-        zones: [zone('t', 'Picsou Magazine', 20), zone('n', 'N° 547', 60)],
-        expectPublication: 'Picsou Magazine',
-        expectIssue: '547',
-      },
-      {
-        name: 'pages et prix parasites',
-        zones: [
-          zone('t', 'Picsou Magazine', 20),
-          zone('p', '52 pages', 90),
-          zone('eur', '3,50 €', 120),
-          zone('n', 'N° 547', 60),
-        ],
-        expectPublication: 'Picsou Magazine',
-        expectIssue: '547',
-      },
-      {
-        name: 'année seule lue, pas de numéro',
-        zones: [zone('t', 'Picsou Magazine', 20), zone('a', '2024', 140)],
-        expectPublication: 'Picsou Magazine',
-      },
-    ];
+  const cases: {
+    name: string;
+    zones: OcrTextZone[];
+    expectPublication?: string;
+    expectIssue?: string;
+  }[] = [
+    {
+      name: 'lecture propre',
+      zones: [zone('t', 'Picsou Magazine', 20), zone('n', 'N° 547', 60)],
+      expectPublication: 'Picsou Magazine',
+      expectIssue: '547',
+    },
+    {
+      name: 'pages et prix parasites',
+      zones: [
+        zone('t', 'Picsou Magazine', 20),
+        zone('p', '52 pages', 90),
+        zone('eur', '3,50 €', 120),
+        zone('n', 'N° 547', 60),
+      ],
+      expectPublication: 'Picsou Magazine',
+      expectIssue: '547',
+    },
+    {
+      name: 'année seule lue, pas de numéro',
+      zones: [zone('t', 'Picsou Magazine', 20), zone('a', '2024', 140)],
+      expectPublication: 'Picsou Magazine',
+    },
+  ];
 
   for (const c of cases) {
     it(c.name, () => {
@@ -153,7 +151,9 @@ describe('analyzeOcrFrame — matrices M12-08 (jeu de test réel)', () => {
   });
 
   it('extrait l’année enfouie dans une ligne de texte (© Disney 2026)', () => {
-    const analysis = analyzeOcrFrame(frame([zone('a', 'Picsou Magazine'), zone('b', '© Disney 2026')]));
+    const analysis = analyzeOcrFrame(
+      frame([zone('a', 'Picsou Magazine'), zone('b', '© Disney 2026')]),
+    );
     const years = analysis.candidates.year ?? [];
     expect(years[0]?.value).toBe('2026');
     expect(years[0]?.confidence).toBe(0.6);

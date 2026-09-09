@@ -105,9 +105,7 @@ describe('buildOcrProposals (M-12, US-OCR-04)', () => {
 
   it('théorème du seuil : 0.7 seul est auto, 0.69 est select', () => {
     const make = (confidence: number) =>
-      buildOcrProposals(
-        analysis({ title: [{ value: 'X', confidence, zoneIds: ['z'] }] }),
-      ).title;
+      buildOcrProposals(analysis({ title: [{ value: 'X', confidence, zoneIds: ['z'] }] })).title;
     expect(make(AUTO_PROPOSE_THRESHOLD).kind).toBe('auto');
     expect(make(AUTO_PROPOSE_THRESHOLD - 0.01).kind).toBe('select');
     expect(CONFIDENCE_EQUALITY_MARGIN).toBeGreaterThan(0);
