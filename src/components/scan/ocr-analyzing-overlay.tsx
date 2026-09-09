@@ -10,6 +10,7 @@ type Props = {
   detected: DetectedInfo;
   hint: string;
   weakCycles: number;
+  capturing: boolean;
   torchOn: boolean;
   onOpenConfirm: () => void;
   onGoBarcode: () => void;
@@ -23,6 +24,7 @@ export function OcrAnalyzingOverlay({
   detected,
   hint,
   weakCycles,
+  capturing,
   torchOn,
   onOpenConfirm,
   onGoBarcode,
@@ -34,15 +36,17 @@ export function OcrAnalyzingOverlay({
 
   return (
     <>
-      <View style={styles.overlay}>
-        <View style={styles.reticle} />
+      <View style={[styles.overlay, styles.analyzingLayout]}>
+        <View style={styles.reticle} testID="ocr-reticle" />
         <Text style={styles.scanHint} testID="ocr-hint">
           {hint}
         </Text>
-        <View style={styles.processingPill}>
-          <ActivityIndicator color={colors.accent} />
-          <Text style={styles.processingText}>Lecture…</Text>
-        </View>
+        {capturing && (
+          <View style={styles.processingPill}>
+            <ActivityIndicator color={colors.accent} />
+            <Text style={styles.processingText}>Lecture…</Text>
+          </View>
+        )}
 
         {/* Surcouche US-ID-08 : champs détectés en direct. */}
         <View style={styles.detectedBoard} testID="ocr-detected-board">
@@ -89,13 +93,22 @@ export function OcrAnalyzingOverlay({
         )}
       </View>
 
-      <Pressable
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-        onPress={onGoBarcode}
-        testID="ocr-barcode"
-        accessibilityRole="button">
-        <Text style={styles.secondaryButtonText}>Scanner le code-barres</Text>
-      </Pressable>
+      <View style={styles.analyzingActions}>
+        <Pressable
+          style={({ pressed }) => [styles.analyzingActionButton, pressed && styles.buttonPressed]}
+          onPress={() => onGoManual(detected)}
+          testID="ocr-manual-shortcut"
+          accessibilityRole="button">
+          <Text style={styles.analyzingActionText}>Saisie manuelle</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.analyzingActionButton, pressed && styles.buttonPressed]}
+          onPress={onGoBarcode}
+          testID="ocr-barcode"
+          accessibilityRole="button">
+          <Text style={styles.analyzingActionText}>Scanner le code-barres</Text>
+        </Pressable>
+      </View>
 
       <Pressable
         style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}

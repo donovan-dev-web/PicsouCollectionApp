@@ -8,12 +8,15 @@ interface SettingsState {
   onboardingDone: boolean;
   onboardingLoaded: boolean;
   reducedMotion: boolean;
+  ocrDebug: boolean;
   setColorScheme: (colorScheme: ColorSchemeSetting) => void;
   loadColorScheme: () => Promise<void>;
   loadOnboardingDone: () => Promise<void>;
   markOnboardingDone: () => void;
   setReducedMotion: (reduced: boolean) => void;
   loadReducedMotion: () => Promise<void>;
+  setOcrDebug: (enabled: boolean) => void;
+  loadOcrDebug: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -21,6 +24,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   onboardingDone: false,
   onboardingLoaded: false,
   reducedMotion: false,
+  ocrDebug: false,
 
   setColorScheme: (colorScheme) => {
     set({ colorScheme });
@@ -68,5 +72,21 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   loadReducedMotion: async () => {
     const reducedMotion = await getDeps().settingsRepository.getReducedMotion();
     set({ reducedMotion });
+  },
+
+  setOcrDebug: (enabled) => {
+    set({ ocrDebug: enabled });
+    try {
+      void getDeps()
+        .settingsRepository.setOcrDebug(enabled)
+        .catch(() => undefined);
+    } catch {
+      // dépendances pas encore initialisées : on ignore la persistance
+    }
+  },
+
+  loadOcrDebug: async () => {
+    const ocrDebug = await getDeps().settingsRepository.getOcrDebug();
+    set({ ocrDebug });
   },
 }));

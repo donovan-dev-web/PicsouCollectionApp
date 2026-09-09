@@ -1,18 +1,6 @@
 import { MIN_CONFIDENCE } from '@/identification/ocr/ocrTextParser';
 
 /**
- * Intervalle d'analyse OCR : quelques frames / seconde max (pas toutes).
- */
-export const ANALYSIS_INTERVAL_MS = 500;
-
-/**
- * Lectures OCR identiques requises avant de conclure une identification
- * (M10R2-09 — vote multi-frames conservateur, une lecture isolée pouvant être
- * erronée sur des textes stylisés / à encres faibles).
- */
-export const OCR_STABLE_READS = 2;
-
-/**
  * Informations détectées par l'OCR, affichées en surcouche caméra (US-ID-08)
  * et proposées à la validation / correction (US-ID-09).
  */
@@ -24,8 +12,18 @@ export type DetectedInfo = {
 
 export const EMPTY_DETECTED: DetectedInfo = { publication: null, issueNumber: null, date: null };
 
+/**
+ * Données brutes du debug OCR (paramètres avancés) : texte reconnu, confiance
+ * de la dernière lecture et nombre de lectures identiques consécutives.
+ */
+export type OcrDebugFrame = {
+  rawText: string;
+  confidence: number | null;
+  voteCount: number;
+};
+
 export type OcrUiState =
-  | { status: 'analyzing'; detected: DetectedInfo }
+  | { status: 'analyzing'; detected: DetectedInfo; noText?: boolean }
   | { status: 'confirm'; detected: DetectedInfo }
   | {
       status: 'found';
