@@ -19,8 +19,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = makeStyles(colors);
-  const totalCopies = useCollectionStore((s) => s.totalCopies);
-  const recentCopies = useCollectionStore((s) => s.recentCopies);
+  const totalMagazines = useCollectionStore((s) => s.totalMagazines);
+  const recent = useCollectionStore((s) => s.recent);
   const loading = useCollectionStore((s) => s.loading);
   const loaded = useCollectionStore((s) => s.loaded);
   const error = useCollectionStore((s) => s.error);
@@ -44,7 +44,7 @@ export default function HomeScreen() {
           style={styles.counterCard}
           testID="collection-counter"
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`${totalCopies} exemplaires possédés`}>
+          accessibilityLabel={`${totalMagazines} éditions possédées`}>
           {loading && !loaded ? (
             <ActivityIndicator testID="counter-loading" color={colors.navActive} />
           ) : error ? (
@@ -53,8 +53,8 @@ export default function HomeScreen() {
             </Text>
           ) : (
             <>
-              <Text style={styles.counterValue}>{totalCopies}</Text>
-              <Text style={styles.counterLabel}>exemplaires possédés</Text>
+              <Text style={styles.counterValue}>{totalMagazines}</Text>
+              <Text style={styles.counterLabel}>éditions possédées</Text>
             </>
           )}
         </View>
@@ -85,7 +85,7 @@ export default function HomeScreen() {
 
         <View style={styles.recentSection}>
           <Text style={styles.recentTitle}>Ajouts récents</Text>
-          {recentCopies.length === 0 ? (
+          {recent.length === 0 ? (
             <View style={styles.emptyWrap}>
               <Text style={styles.emptyText} testID="recent-empty">
                 Aucun ajout pour le moment.
@@ -102,9 +102,9 @@ export default function HomeScreen() {
               </Pressable>
             </View>
           ) : (
-            recentCopies.map(({ copy, magazine }) => (
+            recent.map((magazine) => (
               <Pressable
-                key={copy.id}
+                key={magazine.id}
                 style={({ pressed }) => [styles.recentItem, pressed && styles.buttonPressed]}
                 onPress={() => router.push(`/collection/${magazine.id}`)}
                 testID="recent-item"
@@ -116,7 +116,7 @@ export default function HomeScreen() {
                     {magazine.publication}
                     {magazine.issueNumber != null ? ` n°${magazine.issueNumber}` : ''}
                   </Text>
-                  <Text style={styles.recentItemDate}>{formatDateLong(copy.dateAdded)}</Text>
+                  <Text style={styles.recentItemDate}>{formatDateLong(magazine.createdAt)}</Text>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.textSecondary} />
               </Pressable>

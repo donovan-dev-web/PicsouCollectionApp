@@ -4,6 +4,7 @@ import {
   MIGRATION_002,
   MIGRATION_003,
   MIGRATION_004,
+  MIGRATION_005,
   SCHEMA_VERSION,
 } from '@/database/schema';
 
@@ -17,6 +18,7 @@ const MIGRATIONS: Migration[] = [
   { version: 2, up: (db) => db.execAsync(MIGRATION_002) },
   { version: 3, up: (db) => db.execAsync(MIGRATION_003) },
   { version: 4, up: (db) => db.execAsync(MIGRATION_004) },
+  { version: 5, up: (db) => db.execAsync(MIGRATION_005) },
 ];
 
 export async function migrate(db: Database): Promise<void> {

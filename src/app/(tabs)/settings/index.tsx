@@ -42,6 +42,13 @@ const MENU_ITEMS: {
     route: '/settings/help',
     testID: 'settings-help',
   },
+  {
+    icon: 'cpu',
+    label: 'Paramètres avancés',
+    description: 'Debug OCR et reconnaissance',
+    route: '/settings/advanced',
+    testID: 'settings-advanced',
+  },
 ];
 
 export default function SettingsScreen() {
