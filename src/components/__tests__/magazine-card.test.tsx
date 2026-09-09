@@ -16,7 +16,6 @@ const base: MagazineListItem = {
   ocrText: null,
   createdAt: '2026-09-01T10:00:00Z',
   updatedAt: '2026-09-01T10:00:00Z',
-  quantity: 1,
 };
 
 describe('MagazineCard', () => {
@@ -27,33 +26,16 @@ describe('MagazineCard', () => {
     expect(screen.getByText('n° 547')).toBeTruthy();
   });
 
-  it('affiche Possede avec la quantite', () => {
-    render(<MagazineCard magazine={{ ...base, quantity: 3 }} />);
+  it('affiche le badge Possédé (plus d exemplaires)', () => {
+    render(<MagazineCard magazine={base} />);
 
     expect(screen.getByTestId('status-owned')).toBeTruthy();
-    expect(screen.getByText(/Possédé \(3\)/)).toBeTruthy();
-  });
-
-  it('affiche Absent quand aucune copie', () => {
-    render(<MagazineCard magazine={{ ...base, quantity: 0 }} />);
-
-    expect(screen.getByTestId('status-absent')).toBeTruthy();
-    expect(screen.getByText('Absent')).toBeTruthy();
+    expect(screen.getByText('Possédé')).toBeTruthy();
   });
 
   it('annonce le statut possédé au lecteur d’écran', () => {
-    render(<MagazineCard magazine={{ ...base, quantity: 2 }} />);
+    render(<MagazineCard magazine={base} />);
 
-    expect(screen.getByRole('button')).toHaveAccessibleName(
-      'Picsou Magazine numéro 547, possédé 2 fois',
-    );
-  });
-
-  it('annonce l’absence au lecteur d’écran', () => {
-    render(<MagazineCard magazine={{ ...base, quantity: 0 }} />);
-
-    expect(screen.getByRole('button')).toHaveAccessibleName(
-      'Picsou Magazine numéro 547, absent de la collection',
-    );
+    expect(screen.getByRole('button')).toHaveAccessibleName('Picsou Magazine numéro 547, possédé');
   });
 });

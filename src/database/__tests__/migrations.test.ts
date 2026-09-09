@@ -21,23 +21,22 @@ describe('migrate', () => {
     expect(row?.user_version).toBe(getSchemaVersion());
   });
 
-  it('cree les tables magazines, collection_items et settings', async () => {
+  it('cree les tables magazines et settings', async () => {
     await migrate(testDb);
 
     const tables = await testDb.getAllAsync<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('magazines','collection_items','settings') ORDER BY name",
     );
-    expect(tables.map((t) => t.name)).toEqual(['collection_items', 'magazines', 'settings']);
+    expect(tables.map((t) => t.name)).toEqual(['magazines', 'settings']);
   });
 
-  it('cree les 3 index requis', async () => {
+  it('cree les 2 index requis', async () => {
     await migrate(testDb);
 
     const indexes = await testDb.getAllAsync<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_%' ORDER BY name",
     );
     expect(indexes.map((i) => i.name)).toEqual([
-      'idx_collection_items_magazine_id',
       'idx_magazines_barcode',
       'idx_magazines_publication_issue',
     ]);
@@ -112,5 +111,61 @@ describe('migrate', () => {
     } as unknown as Database;
 
     await expect(migrate(db)).rejects.toThrow(/Migration incomplète/);
+  });
+
+  it('migre v4 → v5 : reporte la note de la première copie puis supprime collection_items', async () => {
+    await testDb.execAsync(`
+      CREATE TABLE magazines (
+        id               TEXT PRIMARY KEY NOT NULL,
+        publication      TEXT NOT NULL,
+        issue_number     INTEGER,
+        edition          TEXT,
+        language         TEXT,
+        condition        TEXT,
+        publication_date TEXT,
+        barcode          TEXT,
+        notes            TEXT,
+        ocr_text         TEXT,
+        created_at       TEXT NOT NULL,
+        updated_at       TEXT NOT NULL
+      );
+      CREATE TABLE collection_items (
+        id TEXT PRIMARY KEY NOT NULL,
+        magazine_id TEXT NOT NULL,
+        condition TEXT,
+        notes TEXT,
+        date_added TEXT NOT NULL
+      );
+      INSERT INTO magazines (id, publication, issue_number, created_at, updated_at)
+        VALUES
+          ('m1', 'Picsou', 547, '2020-01-01T00:00:00Z', '2020-01-01T00:00:00Z'),
+          ('m2', 'Journal', NULL, '2020-01-01T00:00:00Z', '2020-01-01T00:00:00Z');
+      INSERT INTO collection_items (id, magazine_id, notes, date_added)
+        VALUES
+          ('c1', 'm1', 'Note première', '2020-01-01T00:00:00Z'),
+          ('c2', 'm1', 'Note seconde', '2021-01-01T00:00:00Z'),
+          ('c3', 'm2', '', '2020-01-01T00:00:00Z');
+      PRAGMA user_version = 4;
+    `);
+
+    await migrate(testDb);
+
+    const m1 = await testDb.getFirstAsync<{ notes: string | null }>(
+      'SELECT notes FROM magazines WHERE id = ?',
+      'm1',
+    );
+    const m2 = await testDb.getFirstAsync<{ notes: string | null }>(
+      'SELECT notes FROM magazines WHERE id = ?',
+      'm2',
+    );
+    const leftover = await testDb.getAllAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name = 'collection_items'",
+    );
+    const version = await testDb.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+
+    expect(m1?.notes).toBe('Note première');
+    expect(m2?.notes).toBeNull();
+    expect(leftover).toHaveLength(0);
+    expect(version?.user_version).toBe(getSchemaVersion());
   });
 });

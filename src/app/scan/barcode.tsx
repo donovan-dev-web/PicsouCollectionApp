@@ -31,7 +31,6 @@ export default function BarcodeScreen() {
     handleScan,
     resume,
     reset,
-    confirmAdd,
   } = useBarcodeScanning();
 
   if (!permission || !permission.granted) {
@@ -86,7 +85,6 @@ export default function BarcodeScreen() {
           styles={styles}
           pending={pending}
           onResume={resume}
-          onConfirmAdd={confirmAdd}
           onManual={(barcode) => router.replace({ pathname: '/scan/manual', params: { barcode } })}
         />
       )}

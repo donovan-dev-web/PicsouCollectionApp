@@ -22,8 +22,8 @@ function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
   };
 }
 
-function asListItem(magazine: Magazine, quantity = 0): MagazineListItem {
-  return { ...magazine, quantity };
+function asListItem(magazine: Magazine): MagazineListItem {
+  return { ...magazine };
 }
 
 function makeRepository(

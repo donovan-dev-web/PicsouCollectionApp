@@ -1,6 +1,5 @@
 import { createTestDatabase } from '@/test-utils/test-db';
 import { migrate } from '@/database/migrations';
-import { CollectionRepository } from '@/database/repositories/collection-repository';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 import { BackupService, InvalidBackupError } from '@/backup/backup-service';
 import type { FileGateway } from '@/backup/file-gateway';
@@ -31,7 +30,6 @@ const fakeGateway: FileGateway = {
 function buildDeps(): Dependencies {
   return {
     magazineRepository: new MagazineRepository(testDb),
-    collectionRepository: new CollectionRepository(testDb),
     settingsRepository: {} as Dependencies['settingsRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
@@ -42,12 +40,10 @@ function buildDeps(): Dependencies {
 
 async function seed(): Promise<string> {
   const magazineRepo = new MagazineRepository(testDb);
-  const collectionRepo = new CollectionRepository(testDb);
   const magazine = await magazineRepo.create({
     publication: 'Picsou Magazine',
     issueNumber: 547,
   });
-  await collectionRepo.addCopy(magazine.id, { notes: 'OK' });
   return magazine.id;
 }
 
@@ -108,7 +104,7 @@ describe('useBackupStore.exportCollection', () => {
     const [csv, format] = writeExport.mock.calls[0];
     expect(format).toBe('csv');
     expect(csv).toMatch(
-      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded,createdAt,updatedAt\n/,
+      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,createdAt,updatedAt\n/,
     );
     expect(useBackupStore.getState().lastExport?.name).toBe('picsou-collection-2026-09-01.csv');
   });
@@ -149,7 +145,7 @@ describe('useBackupStore.pickAndValidate', () => {
 
     const preview = await useBackupStore.getState().pickAndValidate('json');
 
-    expect(preview).toEqual({ magazines: 1, copies: 1 });
+    expect(preview).toEqual({ magazines: 1 });
     expect(useBackupStore.getState().pendingRaw).toBeTruthy();
     expect(useBackupStore.getState().pendingFormat).toBe('json');
   });
@@ -164,7 +160,7 @@ describe('useBackupStore.pickAndValidate', () => {
 
     const preview = await useBackupStore.getState().pickAndValidate('csv');
 
-    expect(preview).toEqual({ magazines: 1, copies: 1 });
+    expect(preview).toEqual({ magazines: 1 });
     expect(useBackupStore.getState().pendingRaw).toBeTruthy();
     expect(useBackupStore.getState().pendingFormat).toBe('csv');
   });
@@ -235,7 +231,7 @@ describe('useBackupStore.applyPendingImport', () => {
     await useBackupStore.getState().pickAndValidate('json');
     const summary = await useBackupStore.getState().applyPendingImport();
 
-    expect(summary).toEqual({ magazines: 1, copies: 1 });
+    expect(summary).toEqual({ magazines: 1 });
     const after = await service.exportCollection();
     expect(after.magazines[0].publication).toBe('Imported');
     expect(useBackupStore.getState().pendingRaw).toBeNull();
@@ -252,7 +248,7 @@ describe('useBackupStore.applyPendingImport', () => {
     await useBackupStore.getState().pickAndValidate('csv');
     const summary = await useBackupStore.getState().applyPendingImport();
 
-    expect(summary).toEqual({ magazines: 1, copies: 1 });
+    expect(summary).toEqual({ magazines: 1 });
     const after = await service.exportCollection();
     expect(after.magazines[0].publication).toBe('Csv Imported');
   });

@@ -21,9 +21,17 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
     camera: {
       flex: 1,
     },
+    /**
+     * Retours test physique : le cadre de détection est un guide visuel ré-ancré
+     * en haut de l'écran. L'OCR analyse toujours l'image entière.
+     */
+    analyzingLayout: {
+      justifyContent: 'flex-start',
+      paddingTop: insets.top + 110,
+    },
     reticle: {
-      width: 220,
-      height: 220,
+      width: 200,
+      height: 200,
       borderWidth: 3,
       borderColor: colors.accent,
       borderRadius: 16,
@@ -86,18 +94,15 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
       fontWeight: '400',
     },
     resultCard: {
-      alignSelf: 'stretch',
-      marginHorizontal: Spacing.four,
-      marginTop: insets.top + Spacing.three,
-      marginBottom: insets.bottom + Spacing.three,
-      maxHeight: '85%',
+      alignSelf: 'center',
+      width: '88%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
-      padding: Spacing.four,
+      padding: Spacing.three,
     },
     resultCardContent: {
       alignItems: 'center',
-      gap: Spacing.three,
+      gap: Spacing.two,
     },
     mutedTitle: {
       fontSize: 14,
@@ -185,6 +190,56 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
     buttonPressed: {
       opacity: 0.8,
     },
+    /**
+     * Bouton de prise de vue manuelle (retours test physique) : 1 appui → 1
+     * photo → 1 lecture, sans capture automatique périodique.
+     */
+    shutterButton: {
+      position: 'absolute',
+      bottom: insets.bottom + 28,
+      alignSelf: 'center',
+      width: 76,
+      height: 76,
+      borderRadius: 38,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 4,
+      borderColor: 'rgba(0,0,0,0.25)',
+    },
+    shutterButtonInner: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    shutterButtonDisabled: {
+      opacity: 0.55,
+    },
+    analyzingActions: {
+      position: 'absolute',
+      bottom: insets.bottom + 118,
+      left: Spacing.four,
+      right: Spacing.four,
+      flexDirection: 'row',
+      gap: Spacing.two,
+    },
+    analyzingActionButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.65)',
+      paddingVertical: Spacing.two,
+      borderRadius: 10,
+    },
+    analyzingActionText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#FFFFFF',
+      textAlign: 'center',
+    },
     cancelButton: {
       marginTop: Spacing.three,
       alignSelf: 'center',
@@ -222,7 +277,7 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
       position: 'absolute',
       left: Spacing.four,
       right: Spacing.four,
-      bottom: insets.bottom + Spacing.three,
+      bottom: insets.bottom + 168,
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'center',
@@ -255,6 +310,46 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
       fontSize: 13,
       fontWeight: '700',
       color: colors.accentText,
+    },
+    debugPanel: {
+      position: 'absolute',
+      top: insets.top + 60,
+      left: Spacing.three,
+      right: Spacing.three,
+      backgroundColor: 'rgba(0,0,0,0.82)',
+      borderRadius: 10,
+      padding: Spacing.two,
+      gap: 4,
+    },
+    debugTitle: {
+      fontSize: 12,
+      fontWeight: '800',
+      color: '#7FDBFF',
+      textAlign: 'center',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    debugRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: Spacing.two,
+    },
+    debugLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: 'rgba(255,255,255,0.85)',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    debugValue: {
+      flexShrink: 1,
+      fontSize: 12,
+      lineHeight: 16,
+      color: '#7FDBFF',
+      textAlign: 'right',
+    },
+    debugValueEmpty: {
+      color: 'rgba(255,255,255,0.6)',
     },
   });
 }

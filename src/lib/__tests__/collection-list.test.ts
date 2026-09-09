@@ -21,7 +21,6 @@ const m = (
   ocrText: null,
   createdAt: over.createdAt ?? '',
   updatedAt: '',
-  quantity: over.quantity ?? 0,
 });
 
 describe('sortMagazines', () => {

@@ -29,7 +29,6 @@ describe('OnboardingScreen', () => {
     mockSetOnboardingDone.mockClear();
     setDepsForTest({
       magazineRepository: {} as Dependencies['magazineRepository'],
-      collectionRepository: {} as Dependencies['collectionRepository'],
       settingsRepository: {
         setOnboardingDone: mockSetOnboardingDone,
       } as unknown as Dependencies['settingsRepository'],

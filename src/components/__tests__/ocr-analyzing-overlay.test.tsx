@@ -7,7 +7,9 @@ import { Colors } from '@/constants/theme';
 
 const styles = makeCameraOcrStyles(Colors.light, { top: 0, bottom: 0 });
 
-function renderOverlay(overrides: Partial<{ detected: DetectedInfo; weakCycles: number }> = {}) {
+function renderOverlay(
+  overrides: Partial<{ detected: DetectedInfo; weakCycles: number; capturing: boolean }> = {},
+) {
   const callbacks = {
     onOpenConfirm: jest.fn(),
     onGoBarcode: jest.fn(),
@@ -21,6 +23,7 @@ function renderOverlay(overrides: Partial<{ detected: DetectedInfo; weakCycles: 
       detected={overrides.detected ?? { publication: null, issueNumber: null, date: null }}
       hint="Centre le magazine"
       weakCycles={overrides.weakCycles ?? 0}
+      capturing={overrides.capturing ?? false}
       torchOn={false}
       onOpenConfirm={callbacks.onOpenConfirm}
       onGoBarcode={callbacks.onGoBarcode}
@@ -33,11 +36,17 @@ function renderOverlay(overrides: Partial<{ detected: DetectedInfo; weakCycles: 
 }
 
 describe('OcrAnalyzingOverlay', () => {
-  it('affiche le texte-guide et la lecture en cours', () => {
-    renderOverlay();
+  it('affiche le texte-guide et la lecture en cours pendant la capture', () => {
+    renderOverlay({ capturing: true });
 
     expect(screen.getByTestId('ocr-hint')).toHaveTextContent('Centre le magazine');
     expect(screen.getByText('Lecture…')).toBeTruthy();
+  });
+
+  it('n’affiche pas la pastille de lecture hors capture', () => {
+    renderOverlay();
+
+    expect(screen.queryByText('Lecture…')).toBeNull();
   });
 
   it('affiche des champs détectés avec leurs valeurs', () => {
@@ -94,6 +103,7 @@ describe('OcrAnalyzingOverlay', () => {
         detected={{ publication: null, issueNumber: null, date: null }}
         hint=""
         weakCycles={0}
+        capturing={false}
         torchOn
         onOpenConfirm={jest.fn()}
         onGoBarcode={jest.fn()}

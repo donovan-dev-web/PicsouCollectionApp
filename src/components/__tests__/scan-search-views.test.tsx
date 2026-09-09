@@ -1,14 +1,12 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 
 import { SearchFoundResult, SearchUnknownResult } from '@/components/scan-search-views';
 
 describe('SearchFoundResult', () => {
-  const onAddCopy = jest.fn();
   const onView = jest.fn();
   const onRescan = jest.fn();
 
   beforeEach(() => {
-    onAddCopy.mockClear();
     onView.mockClear();
     onRescan.mockClear();
   });
@@ -18,73 +16,43 @@ describe('SearchFoundResult', () => {
       <SearchFoundResult
         publication="Picsou Magazine"
         issueNumber={547}
-        owned
-        ownedCount={2}
-        resolved
-        onAddCopy={onAddCopy}
         onView={onView}
         onRescan={onRescan}
       />,
     );
 
+    expect(screen.getByTestId('search-magazine')).toHaveTextContent('Picsou Magazine');
     expect(screen.getByText('N° 547')).toBeTruthy();
-    expect(screen.getByTestId('search-status-owned')).toHaveTextContent('✓ Possédé (2)');
-    fireEvent.press(screen.getByTestId('search-add'));
-    expect(onAddCopy).toHaveBeenCalled();
+    expect(screen.getByTestId('search-status-owned')).toHaveTextContent('✓ Possédé');
   });
 
-  it('affiche « absent » quand l’édition n’est pas possédée', () => {
+  it('s’affiche sans numéro quand celui-ci est absent', () => {
     render(
       <SearchFoundResult
         publication="Picsou Magazine"
         issueNumber={null}
-        owned={false}
-        ownedCount={0}
-        resolved
-        onAddCopy={onAddCopy}
         onView={onView}
         onRescan={onRescan}
       />,
     );
 
     expect(screen.queryByText('N° 547')).toBeNull();
-    expect(screen.getByTestId('search-status-absent')).toHaveTextContent('○ Absent');
   });
 
-  it('affiche la vérification en cours tant que l’édition n’est pas résolue', () => {
+  it('sait relancer un scan ou ouvrir la fiche', async () => {
+    const user = userEvent.setup();
     render(
       <SearchFoundResult
         publication="Picsou Magazine"
         issueNumber={547}
-        owned={false}
-        ownedCount={0}
-        resolved={false}
-        onAddCopy={onAddCopy}
         onView={onView}
         onRescan={onRescan}
       />,
     );
 
-    expect(screen.getByTestId('search-loading')).toHaveTextContent('Vérification…');
-  });
-
-  it('sait relancer un scan ou ouvrir la fiche', () => {
-    render(
-      <SearchFoundResult
-        publication="Picsou Magazine"
-        issueNumber={547}
-        owned={false}
-        ownedCount={0}
-        resolved
-        onAddCopy={onAddCopy}
-        onView={onView}
-        onRescan={onRescan}
-      />,
-    );
-
-    fireEvent.press(screen.getByTestId('search-view'));
+    await user.press(screen.getByTestId('search-view'));
     expect(onView).toHaveBeenCalled();
-    fireEvent.press(screen.getByTestId('search-rescan'));
+    await user.press(screen.getByTestId('search-rescan'));
     expect(onRescan).toHaveBeenCalled();
   });
 });
@@ -93,7 +61,8 @@ describe('SearchUnknownResult', () => {
   const onManual = jest.fn();
   const onAgain = jest.fn();
 
-  it('affiche la publication, avec ou sans numéro', () => {
+  it('affiche la publication, avec ou sans numéro', async () => {
+    const user = userEvent.setup();
     render(
       <SearchUnknownResult
         publication="Picsou Magazine"
@@ -105,9 +74,9 @@ describe('SearchUnknownResult', () => {
     expect(screen.getByText(/Picsou Magazine/)).toBeTruthy();
     expect(screen.getByText('N° 547')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('search-manual'));
+    await user.press(screen.getByTestId('search-manual'));
     expect(onManual).toHaveBeenCalled();
-    fireEvent.press(screen.getByTestId('search-again'));
+    await user.press(screen.getByTestId('search-again'));
     expect(onAgain).toHaveBeenCalled();
   });
 

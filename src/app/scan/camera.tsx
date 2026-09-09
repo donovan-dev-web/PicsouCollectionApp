@@ -1,12 +1,14 @@
 import { CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 
 import { CameraPermissionScreen } from '@/components/camera-permission-screen';
 import { useThemeColors } from '@/hooks/use-theme';
 import { OcrAnalyzingOverlay } from '@/components/scan/ocr-analyzing-overlay';
 import { OcrConfirmOverlay } from '@/components/scan/ocr-confirm-overlay';
+import { OcrDebugPanel } from '@/components/scan/ocr-debug-panel';
 import { OcrResultOverlay } from '@/components/scan/ocr-result-overlay';
 import { makeCameraOcrStyles } from '@/components/scan/camera-ocr-styles';
 import { useOcrAnalysis } from '@/components/scan/use-ocr-analysis';
@@ -24,8 +26,12 @@ export default function CameraOcrScreen() {
     draft,
     torchOn,
     weakCycles,
+    capturing,
+    debugFrame,
+    ocrDebug,
     setTorchOn,
     setDraft,
+    capture,
     stopAndRetry,
     openConfirm,
     goManual,
@@ -51,11 +57,34 @@ export default function CameraOcrScreen() {
     state.status === 'analyzing' || state.status === 'confirm' ? state.detected : null;
 
   const hint =
-    detected?.publication && detected?.issueNumber === null
-      ? 'Pointez maintenant le numéro du magazine'
-      : detected?.publication || detected?.issueNumber
-        ? 'Identification en cours…'
-        : 'Pointez la couverture du magazine dans le cadre';
+    state.status === 'analyzing'
+      ? detected?.publication && detected?.issueNumber === null
+        ? 'Reprenez une photo pour lire le numéro'
+        : detected?.publication || detected?.issueNumber
+          ? 'Pointez la couverture puis appuyez sur le déclencheur'
+          : 'Pointez la couverture du magazine, puis appuyez sur le déclencheur'
+      : '';
+
+  const debugFields = {
+    publication:
+      state.status === 'analyzing' || state.status === 'confirm'
+        ? state.detected.publication
+        : state.status === 'found' || state.status === 'unknown'
+          ? state.publication
+          : null,
+    issueNumber:
+      state.status === 'analyzing' || state.status === 'confirm'
+        ? state.detected.issueNumber
+        : state.status === 'found' || state.status === 'unknown'
+          ? state.issueNumber
+          : null,
+    date:
+      state.status === 'analyzing' || state.status === 'confirm'
+        ? state.detected.date
+        : state.status === 'found' || state.status === 'unknown'
+          ? state.date
+          : null,
+  };
 
   return (
     <View style={styles.container}>
@@ -73,6 +102,7 @@ export default function CameraOcrScreen() {
           detected={state.detected}
           hint={hint}
           weakCycles={weakCycles}
+          capturing={capturing}
           torchOn={torchOn}
           onOpenConfirm={openConfirm}
           onGoBarcode={goBarcode}
@@ -80,6 +110,24 @@ export default function CameraOcrScreen() {
           onBack={() => router.back()}
           onToggleTorch={() => setTorchOn((t) => !t)}
         />
+      )}
+
+      {isAnalyzing && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.shutterButton,
+            capturing && styles.shutterButtonDisabled,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={capture}
+          disabled={capturing}
+          testID="ocr-shutter"
+          accessibilityRole="button"
+          accessibilityLabel={capturing ? 'Lecture en cours' : 'Prendre la photo pour la lecture'}>
+          <View style={styles.shutterButtonInner}>
+            <Feather name="camera" size={26} color={colors.accentText} />
+          </View>
+        </Pressable>
       )}
 
       {isConfirming && (
@@ -123,6 +171,8 @@ export default function CameraOcrScreen() {
           }
         />
       )}
+
+      {ocrDebug && <OcrDebugPanel styles={styles} frame={debugFrame} fields={debugFields} />}
     </View>
   );
 }

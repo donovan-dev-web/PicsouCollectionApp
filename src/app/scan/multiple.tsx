@@ -111,7 +111,7 @@ export default function MultipleBarcodeScreen() {
                         <Text style={styles.issue}>n° {item.issueNumber}</Text>
                       ) : null}
                     </View>
-                    <StatusBadge owned={item.quantity > 0} quantity={item.quantity} />
+                    <StatusBadge />
                   </Pressable>
                 )}
               />

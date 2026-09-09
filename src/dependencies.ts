@@ -1,7 +1,7 @@
 import type { Database } from '@/database/types';
 import { getDatabase } from '@/database/db';
+// Migration avant création des dépôts : toutes les tables sont à jour.
 import { migrate } from '@/database/migrations';
-import { CollectionRepository } from '@/database/repositories/collection-repository';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 import { SettingsRepository } from '@/database/repositories/settings-repository';
 import { IdentificationService } from '@/identification/identificationService';
@@ -15,7 +15,6 @@ import type { FileGateway } from '@/backup/file-gateway';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
-  collectionRepository: CollectionRepository;
   settingsRepository: SettingsRepository;
   identificationService: IdentificationService;
   ocrEngine: OcrEngine;
@@ -55,7 +54,6 @@ export async function initialize(): Promise<Dependencies> {
     const magazineRepository = new MagazineRepository(db);
     deps = {
       magazineRepository,
-      collectionRepository: new CollectionRepository(db),
       settingsRepository: new SettingsRepository(db),
       identificationService: new IdentificationService(magazineRepository),
       ocrEngine,

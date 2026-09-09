@@ -1,25 +1,24 @@
 import { useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
 import type { CameraView as CameraViewType } from 'expo-camera';
+import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 
 import { getDeps } from '@/dependencies';
-import { OcrTextStabilizer } from '@/identification/ocr/ocrTextStabilizer';
+import { useSettingsStore } from '@/store/use-settings-store';
 import {
-  ANALYSIS_INTERVAL_MS,
   buildManualParams,
   EMPTY_DETECTED,
-  OCR_STABLE_READS,
   type DetectedInfo,
+  type OcrDebugFrame,
   type OcrUiState,
 } from './ocr-analysis';
 
 /**
- * Logique d'analyse OCR d'une couverture (détection périodique, vote multi-frames,
- * surcouche de validation / correction, recherche hors confiance).
- *
- * Expose l'état d'interface OCR et les actions associées de façon découplée de
- * la vue, afin de la rendre testable.
+ * Logique d'analyse OCR d'une couverture. Retours test physique : la capture
+ * est désormais manuelle (1 appui → 1 photo → 1 lecture, sans son
+ * d'obturateur) au lieu d'une capture périodique. Le debug OCR (paramètres
+ * avancés) expose le texte brut, les champs parsés, la confiance et le nombre
+ * de lectures identiques consécutives.
  */
 export function useOcrAnalysis() {
   const router = useRouter();
@@ -31,102 +30,121 @@ export function useOcrAnalysis() {
   const [draft, setDraft] = useState<DetectedInfo>(EMPTY_DETECTED);
   const [torchOn, setTorchOn] = useState(false);
   const [weakCycles, setWeakCycles] = useState(0);
+  const [capturing, setCapturing] = useState(false);
+  const [debugFrame, setDebugFrame] = useState<OcrDebugFrame | null>(null);
   const inFlight = useRef(false);
+  const lastKeyRef = useRef<string | null>(null);
+  const voteCountRef = useRef(0);
   const cameraRef = useRef<CameraViewType>(null);
-  const ocrStabilizer = useRef(new OcrTextStabilizer(OCR_STABLE_READS));
+  const ocrDebug = useSettingsStore((s) => s.ocrDebug);
 
-  useEffect(() => {
-    if (!permission?.granted || state.status !== 'analyzing') {
+  const rememberFrame = (rawText: string, confidence: number | null) => {
+    setDebugFrame({ rawText, confidence, voteCount: voteCountRef.current });
+  };
+
+  const capture = async () => {
+    if (inFlight.current || state.status !== 'analyzing') {
       return;
     }
-
-    const { ocrEngine, identificationService } = getDeps();
-    const interval = setInterval(async () => {
-      if (inFlight.current) {
+    inFlight.current = true;
+    setCapturing(true);
+    try {
+      const { ocrEngine, identificationService } = getDeps();
+      // Capture manuelle éphémère (aucune image persistée) → URI.
+      // `shutterSound: false` (expo-camera ≤ 57) : pas de son d'obturateur.
+      const photo = await cameraRef.current?.takePictureAsync?.({
+        quality: 1,
+        skipProcessing: false,
+        shutterSound: false,
+      });
+      const uri = photo?.uri ?? null;
+      const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
+      const text = frame?.text ?? '';
+      if (!frame) {
+        voteCountRef.current = 0;
+        rememberFrame(text, null);
+        setState((prev) =>
+          prev.status === 'analyzing'
+            ? { status: 'analyzing', detected: EMPTY_DETECTED, noText: true }
+            : prev,
+        );
         return;
       }
-      inFlight.current = true;
-      try {
-        // Capture éphémère d'une photo (aucune image persistée) → URI.
-        // Haute résolution (M10R2-09) : préserve les petites encres des textes stylisés.
-        const photo = await cameraRef.current?.takePictureAsync?.({
-          quality: 1,
-          skipProcessing: false,
-        });
-        const uri = photo?.uri ?? null;
-        const frame = await ocrEngine.recognize({ native: uri, width: 0, height: 0 });
-        if (!frame) {
-          return;
-        }
-        const result = await identificationService.identifyByOCR(frame.text);
+      const result = await identificationService.identifyByOCR(frame.text);
 
-        if (result.status === 'no-text') {
-          return;
-        }
+      const key = [
+        result.status === 'no-text' ? '' : result.publication,
+        result.status === 'no-text'
+          ? ''
+          : result.issueNumber != null
+            ? String(result.issueNumber)
+            : '',
+        result.status === 'no-text' ? '' : (result.date ?? ''),
+      ].join('|');
+      voteCountRef.current = key === lastKeyRef.current ? voteCountRef.current + 1 : 1;
+      lastKeyRef.current = key;
+      const confidence = result.status === 'no-text' ? null : result.confidence;
+      rememberFrame(frame.text, confidence);
 
-        if (result.status === 'weak') {
-          // US-ID-08 : on ne conclut plus en échec dès la première lecture partielle.
-          // On met en surcouche les champs détectés et on continue d'analyser
-          // (le pointeur guide l'utilisateur vers le champ manquant).
-          setWeakCycles((c) => c + 1);
-          setState((prev) =>
-            prev.status === 'analyzing'
-              ? {
-                  status: 'analyzing',
-                  detected: {
-                    publication:
-                      result.publication === 'Publication inconnue' ? null : result.publication,
-                    issueNumber: result.issueNumber,
-                    date: result.date,
-                  },
-                }
-              : prev,
-          );
-          return;
-        }
+      if (result.status === 'no-text') {
+        setState((prev) =>
+          prev.status === 'analyzing'
+            ? { status: 'analyzing', detected: EMPTY_DETECTED, noText: true }
+            : prev,
+        );
+        return;
+      }
 
-        // Vote multi-frames (M10R2-09) : on ne conclut pas sur une lecture
-        // isolée, une frame suivante identique est requise (textes stylisés).
-        const key = [
-          result.publication ?? '',
-          result.issueNumber != null ? String(result.issueNumber) : '',
-          result.date ?? '',
-        ].join('|');
-        if (!ocrStabilizer.current.push(key)) {
-          return;
-        }
-        ocrStabilizer.current.reset();
+      if (result.status === 'weak') {
+        // Confiance partielle : on met en surcouche les champs détectés et on
+        // laisse l'utilisateur reprendre une photo ou valider (US-ID-08).
+        setWeakCycles((c) => c + 1);
+        setState((prev) =>
+          prev.status === 'analyzing'
+            ? {
+                status: 'analyzing',
+                detected: {
+                  publication:
+                    result.publication === 'Publication inconnue' ? null : result.publication,
+                  issueNumber: result.issueNumber,
+                  date: result.date,
+                },
+              }
+            : prev,
+        );
+        return;
+      }
 
-        if (result.status === 'unknown') {
-          setState({
-            status: 'unknown',
-            publication: result.publication,
-            issueNumber: result.issueNumber,
-            date: result.date,
-            confidence: result.confidence,
-          });
-          return;
-        }
-
+      if (result.status === 'unknown') {
         setState({
-          status: 'found',
-          id: result.magazine.id,
+          status: 'unknown',
           publication: result.publication,
           issueNumber: result.issueNumber,
           date: result.date,
           confidence: result.confidence,
         });
-      } finally {
-        inFlight.current = false;
+        return;
       }
-    }, ANALYSIS_INTERVAL_MS);
 
-    return () => clearInterval(interval);
-  }, [permission?.granted, state.status]);
+      setState({
+        status: 'found',
+        id: result.magazine.id,
+        publication: result.publication,
+        issueNumber: result.issueNumber,
+        date: result.date,
+        confidence: result.confidence,
+      });
+    } finally {
+      inFlight.current = false;
+      setCapturing(false);
+    }
+  };
 
   const stopAndRetry = () => {
-    ocrStabilizer.current.reset();
+    lastKeyRef.current = null;
+    voteCountRef.current = 0;
     setWeakCycles(0);
+    setDebugFrame(null);
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
 
@@ -193,8 +211,12 @@ export function useOcrAnalysis() {
     draft,
     torchOn,
     weakCycles,
+    capturing,
+    debugFrame,
+    ocrDebug,
     setTorchOn,
     setDraft,
+    capture,
     stopAndRetry,
     openConfirm,
     goManual,

@@ -1,11 +1,5 @@
 import type { Database } from '@/database/types';
-import type {
-  Magazine,
-  CollectionItem,
-  CreateMagazineInput,
-  MagazineDetail,
-  MagazineListItem,
-} from '@/types';
+import type { Magazine, CreateMagazineInput, MagazineListItem } from '@/types';
 import { generateId } from '@/utils/id';
 
 type MagazineRow = {
@@ -23,12 +17,16 @@ type MagazineRow = {
   updated_at: string;
 };
 
+const DETAIL_SELECT = `
+  SELECT id, publication, issue_number, edition, language, condition, publication_date,
+         barcode, notes, ocr_text, created_at, updated_at
+  FROM magazines`;
+
+/** Liste légère : pas de notes ni d'ocr_text (colonnes potentiellement lourdes). */
 const LIST_SELECT = `
-  SELECT m.id, m.publication, m.issue_number, m.edition, m.language,
-         m.publication_date, m.barcode, m.created_at, m.updated_at,
-         COUNT(c.id) AS quantity
-  FROM magazines m
-  LEFT JOIN collection_items c ON c.magazine_id = m.id`;
+  SELECT id, publication, issue_number, edition, language, condition, publication_date,
+         barcode, created_at, updated_at
+  FROM magazines`;
 
 function toMagazine(
   row: Omit<MagazineRow, 'notes' | 'ocr_text'> & {
@@ -56,10 +54,7 @@ function toMagazine(
  * Tri stable, insensible à la casse et aux accents (collation française) :
  * le `ORDER BY` SQLite utilise la collation BINARY et `lower()` est ASCII-only.
  */
-function compareByPublication(
-  a: Pick<MagazineListItem, 'publication' | 'issueNumber' | 'id'>,
-  b: Pick<MagazineListItem, 'publication' | 'issueNumber' | 'id'>,
-): number {
+function compareByPublication(a: Magazine, b: Magazine): number {
   const byPublication = a.publication.localeCompare(b.publication, 'fr', {
     sensitivity: 'base',
   });
@@ -85,17 +80,14 @@ export class MagazineRepository {
   constructor(private readonly db: Database) {}
 
   async findManyByBarcode(barcode: string): Promise<MagazineListItem[]> {
-    const rows = await this.db.getAllAsync<
-      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
-    >(
-      `${LIST_SELECT}
-       WHERE m.barcode = ?
-       GROUP BY m.id
-       ORDER BY m.publication, m.issue_number`,
+    const rows = await this.db.getAllAsync<MagazineRow>(
+      `${DETAIL_SELECT}
+       WHERE barcode = ?
+       ORDER BY publication, issue_number`,
       barcode,
     );
 
-    return rows.map((row) => ({ ...toMagazine(row), quantity: row.quantity }));
+    return rows.map(toMagazine);
   }
 
   /**
@@ -112,9 +104,7 @@ export class MagazineRepository {
     }
 
     const row = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
-              barcode, notes, ocr_text, created_at, updated_at
-       FROM magazines
+      `${DETAIL_SELECT}
        WHERE lower(publication) = lower(?) AND issue_number = ?
        ORDER BY created_at ASC
        LIMIT 1`,
@@ -126,14 +116,9 @@ export class MagazineRepository {
   }
 
   async list(): Promise<MagazineListItem[]> {
-    const rows = await this.db.getAllAsync<
-      Omit<MagazineRow, 'notes' | 'ocr_text'> & { quantity: number }
-    >(`${LIST_SELECT}
-       GROUP BY m.id`);
+    const rows = await this.db.getAllAsync<MagazineRow>(`${LIST_SELECT}`);
 
-    return rows
-      .map((row) => ({ ...toMagazine(row), quantity: row.quantity }))
-      .sort(compareByPublication);
+    return rows.map(toMagazine).sort(compareByPublication);
   }
 
   async search(query: string): Promise<MagazineListItem[]> {
@@ -155,40 +140,33 @@ export class MagazineRepository {
       .sort(compareByPublication);
   }
 
-  async findById(id: string): Promise<MagazineDetail | null> {
+  /** Dernières éditions ajoutées (accueil), les plus récentes d'abord. */
+  async findRecent(limit = 5): Promise<MagazineListItem[]> {
+    const rows = await this.db.getAllAsync<MagazineRow>(
+      `${LIST_SELECT}
+       ORDER BY created_at DESC, rowid DESC
+       LIMIT ?`,
+      limit,
+    );
+
+    return rows.map(toMagazine);
+  }
+
+  async countAll(): Promise<number> {
+    const row = await this.db.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) AS count FROM magazines',
+    );
+    return Number(row?.count ?? 0);
+  }
+
+  async findById(id: string): Promise<Magazine | null> {
     const row = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
-              barcode, notes, ocr_text, created_at, updated_at
-       FROM magazines
+      `${DETAIL_SELECT}
        WHERE id = ?`,
       id,
     );
 
-    if (!row) {
-      return null;
-    }
-
-    const copyRows = await this.db.getAllAsync<{
-      id: string;
-      magazine_id: string;
-      notes: string | null;
-      date_added: string;
-    }>(
-      `SELECT id, magazine_id, notes, date_added
-       FROM collection_items
-       WHERE magazine_id = ?
-       ORDER BY date_added DESC`,
-      id,
-    );
-
-    const copies: CollectionItem[] = copyRows.map((r) => ({
-      id: r.id,
-      magazineId: r.magazine_id,
-      notes: r.notes,
-      dateAdded: r.date_added,
-    }));
-
-    return { ...toMagazine(row), copies };
+    return row ? toMagazine(row) : null;
   }
 
   async delete(id: string): Promise<void> {
@@ -239,80 +217,9 @@ export class MagazineRepository {
     return magazine;
   }
 
-  /**
-   * Crée une édition **et** son premier exemplaire dans une seule transaction
-   * (US-COL : l'ajout d'une nouveauté produit toujours un exemplaire). Un échec
-   * de l'un des deux INSERT annule l'ensemble : pas d'édition orpheline.
-   */
-  async createWithCopy(
-    input: CreateMagazineInput,
-  ): Promise<{ magazine: Magazine; copyId: string }> {
-    const publication = input.publication.trim();
-    if (!publication) {
-      throw new Error('La publication est obligatoire.');
-    }
-
-    const now = new Date().toISOString();
-    const magazine: Magazine = {
-      id: generateId(),
-      publication,
-      issueNumber: input.issueNumber ?? null,
-      edition: input.edition ?? null,
-      language: input.language ?? null,
-      condition: input.condition ?? null,
-      publicationDate: input.publicationDate ?? null,
-      barcode: input.barcode ?? null,
-      notes: input.notes ?? null,
-      ocrText: input.ocrText ?? null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const copyId = generateId();
-
-    await this.db.execAsync('BEGIN');
-    try {
-      await this.db.runAsync(
-        `INSERT INTO magazines
-          (id, publication, issue_number, edition, language, condition, publication_date,
-           barcode, notes, ocr_text, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        magazine.id,
-        magazine.publication,
-        magazine.issueNumber,
-        magazine.edition,
-        magazine.language,
-        magazine.condition,
-        magazine.publicationDate,
-        magazine.barcode,
-        magazine.notes,
-        magazine.ocrText,
-        magazine.createdAt,
-        magazine.updatedAt,
-      );
-      await this.db.runAsync(
-        `INSERT INTO collection_items (id, magazine_id, notes, date_added)
-         VALUES (?, ?, NULL, ?)`,
-        copyId,
-        magazine.id,
-        now,
-      );
-      await this.db.execAsync('COMMIT');
-    } catch (error) {
-      try {
-        await this.db.execAsync('ROLLBACK');
-      } catch {
-        // Ignorer l'échec du rollback : on renvoie l'erreur d'origine.
-      }
-      throw error;
-    }
-
-    return { magazine, copyId };
-  }
   async update(id: string, input: CreateMagazineInput): Promise<Magazine | null> {
     const current = await this.db.getFirstAsync<MagazineRow>(
-      `SELECT id, publication, issue_number, edition, language, condition, publication_date,
-              barcode, notes, ocr_text, created_at, updated_at
-       FROM magazines
+      `${DETAIL_SELECT}
        WHERE id = ?`,
       id,
     );

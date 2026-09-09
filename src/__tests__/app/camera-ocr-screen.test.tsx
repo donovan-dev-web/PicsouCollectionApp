@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import CameraOcrScreen from '@/app/scan/camera';
 import { setDepsForTest, type Dependencies } from '@/dependencies';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
+import { useSettingsStore } from '@/store/use-settings-store';
 import type { Magazine } from '@/types';
 
 const mockReplace = jest.fn();
@@ -17,7 +18,9 @@ const mockRequestPermission = jest.fn();
 jest.mock('expo-camera', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require('react-native');
-  const MockCameraView = (props: any) => <View testID="ocr-camera-view" {...props} />;
+  const MockCameraView = (props: any) => {
+    return <View testID="ocr-camera-view" {...props} />;
+  };
   return {
     useCameraPermissions: () => [
       { granted: true, canAskAgain: true, status: 'granted' },
@@ -48,7 +51,6 @@ function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
 function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     settingsRepository: {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: jest.fn().mockResolvedValue(undefined),
@@ -66,32 +68,30 @@ function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
   };
 }
 
-/** Fait avancer l'intervalle d'analyse pour déclencher handleOcr. */
-async function tick(ms = 500) {
+/** Appuie sur le déclencheur (1 appui → 1 photo → 1 lecture) et draine les promesses. */
+async function shoot() {
   await act(async () => {
-    jest.advanceTimersByTime(ms);
+    fireEvent.press(screen.getByTestId('ocr-shutter'));
   });
 }
 
 describe('CameraOcrScreen', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     mockReplace.mockClear();
     mockBack.mockClear();
+    useSettingsStore.setState({ ocrDebug: false });
     setDepsForTest(stubDeps());
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('affiche le preview caméra quand la permission est accordée', () => {
+  it('affiche le preview caméra et le déclencheur quand la permission est accordée', () => {
     render(<CameraOcrScreen />);
     expect(screen.getByTestId('ocr-camera-view')).toBeTruthy();
     expect(screen.getByText(/Pointez la couverture/)).toBeTruthy();
+    expect(screen.getByTestId('ocr-shutter')).toBeTruthy();
+    expect(screen.getByLabelText('Prendre la photo pour la lecture')).toBeTruthy();
   });
 
-  it('continue d’analyser quand le moteur n’a rien détecté', async () => {
+  it('reste en analyse quand le moteur n’a rien détecté', async () => {
     const identity = jest.fn().mockResolvedValue({ status: 'no-text' });
     setDepsForTest(
       stubDeps({
@@ -105,10 +105,11 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
-    await tick();
+    await shoot();
+    await shoot();
 
     expect(screen.getByText(/Pointez la couverture/)).toBeTruthy();
+    expect(identity).not.toHaveBeenCalled();
   });
 
   it('affiche la fiche reconnue quand l’édition est trouvée en base', async () => {
@@ -132,8 +133,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
-    await tick();
+    await shoot();
 
     expect(screen.getByTestId('ocr-found')).toBeTruthy();
     expect(screen.getByTestId('ocr-publication')).toHaveTextContent('Picsou Magazine');
@@ -160,8 +160,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-confirm'));
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-547');
@@ -183,12 +182,12 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
 
     expect(screen.getByTestId('ocr-detected-board')).toBeTruthy();
     expect(screen.getByTestId('ocr-field-publication')).toHaveTextContent('Picsou Magazine');
     expect(screen.getByTestId('ocr-field-issue')).toHaveTextContent('…');
-    expect(screen.getByText(/Pointez maintenant le numéro/)).toBeTruthy();
+    expect(screen.getByText(/Reprenez une photo pour lire le numéro/)).toBeTruthy();
     expect(screen.queryByTestId('ocr-found')).toBeNull();
     expect(screen.getByTestId('ocr-confirm-detected')).toBeTruthy();
     expect(screen.getByTestId('ocr-barcode')).toBeTruthy();
@@ -222,18 +221,17 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
     expect(screen.getByTestId('ocr-confirm-detected')).toBeTruthy();
 
-    await tick();
-    await tick();
+    await shoot();
     expect(screen.getByTestId('ocr-found')).toBeTruthy();
     expect(identity).toHaveBeenCalledWith('Picsou Magazine N° 547');
   });
 
   it('Scanner le code-barres mène au scan de code-barres', async () => {
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
     fireEvent.press(screen.getByTestId('ocr-barcode'));
     expect(mockReplace).toHaveBeenCalledWith('/scan/barcode');
   });
@@ -253,8 +251,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
-    await tick();
+    await shoot();
 
     expect(screen.getByTestId('ocr-unknown')).toBeTruthy();
     expect(screen.getByText(/Non trouvé en collection/)).toBeTruthy();
@@ -276,8 +273,7 @@ describe('CameraOcrScreen', () => {
     );
 
     render(<CameraOcrScreen />);
-    await tick();
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-manual'));
     expect(mockReplace).toHaveBeenCalledWith({
@@ -293,13 +289,9 @@ describe('CameraOcrScreen', () => {
 
 describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     mockReplace.mockClear();
     mockBack.mockClear();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
+    useSettingsStore.setState({ ocrDebug: false });
   });
 
   const weakDeps = (searchByOcrFields?: jest.Mock) =>
@@ -327,7 +319,7 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
   it('ouvre le panneau de vérification pré-rempli depuis la surcouche', async () => {
     setDepsForTest(weakDeps());
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
 
@@ -339,7 +331,7 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
   it('retour à la caméra depuis le panneau relance l’analyse', async () => {
     setDepsForTest(weakDeps());
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
     fireEvent.press(screen.getByTestId('ocr-override-back'));
@@ -359,7 +351,7 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
     });
     setDepsForTest(weakDeps(search));
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
     fireEvent.changeText(screen.getByTestId('ocr-override-publication'), 'Picsou Magazine');
@@ -375,7 +367,7 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
   it('oriente vers la saisie manuelle si nom ou numéro restent manquants', async () => {
     setDepsForTest(weakDeps());
     render(<CameraOcrScreen />);
-    await tick();
+    await shoot();
 
     fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
     fireEvent.press(screen.getByTestId('ocr-override-search'));
@@ -386,5 +378,57 @@ describe('CameraOcrScreen — US-ID-09 surcouche de validation / correction', ()
       pathname: '/scan/manual',
       params: { publication: 'Picsou Magazine', year: '2023' },
     });
+  });
+});
+
+describe('CameraOcrScreen — debug OCR (paramètres avancés)', () => {
+  beforeEach(() => {
+    mockReplace.mockClear();
+    mockBack.mockClear();
+    useSettingsStore.setState({ ocrDebug: true });
+  });
+
+  it('affiche le panneau de debug avec le texte brut, la confiance et le vote une lecture active', async () => {
+    setDepsForTest(stubDeps());
+    render(<CameraOcrScreen />);
+
+    expect(screen.getByTestId('ocr-debug-panel')).toBeTruthy();
+    expect(screen.getByTestId('ocr-debug-raw')).toHaveTextContent('…');
+
+    await shoot();
+    expect(screen.getByTestId('ocr-debug-raw')).toHaveTextContent('Picsou Magazine N° 547');
+  });
+
+  it('compte les lectures identiques consécutives', async () => {
+    setDepsForTest(
+      stubDeps({
+        identificationService: {
+          identifyByOCR: jest.fn().mockResolvedValue({
+            status: 'weak',
+            publication: 'Picsou Magazine',
+            issueNumber: 547,
+            date: null,
+            confidence: 0.5,
+          }),
+        } as unknown as Dependencies['identificationService'],
+        ocrEngine: {
+          recognize: jest.fn().mockResolvedValue({ text: 'Picsou Magazine N° 547' }),
+        } as unknown as OcrEngine,
+      }),
+    );
+
+    render(<CameraOcrScreen />);
+    await shoot();
+    await shoot();
+
+    expect(screen.getByText('Lectures identiques')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
+  });
+
+  it('n’affiche pas le panneau de debug quand il est désactivé', () => {
+    useSettingsStore.setState({ ocrDebug: false });
+    render(<CameraOcrScreen />);
+
+    expect(screen.queryByTestId('ocr-debug-panel')).toBeNull();
   });
 });

@@ -32,13 +32,11 @@ type MagazineRow = {
   updated_at: string;
 };
 
-type CopyRow = {
-  id: string;
-  magazine_id: string;
-  notes: string | null;
-  date_added: string;
-};
-
+/**
+ * Export / import de la collection. Retours test physique : le système
+ * d'exemplaires (`collection_items`) a été supprimé, chaque édition exportée
+ * est une ligne unique. Les exports v1 (avec exemplaires) restent importables.
+ */
 export class BackupService {
   constructor(
     private readonly db: Database,
@@ -53,26 +51,6 @@ export class BackupService {
        ORDER BY publication, issue_number`,
     );
 
-    const copyRows = await this.db.getAllAsync<CopyRow>(
-      `SELECT id, magazine_id, notes, date_added
-       FROM collection_items
-       ORDER BY date_added, id`,
-    );
-
-    const copiesByMagazine = new Map<
-      string,
-      { id: string; notes: string | null; dateAdded: string }[]
-    >();
-    for (const row of copyRows) {
-      const copies = copiesByMagazine.get(row.magazine_id) ?? [];
-      copies.push({
-        id: row.id,
-        notes: row.notes,
-        dateAdded: row.date_added,
-      });
-      copiesByMagazine.set(row.magazine_id, copies);
-    }
-
     const magazines: BackupMagazine[] = magazineRows.map((row) => ({
       id: row.id,
       publication: row.publication,
@@ -84,7 +62,6 @@ export class BackupService {
       barcode: row.barcode,
       notes: row.notes,
       ocrText: row.ocr_text,
-      copies: copiesByMagazine.get(row.id) ?? [],
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }));
@@ -122,7 +99,6 @@ export class BackupService {
     const file = this.parseBackupRaw(raw, format);
     return {
       magazines: file.magazines.length,
-      copies: file.magazines.reduce((total, magazine) => total + magazine.copies.length, 0),
     };
   }
 
@@ -131,7 +107,6 @@ export class BackupService {
 
     await this.db.execAsync('BEGIN');
     try {
-      await this.db.execAsync('DELETE FROM collection_items');
       await this.db.execAsync('DELETE FROM magazines');
 
       for (const magazine of file.magazines) {
@@ -153,17 +128,6 @@ export class BackupService {
           magazine.createdAt ?? new Date().toISOString(),
           magazine.updatedAt ?? new Date().toISOString(),
         );
-
-        for (const copy of magazine.copies) {
-          await this.db.runAsync(
-            `INSERT INTO collection_items (id, magazine_id, notes, date_added)
-             VALUES (?, ?, ?, ?)`,
-            copy.id,
-            magazine.id,
-            copy.notes,
-            copy.dateAdded || new Date().toISOString(),
-          );
-        }
       }
 
       await this.db.execAsync('COMMIT');
@@ -178,7 +142,6 @@ export class BackupService {
 
     return {
       magazines: file.magazines.length,
-      copies: file.magazines.reduce((total, magazine) => total + magazine.copies.length, 0),
     };
   }
 }

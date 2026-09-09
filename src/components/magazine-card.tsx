@@ -13,7 +13,6 @@ type Props = {
 
 export function MagazineCard({ magazine, onPress }: Props) {
   const colors = useThemeColors();
-  const owned = magazine.quantity > 0;
   const styles = makeStyles(colors);
 
   return (
@@ -22,7 +21,7 @@ export function MagazineCard({ magazine, onPress }: Props) {
       onPress={onPress}
       testID="magazine-card"
       accessibilityRole="button"
-      accessibilityLabel={`${magazine.publication}${magazine.issueNumber != null ? ` numéro ${magazine.issueNumber}` : ''}${owned ? `, possédé ${magazine.quantity} fois` : ', absent de la collection'}`}
+      accessibilityLabel={`${magazine.publication}${magazine.issueNumber != null ? ` numéro ${magazine.issueNumber}` : ''}, possédé`}
       accessibilityHint="Voir la fiche de l'édition"
       android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
       <View style={styles.header}>
@@ -35,7 +34,7 @@ export function MagazineCard({ magazine, onPress }: Props) {
           </Text>
         ) : null}
       </View>
-      <StatusBadge owned={owned} quantity={magazine.quantity} />
+      <StatusBadge />
     </Pressable>
   );
 }

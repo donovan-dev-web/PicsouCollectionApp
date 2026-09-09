@@ -89,7 +89,6 @@ export function parseBackupFile(raw: unknown): BackupFile {
 
   const magazines: BackupMagazine[] = [];
   const seenMagazineIds = new Set<string>();
-  const seenCopyIds = new Set<string>();
   for (const entry of root['magazines']) {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
       throw new InvalidBackupError('Fichier invalide : une édition est mal formée.');
@@ -103,28 +102,11 @@ export function parseBackupFile(raw: unknown): BackupFile {
     }
     seenMagazineIds.add(id);
 
-    if (!Array.isArray(magazine['copies'])) {
+    // Rétro-compatibilité v1 : la clé `copies` peut être absente (v2+) ou
+    // présente (v1). Son contenu est ignoré : chaque édition est possédée.
+    const hasCopies = 'copies' in magazine;
+    if (hasCopies && !Array.isArray(magazine['copies'])) {
       throw new InvalidBackupError('Fichier invalide : la liste des exemplaires est absente.');
-    }
-
-    const copies = [];
-    for (const copyEntry of magazine['copies']) {
-      if (typeof copyEntry !== 'object' || copyEntry === null || Array.isArray(copyEntry)) {
-        throw new InvalidBackupError('Fichier invalide : un exemplaire est mal formé.');
-      }
-      const copy = copyEntry as Record<string, unknown>;
-      const copyId = asNonEmptyString(copy['id'], 'identifiant d’exemplaire');
-      if (seenCopyIds.has(copyId)) {
-        throw new InvalidBackupError(
-          'Fichier invalide : des identifiants d’exemplaire sont dupliqués.',
-        );
-      }
-      seenCopyIds.add(copyId);
-      copies.push({
-        id: copyId,
-        notes: asNullableString(copy['notes']),
-        dateAdded: asNullableIsoDate(copy['dateAdded']) ?? '',
-      });
     }
 
     magazines.push({
@@ -138,7 +120,6 @@ export function parseBackupFile(raw: unknown): BackupFile {
       barcode: asNullableString(magazine['barcode']),
       notes: asNullableString(magazine['notes']),
       ocrText: asNullableString(magazine['ocrText']),
-      copies,
       createdAt: asNullableIsoDate(magazine['createdAt']),
       updatedAt: asNullableIsoDate(magazine['updatedAt']),
     });

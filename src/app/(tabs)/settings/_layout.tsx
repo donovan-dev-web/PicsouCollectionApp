@@ -12,6 +12,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="appearance" options={{ title: 'Apparence' }} />
       <Stack.Screen name="backup" options={{ title: 'Sauvegarde' }} />
       <Stack.Screen name="accessibility" options={{ title: 'Accessibilité' }} />
+      <Stack.Screen name="advanced" options={{ title: 'Paramètres avancés' }} />
       <Stack.Screen name="help" options={{ title: 'Aide & retours' }} />
     </Stack>
   );

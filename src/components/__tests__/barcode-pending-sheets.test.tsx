@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 
 import {
   BarcodeContinuousBar,
@@ -29,7 +29,6 @@ const magazine: Magazine = {
 function renderPending(pending: Pending) {
   const callbacks = {
     onResume: jest.fn(),
-    onConfirmAdd: jest.fn(),
     onManual: jest.fn(),
   };
   render(
@@ -37,7 +36,6 @@ function renderPending(pending: Pending) {
       styles={styles}
       pending={pending}
       onResume={callbacks.onResume}
-      onConfirmAdd={callbacks.onConfirmAdd}
       onManual={callbacks.onManual}
     />,
   );
@@ -45,80 +43,58 @@ function renderPending(pending: Pending) {
 }
 
 describe('BarcodePendingSheets', () => {
-  it('affiche la confirmation de doublon avec le numéro et le nombre d’exemplaires', () => {
-    const callbacks = renderPending({
-      kind: 'confirm',
-      magazine,
-      ownedCount: 3,
-    });
+  it('affiche le panier « Déjà dans votre collection » avec le numéro', async () => {
+    const user = userEvent.setup();
+    const callbacks = renderPending({ kind: 'owned', magazine });
 
-    expect(screen.getByText('Vous possédez déjà ce magazine')).toBeTruthy();
+    expect(screen.getByText('Déjà dans votre collection')).toBeTruthy();
     expect(screen.getByText('Picsou Magazine n° 547')).toBeTruthy();
-    expect(screen.getByText(/Exemplaires actuels : 3/)).toBeTruthy();
+    expect(screen.getByText('Cette édition est bien possédée.')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('pending-confirm-add'));
-    expect(callbacks.onConfirmAdd).toHaveBeenCalled();
+    await user.press(screen.getByTestId('pending-owned-ok'));
+    expect(callbacks.onResume).toHaveBeenCalled();
 
-    fireEvent.press(screen.getByTestId('pending-confirm-cancel'));
+    await user.press(screen.getByTestId('pending-close'));
     expect(callbacks.onResume).toHaveBeenCalled();
   });
 
   it('affiche le magazine sans numéro quand il est absent', () => {
-    renderPending({ kind: 'confirm', magazine: { ...magazine, issueNumber: null }, ownedCount: 1 });
+    renderPending({ kind: 'owned', magazine: { ...magazine, issueNumber: null } });
 
     expect(screen.getByText('Picsou Magazine')).toBeTruthy();
   });
 
-  it('affiche l’écran de succès puis reprend le scan', () => {
-    const callbacks = renderPending({
-      kind: 'success',
-      publication: 'Picsou Magazine',
-      issueNumber: 547,
-    });
-
-    expect(screen.getByText('Ajouté à la collection')).toBeTruthy();
-    expect(screen.getByText('Picsou Magazine n° 547')).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId('pending-success-ok'));
-    expect(callbacks.onResume).toHaveBeenCalled();
-  });
-
-  it('affiche l’écran de succès sans numéro si l’édition n’en a pas', () => {
-    renderPending({ kind: 'success', publication: 'Picsou Magazine', issueNumber: null });
-
-    expect(screen.getByText('Picsou Magazine')).toBeTruthy();
-  });
-
-  it('suggère la saisie manuelle pour un code-barres inconnu', () => {
+  it('suggère la saisie manuelle pour un code-barres inconnu', async () => {
+    const user = userEvent.setup();
     const callbacks = renderPending({ kind: 'unknown', barcode: '9791234567890' });
 
     expect(screen.getByText('Code-barres inconnu')).toBeTruthy();
     expect(screen.getByText('9791234567890')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('pending-unknown-manual'));
+    await user.press(screen.getByTestId('pending-unknown-manual'));
     expect(callbacks.onManual).toHaveBeenCalledWith('9791234567890');
 
-    fireEvent.press(screen.getByTestId('pending-unknown-continue'));
+    await user.press(screen.getByTestId('pending-unknown-continue'));
     expect(callbacks.onResume).toHaveBeenCalled();
   });
 
   it('ne rend rien pour un état inconnu', () => {
     renderPending('idle' as unknown as Pending);
 
-    expect(screen.queryByTestId('pending-confirm')).toBeNull();
-    expect(screen.queryByTestId('pending-success')).toBeNull();
+    expect(screen.queryByTestId('pending-owned')).toBeNull();
     expect(screen.queryByTestId('pending-unknown')).toBeNull();
   });
 });
 
 describe('BarcodeContinuousBar', () => {
-  it('affiche le bandeau continu et permet de l’arrêter', () => {
+  it('affiche le bandeau continu et permet de l’arrêter', async () => {
+    const user = userEvent.setup();
     const onStop = jest.fn();
     render(<BarcodeContinuousBar styles={styles} onStop={onStop} />);
 
-    expect(screen.getByText(/Scan en continu/)).toBeTruthy();
+    expect(screen.getByText(/Scan en continu — vérifie chaque code-barres/)).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('continuous-stop'));
+    await user.press(screen.getByTestId('continuous-stop'));
     expect(onStop).toHaveBeenCalled();
   });
 });

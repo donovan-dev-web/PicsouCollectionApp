@@ -3,12 +3,15 @@ import { InvalidBackupError } from './backup-parsers';
 import {
   BACKUP_FORMAT,
   BACKUP_VERSION,
-  type BackupCopy,
   type BackupFile,
   type BackupMagazine,
 } from './backup-types';
 import { APP_VERSION } from '@/utils/app-version';
 
+/**
+ * En-têtes CSV lus à l'import (v2). Les colonnes `copyNotes`/`dateAdded` de la
+ * v1 ne sont plus attendues : chaque ligne représente une édition unique.
+ */
 export const BACKUP_CSV_HEADERS = [
   'publication',
   'issueNumber',
@@ -19,8 +22,8 @@ export const BACKUP_CSV_HEADERS = [
   'barcode',
   'notes',
   'ocrText',
-  'copyNotes',
-  'dateAdded',
+  'createdAt',
+  'updatedAt',
 ] as const;
 
 export function escapeCsvField(value: string): string {
@@ -140,9 +143,8 @@ export function parseCsvBackup(raw: string): BackupFile {
     // numéros à `issueNumber` null distincts par état/édition) au lieu de
     // collapse la 1ère ligne seulement.
     const key = `${publication}::${issueNumber ?? ''}::${edition ?? ''}::${language ?? ''}::${condition ?? ''}`;
-    let magazine = byKey.get(key);
-    if (!magazine) {
-      magazine = {
+    if (!byKey.has(key)) {
+      byKey.set(key, {
         id: generateId(),
         publication,
         issueNumber,
@@ -153,28 +155,11 @@ export function parseCsvBackup(raw: string): BackupFile {
         barcode: asCsvString(at('barcode')),
         notes: asCsvString(at('notes')),
         ocrText: asCsvString(at('ocrText')),
-        copies: [],
         createdAt: asCsvString(at('createdAt')),
         updatedAt: asCsvString(at('updatedAt')),
-      };
-      byKey.set(key, magazine);
-      magazines.push(magazine);
+      });
+      magazines.push(byKey.get(key) as BackupMagazine);
     }
-
-    const copyNotes = at('copyNotes').trim();
-    const dateAdded = at('dateAdded').trim();
-    // Une ligne aux champs exemplaire vides désigne une édition **sans copie**
-    // (l'export `toCsv` émet une telle ligne pour la conserver). Ne pas la
-    // réimporter comme un exemplaire fantôme daté d'aujourd'hui.
-    if (copyNotes.length === 0 && dateAdded.length === 0) {
-      continue;
-    }
-    const copy: BackupCopy = {
-      id: generateId(),
-      notes: copyNotes.length > 0 ? copyNotes : null,
-      dateAdded: dateAdded.length > 0 ? dateAdded : new Date().toISOString(),
-    };
-    magazine.copies.push(copy);
   }
 
   return {
@@ -187,35 +172,24 @@ export function parseCsvBackup(raw: string): BackupFile {
 }
 
 export function toCsv(file: BackupFile): string {
-  const header = [...BACKUP_CSV_HEADERS, 'createdAt', 'updatedAt'].join(',');
+  const header = BACKUP_CSV_HEADERS.join(',');
   const lines: string[] = [];
   for (const magazine of file.magazines) {
-    const base = [
-      escapeCsvField(magazine.publication),
-      magazine.issueNumber === null ? '' : escapeCsvField(String(magazine.issueNumber)),
-      escapeCsvField(magazine.edition ?? ''),
-      escapeCsvField(magazine.language ?? ''),
-      escapeCsvField(magazine.condition ?? ''),
-      escapeCsvField(magazine.publicationDate ?? ''),
-      escapeCsvField(magazine.barcode ?? ''),
-      escapeCsvField(magazine.notes ?? ''),
-      escapeCsvField(magazine.ocrText ?? ''),
-    ];
-    const copies =
-      magazine.copies.length > 0
-        ? magazine.copies
-        : [{ id: magazine.id, notes: null, dateAdded: '' }];
-    for (const copy of copies) {
-      lines.push(
-        [
-          ...base,
-          escapeCsvField(copy.notes ?? ''),
-          escapeCsvField(copy.dateAdded),
-          escapeCsvField(magazine.createdAt ?? ''),
-          escapeCsvField(magazine.updatedAt ?? ''),
-        ].join(','),
-      );
-    }
+    lines.push(
+      [
+        escapeCsvField(magazine.publication),
+        magazine.issueNumber === null ? '' : escapeCsvField(String(magazine.issueNumber)),
+        escapeCsvField(magazine.edition ?? ''),
+        escapeCsvField(magazine.language ?? ''),
+        escapeCsvField(magazine.condition ?? ''),
+        escapeCsvField(magazine.publicationDate ?? ''),
+        escapeCsvField(magazine.barcode ?? ''),
+        escapeCsvField(magazine.notes ?? ''),
+        escapeCsvField(magazine.ocrText ?? ''),
+        escapeCsvField(magazine.createdAt ?? ''),
+        escapeCsvField(magazine.updatedAt ?? ''),
+      ].join(','),
+    );
   }
   return [header, ...lines].join('\n') + '\n';
 }

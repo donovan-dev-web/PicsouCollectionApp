@@ -9,7 +9,6 @@ import { useBackupStore } from '@/store/use-backup-store';
 import { createTestDatabase } from '@/test-utils/test-db';
 import { migrate } from '@/database/migrations';
 import { BackupService } from '@/backup/backup-service';
-import { CollectionRepository } from '@/database/repositories/collection-repository';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 
 const setColorSchemeMock = jest.fn().mockResolvedValue(undefined);
@@ -30,7 +29,6 @@ jest.mock('expo-router', () => ({
 function stubDeps(): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
     settingsRepository: {
@@ -159,9 +157,7 @@ describe('BackupScreen — Sauvegarde', () => {
       name: 'picsou-collection-2026-09-01.csv',
     });
     const magazineRepo = new MagazineRepository(testDb);
-    const collectionRepo = new CollectionRepository(testDb);
-    const magazine = await magazineRepo.create({ publication: 'Picsou', issueNumber: 1 });
-    await collectionRepo.addCopy(magazine.id, { notes: 'OK' });
+    await magazineRepo.create({ publication: 'Picsou', issueNumber: 1 });
 
     render(<BackupScreen />);
     fireEvent.press(screen.getByTestId('backup-export'));
@@ -170,7 +166,7 @@ describe('BackupScreen — Sauvegarde', () => {
     await waitFor(() => expect(writeExport).toHaveBeenCalledTimes(1));
     expect(writeExport.mock.calls[0][1]).toBe('csv');
     expect(writeExport.mock.calls[0][0]).toMatch(
-      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded,createdAt,updatedAt\n/,
+      /^publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,createdAt,updatedAt\n/,
     );
   });
 
@@ -193,9 +189,7 @@ describe('BackupScreen — Sauvegarde', () => {
   it('demande confirmation puis remplace la collection par l’import CSV', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const magazineRepo = new MagazineRepository(testDb);
-    const collectionRepo = new CollectionRepository(testDb);
-    const magazine = await magazineRepo.create({ publication: 'Picsou', issueNumber: 1 });
-    await collectionRepo.addCopy(magazine.id, { notes: 'OK' });
+    await magazineRepo.create({ publication: 'Picsou', issueNumber: 1 });
     const source = await service.exportCollection();
     source.magazines[0].publication = 'Csv Importer';
     pickFile.mockResolvedValue({ name: 'backup.csv', content: service.toCsv(source) });
