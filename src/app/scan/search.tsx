@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -14,7 +14,6 @@ import {
 } from '@/components/scan-search-views';
 import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
-import { useScanResult } from '@/hooks/use-scan-result';
 import { useCollectionStore } from '@/store/use-collection-store';
 import type { OcrLookupResult } from '@/identification/identificationService';
 
@@ -25,8 +24,6 @@ export default function ScanSearchScreen() {
   const colors = useThemeColors();
   const screenStyles = makeSearchScreenStyles(colors);
   const magazines = useCollectionStore((s) => s.magazines);
-  const loadDetail = useCollectionStore((s) => s.loadDetail);
-  const detail = useCollectionStore((s) => s.detail);
 
   const [publication, setPublication] = useState('');
   const [issueNumber, setIssueNumber] = useState(EMPTY_ISSUE);
@@ -39,16 +36,6 @@ export default function ScanSearchScreen() {
   const publications = [...new Set(magazines.map((m) => m.publication))];
 
   const foundId = result?.status === 'found' ? result.magazine.id : null;
-
-  useFocusEffect(
-    useCallback(() => {
-      if (foundId) {
-        loadDetail(foundId);
-      }
-    }, [foundId, loadDetail]),
-  );
-
-  const { resolved, owned, ownedCount, handleAddCopy } = useScanResult(detail, foundId);
 
   const issue = issueNumber.replace(/[^0-9]/g, '');
   const canSearch = publication.trim().length > 0 && issue.length > 0 && !searching;
@@ -128,10 +115,6 @@ export default function ScanSearchScreen() {
           <SearchFoundResult
             publication={result.publication}
             issueNumber={result.issueNumber}
-            owned={owned}
-            ownedCount={ownedCount}
-            resolved={resolved}
-            onAddCopy={handleAddCopy}
             onView={() => router.replace(`/collection/${foundId}`)}
             onRescan={() => router.replace('/scan/barcode')}
           />

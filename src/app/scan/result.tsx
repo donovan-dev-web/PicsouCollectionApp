@@ -37,7 +37,7 @@ export default function ScanResultScreen() {
     }, [id, loadDetail]),
   );
 
-  const { resolved, owned, ownedCount, handleAddCopy } = useScanResult(detail, exists ? id : null);
+  const { resolved } = useScanResult(detail, exists ? id : null);
 
   const handleManual = () => {
     router.replace({
@@ -62,10 +62,8 @@ export default function ScanResultScreen() {
               <Text style={styles.issue}>N° {params.issueNumber}</Text>
             ) : null}
             {resolved ? (
-              <Text
-                style={owned ? statusTextStyles.ownedText : statusTextStyles.absentText}
-                testID={`result-status-${owned ? 'owned' : 'absent'}`}>
-                {owned ? `✓ Possédé (${ownedCount})` : '○ Absent'}
+              <Text style={statusTextStyles.ownedText} testID="result-status-owned">
+                ✓ Possédé
               </Text>
             ) : (
               <Text style={styles.muted} testID="result-loading">
@@ -83,19 +81,6 @@ export default function ScanResultScreen() {
         )}
 
         <View style={styles.actions}>
-          {exists && resolved && (
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={handleAddCopy}
-              testID={owned ? 'result-add-copy' : 'result-add'}
-              accessibilityRole="button"
-              accessibilityLabel={owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}>
-              <Text style={styles.primaryButtonText}>
-                {owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}
-              </Text>
-            </Pressable>
-          )}
-
           {exists && (
             <Pressable
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}

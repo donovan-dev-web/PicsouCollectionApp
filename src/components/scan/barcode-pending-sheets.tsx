@@ -9,18 +9,22 @@ type Props = {
   styles: BarcodeStyles;
   pending: Pending;
   onResume: () => void;
-  onConfirmAdd: () => void;
   onManual: (barcode: string) => void;
 };
 
-export function BarcodePendingSheets({ styles, pending, onResume, onConfirmAdd, onManual }: Props) {
+/**
+ * Paniers du scan de code-barres (mode continu). Retours test physique : le
+ * système d'exemplaires étant supprimé, un magazine scanné est toujours
+ * possédé — le panier propose simplement de continuer.
+ */
+export function BarcodePendingSheets({ styles, pending, onResume, onManual }: Props) {
   const colors = useThemeColors();
 
-  if (pending.kind === 'confirm') {
+  if (pending.kind === 'owned') {
     return (
       <View style={styles.backdrop}>
         <ScrollView contentContainerStyle={styles.sheetScroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.pendingCard} testID="pending-confirm">
+          <View style={styles.pendingCard} testID="pending-owned">
             <Pressable
               style={({ pressed }) => [styles.sheetClose, pressed && styles.buttonPressed]}
               onPress={onResume}
@@ -29,50 +33,18 @@ export function BarcodePendingSheets({ styles, pending, onResume, onConfirmAdd, 
               accessibilityLabel="Fermer">
               <Feather name="x" size={20} color={colors.textSecondary} />
             </Pressable>
-            <Text style={styles.pendingTitle}>Vous possédez déjà ce magazine</Text>
+            <Text style={styles.pendingTitle}>Déjà dans votre collection</Text>
             <Text style={styles.pendingMagazine}>
               {pending.magazine.publication}
               {pending.magazine.issueNumber != null ? ` n° ${pending.magazine.issueNumber}` : ''}
             </Text>
-            <Text style={styles.pendingMessage}>
-              Exemplaires actuels : {pending.ownedCount}. Ajouter un exemplaire ?
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-              onPress={onConfirmAdd}
-              testID="pending-confirm-add"
-              accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Ajouter un exemplaire</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
-              onPress={onResume}
-              testID="pending-confirm-cancel"
-              accessibilityRole="button">
-              <Text style={styles.pendingCancelText}>Annuler</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </View>
-    );
-  }
-
-  if (pending.kind === 'success') {
-    return (
-      <View style={styles.backdrop}>
-        <ScrollView contentContainerStyle={styles.sheetScroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.pendingCard} testID="pending-success">
-            <Text style={styles.pendingTitle}>Ajouté à la collection</Text>
-            <Text style={styles.pendingMagazine}>
-              {pending.publication}
-              {pending.issueNumber != null ? ` n° ${pending.issueNumber}` : ''}
-            </Text>
+            <Text style={styles.pendingMessage}>Cette édition est bien possédée.</Text>
             <Pressable
               style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
               onPress={onResume}
-              testID="pending-success-ok"
+              testID="pending-owned-ok"
               accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>Scanner le suivant</Text>
+              <Text style={styles.primaryButtonText}>Continuer</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -122,7 +94,7 @@ export function BarcodeContinuousBar({
 }) {
   return (
     <View style={styles.continuousBar}>
-      <Text style={styles.continuousText}>Scan en continu — ajoute chaque exemplaire</Text>
+      <Text style={styles.continuousText}>Scan en continu — vérifie chaque code-barres</Text>
       <Pressable
         style={({ pressed }) => [styles.continuousStop, pressed && styles.buttonPressed]}
         onPress={onStop}

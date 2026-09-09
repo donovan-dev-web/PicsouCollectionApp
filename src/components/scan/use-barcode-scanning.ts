@@ -4,24 +4,23 @@ import { useRef, useState } from 'react';
 
 import { getDeps } from '@/dependencies';
 import { BarcodeStabilizer } from '@/identification/barcodeStabilizer';
-import { useCollectionStore } from '@/store/use-collection-store';
 import type { Magazine } from '@/types';
 
 export type ScanState =
   { status: 'idle' } | { status: 'searching' } | { status: 'invalid'; reason: string };
 
-export type Pending =
-  | { kind: 'confirm'; magazine: Magazine; ownedCount: number }
-  | { kind: 'success'; publication: string; issueNumber: number | null }
-  | { kind: 'unknown'; barcode: string };
+export type Pending = { kind: 'owned'; magazine: Magazine } | { kind: 'unknown'; barcode: string };
 
 /**
  * Logique du scan de code-barres (stabilisation multi-lectures, identification,
  * mode continu) découplée de la vue pour la rendre testable.
+ *
+ * Retours test physique : le système d'exemplaires a été supprimé — un magazine
+ * en collection est donc toujours possédé, il n'y a plus d'ajout d'exemplaire
+ * (état « confirm » devenu « déjà en collection ») ni d'état « success ».
  */
 export function useBarcodeScanning() {
   const router = useRouter();
-  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
   const params = useLocalSearchParams<{ continuous?: string }>();
 
   const [permission, requestPermission] = useCameraPermissions();
@@ -65,21 +64,11 @@ export function useBarcodeScanning() {
   };
 
   const handleContinuous = async (stabilized: string) => {
-    const { identificationService, collectionRepository } = getDeps();
+    const { identificationService } = getDeps();
     const result = await identificationService.identifyByBarcode(stabilized);
 
     if (result.status === 'found') {
-      const ownedCount = await collectionRepository.countByMagazine(result.magazine.id);
-      if (ownedCount > 0) {
-        setPending({ kind: 'confirm', magazine: result.magazine, ownedCount });
-      } else {
-        await addExistingCopy(result.magazine.id);
-        setPending({
-          kind: 'success',
-          publication: result.magazine.publication,
-          issueNumber: result.magazine.issueNumber,
-        });
-      }
+      setPending({ kind: 'owned', magazine: result.magazine });
     } else if (result.status === 'ambiguous') {
       router.replace({ pathname: '/scan/multiple', params: { barcode: stabilized } });
     } else if (result.status === 'unknown') {
@@ -114,18 +103,6 @@ export function useBarcodeScanning() {
     setState({ status: 'idle' });
   };
 
-  const confirmAdd = async () => {
-    if (pending?.kind !== 'confirm') {
-      return;
-    }
-    await addExistingCopy(pending.magazine.id);
-    setPending({
-      kind: 'success',
-      publication: pending.magazine.publication,
-      issueNumber: pending.magazine.issueNumber,
-    });
-  };
-
   return {
     permission,
     requestPermission,
@@ -139,6 +116,5 @@ export function useBarcodeScanning() {
     handleScan,
     resume,
     reset,
-    confirmAdd,
   };
 }

@@ -54,16 +54,6 @@ export function makeSearchResultStyles(colors: ThemeColors) {
       borderRadius: 8,
       overflow: 'hidden',
     },
-    absentText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.absentText,
-      backgroundColor: colors.absentBg,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.two,
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
     primaryButton: {
       alignItems: 'center',
       justifyContent: 'center',
@@ -101,10 +91,6 @@ export function makeSearchResultStyles(colors: ThemeColors) {
 type SearchFoundResultProps = {
   publication: string;
   issueNumber: number | null;
-  owned: boolean;
-  ownedCount: number;
-  resolved: boolean;
-  onAddCopy: () => void;
   onView: () => void;
   onRescan: () => void;
 };
@@ -112,10 +98,6 @@ type SearchFoundResultProps = {
 export function SearchFoundResult({
   publication,
   issueNumber,
-  owned,
-  ownedCount,
-  resolved,
-  onAddCopy,
   onView,
   onRescan,
 }: SearchFoundResultProps) {
@@ -130,29 +112,10 @@ export function SearchFoundResult({
           {publication}
         </Text>
         {issueNumber != null ? <Text style={styles.issue}>N° {issueNumber}</Text> : null}
-        {resolved ? (
-          <Text
-            style={owned ? styles.ownedText : styles.absentText}
-            testID={`search-status-${owned ? 'owned' : 'absent'}`}>
-            {owned ? `✓ Possédé (${ownedCount})` : '○ Absent'}
-          </Text>
-        ) : (
-          <Text style={styles.muted} testID="search-loading">
-            Vérification…
-          </Text>
-        )}
-      </View>
-
-      <Pressable
-        style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-        onPress={onAddCopy}
-        testID="search-add"
-        accessibilityRole="button"
-        accessibilityLabel={owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}>
-        <Text style={styles.primaryButtonText}>
-          {owned ? 'Ajouter un exemplaire' : 'Ajouter à la collection'}
+        <Text style={styles.ownedText} testID="search-status-owned">
+          ✓ Possédé
         </Text>
-      </Pressable>
+      </View>
 
       <Pressable
         style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
