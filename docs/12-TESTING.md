@@ -121,6 +121,28 @@ Couvrent le rendu et les interactions des **écrans et composants critiques**. I
 ### 5.3 Tests manuels (terrain) [catégorie B]
 Tests sur **téléphone physique** avec de vrais magazines, notamment pour caméra et OCR (difficilement automatisables). C'est le cas le plus évident de validation **du point de vue de l'utilisateur** : le résultat est-il réellement utilisable en brocante ?
 
+### 5.4 Jeu de test OCR interactif (M-12, US-OCR-08)
+Pour fiabiliser le flux OCR v2 (voir `04-FONCTIONAL-SPEC.md` §5.6), un **jeu de
+test sur couvertures réelles** est constitué et documenté (issue M12-08 #212) :
+
+**Couverture du corpus**
+- magazines classiques (ex. Disney) — texte standard, barre titre + numéro « N° » ;
+- BD / comics — titres et logos **fortement stylisés** ;
+- **nombreux nombres** sur la couverture (année, `192 PAGES`, `€8,50`, prix, numéro) ;
+- textes **inclinés** ou fonds complexes / faible contraste.
+
+**Mesures produites**
+- **taux d'erreurs OCR** : texte lu vs texte réel des zones ciblées ;
+- **taux d'erreurs de classification des champs** : un numéro pris pour une
+  année, un prix pour un numéro, etc. ;
+- répartition des décisions : propositions automatiques valides / corrélées /
+  échecs exigeant une sélection manuelle.
+
+**Boucle** : les erreurs alimentent les **règles métier** (`ocrCandidateAnalyzer`,
+M12-03) et les **seuils de confiance** (M12-04) ; la synthèse et les chiffres
+sont consignés dans ce document au fil des passes. Les cas à fort risque sont
+**automatisés** (matrices de classification) pour éviter toute régression.
+
 ---
 
 ## 6. Outillage

@@ -212,6 +212,7 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection, OCR numéro, écran Recherche → v0.9.2 (livrée, PR #176) |
 | `M-09` | Tests terrain & publication | Validation réelle, retours physique → v0.9.3 (M09-01 panneau recherche #177) |
 | `M-11` | Review & Qualité v1.0.0 | Audit doc ↔ code, revue, refactor, tests, retrait Play Store, publication APK GitHub → v1.0.0 (#181-#190) |
+| `M-12` | OCR interactif & fiabilisation (v1.1.0) | Prétraitement de la photo, OCR texte + bounding boxes, analyse de candidats par champ (titre, numéro/tome, année, pages, prix) avec confiance, propositions automatiques, sélection interactive des zones, correction rapide, intégration à la recherche, jeu de test réel → **après v1.0.0** (#205-#212) |
 
 ### Règle d'attribution
 - Chaque milestone a une **date de fin cible** (indicative) et une **description** ;
@@ -291,6 +292,23 @@ M-10/M-10R/M-10R2 terminées, correction issues ouvertes pendant la Phase 9
 | Issue | Titre | GitHub | Statut |
 |---|---|---|---|
 | M09-01 | Collection : panneau de recherche repliable (bouton Rechercher) | #177 | En cours (PR #178) |
+
+**Milestone M-12 « OCR interactif & fiabilisation » (v1.1.0)** — après v1.0.0 ·
+milestone GitHub #17 · issues **#205 à #212** · ajoutées au project #5 (To Do, P1)
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M12-01 | OCR : prétraitement de la photo avant reconnaissance | #205 | À faire |
+| M12-02 | OCR : récupérer texte + bounding boxes (ML Kit) | #206 | À faire |
+| M12-03 | OCR : analyse de candidats par champ + score de confiance | #207 | À faire |
+| M12-04 | OCR : propositions automatiques et seuil de confiance | #208 | À faire |
+| M12-05 | OCR : écran interactif — overlay photo + zones cliquables | #209 | À faire |
+| M12-06 | OCR : sélection d'une zone pour un champ + correction rapide | #210 | À faire |
+| M12-07 | OCR : brancher les valeurs validées à la recherche / l'ajout | #211 | À faire |
+| M12-08 | OCR : jeu de test réel, mesure des erreurs, ajustement des règles | #212 | À faire |
+
+Voir `08-USER-STORIES.md` §11 (US-OCR-01..08). Backlog : non engagé tant que
+**M-11 / v1.0.0** n'est pas clôturé.
 
 ### 6.2 Décisions de conception et causes racines (retours terrain)
 
@@ -539,7 +557,7 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 À l'initialisation du dépôt GitHub, configurer :
 
 - [ ] **Labels** : types, priorités, épiques, complexité (section 5) ;
-- [ ] **Milestones** : M-01 à M-11 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
+- [ ] **Milestones** : M-01 à M-12 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
 - [ ] **Project** : board Kanban "Picsou Collection" (section 10) ;
 - [ ] **Branch protection** sur `main` et `develop` (section 7) ;
 - [ ] **Templates d'issue** (bug + tâche) via `.github/ISSUE_TEMPLATE/` ;
@@ -557,6 +575,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-11 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
+| Milestones | M-01 à M-12 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |

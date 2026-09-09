@@ -18,7 +18,9 @@
 8. [Épique 6 — Qualité & publication](#8-épique-6--qualité--publication)
 9. [Épique 7 — Paramètres](#9-épique-7--paramètres)
 10. [Épique 8 — UI/UX M-10](#10-épique-8--uiux-m-10)
-11. [Représentation graphique](#11-représentation-graphique)
+11. [Épique 9 — OCR interactif & fiabilisation](#11-épique-9--ocr-interactif--fiabilisation)
+12. [Représentation graphique](#12-représentation-graphique)
+13. [Récapitulatif des user stories](#13-récapitulatif-des-user-stories)
 
 ---
 
@@ -679,7 +681,117 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 ---
 
-## 11. Représentation graphique
+## 11. Épique 9 — OCR interactif & fiabilisation (M-12)
+
+> Évolution du flux OCR de l'Épique 4 : l'application lit la couverture,
+> **analyse des candidats** (titre, numéro/tome, année, pages, prix…) avec un
+> **niveau de confiance**, **propose automatiquement** les champs fiables et
+> ne fait **intervenir Marc que pour les zones ambiguës**, sélectionnées en
+> touchant directement la photo. Cible : après v1.0.0 (**M-12 → v1.1.0**,
+> issue #205-#212).
+
+### US-OCR-01 — Préparer la photo avant la lecture (prétraitement)
+> En tant que **Marc**, je veux **que la photo de la couverture soit retravaillée (redimensionnement, contraste) avant la reconnaissance** afin de **maximiser les chances de lecture, même sur une couverture stylisée**.
+
+**Critères d'acceptation** :
+- un prétraitement (redimensionnement + contraste) est appliqué avant la reconnaissance ;
+- aucune image n'est enregistrée (analyse éphémère, R14.2) ;
+- la lecture est plus fiable qu'à l'écran nu sur les couvertures fortement stylisées.
+
+**Statut (M-12)** : backlog — [M12-01 (#205)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/205).
+
+**Priorité** : haute.
+
+### US-OCR-02 — Lire le texte ET sa position (bounding boxes)
+> En tant que **Marc**, je veux **que l'application connaisse non seulement le texte de la couverture mais aussi où se trouve chaque texte sur la photo** afin de **pointer précisément l'information correcte** en cas d'ambiguïté.
+
+**Critères d'acceptation** :
+- l'OCR retourne le texte **et** la position (bounding box) de chaque zone détectée ;
+- les positions sont exprimées dans un référentiel exploitable par l'écran ;
+- le moteur reste abstrait (`OcrEngine`) et la CI reste verte sans module natif.
+
+**Statut (M-12)** : backlog — [M12-02 (#206)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/206).
+
+**Priorité** : haute.
+
+### US-OCR-03 — Comprendre ce que dit la couverture (candidats + confiance)
+> En tant que **Marc**, je veux **que l'application distingue le titre, le numéro/tome/issue, l'année, voire le prix ou le nombre de pages** afin de **ne pas confondre « 125 » (numéro) avec « 192 PAGES », « €8,50 » ou « 2026 »**.
+
+**Critères d'acceptation** :
+- pour chaque champ (titre, numéro/tome, année, éditeur…) une liste de **candidats** est produite avec un **niveau de confiance** ;
+- les règles métier discriminent : `192 PAGES` ≠ numéro, `€8,50` = prix, `2026` = année, `TOME 12` / `N° 125` = numéro ;
+- le module est testable sans dépendance matérielle.
+
+**Statut (M-12)** : backlog — [M12-03 (#207)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/207).
+
+**Priorité** : haute.
+
+### US-OCR-04 — Proposer automatiquement les champs fiables
+> En tant que **Marc**, je veux **que l'application pré-remplisse les champs dont elle est sûre (ex. `Titre ✓ VOGUE`, `Numéro ✓ 125`, `Année ✓ 2026`)** afin de **valider d'un coup d'œil sans tout relire**.
+
+**Critères d'acceptation** :
+- un seuil de confiance déclenche la proposition automatique d'un champ ;
+- en cas de candidats à confiance proche, **aucune** proposition automatique (validation utilisateur requise) ;
+- les propositions restent **toujours** modifiables.
+
+**Statut (M-12)** : backlog — [M12-04 (#208)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/208).
+
+**Priorité** : moyenne.
+
+### US-OCR-05 — Choisir la bonne zone sur la photo
+> En tant que **Marc**, je veux **voir la photo avec les zones de texte détectées et toucher directement la bonne zone** afin de **dire à l'application où se trouve l'information** quand un champ est ambigu ou multiple.
+
+**Critères d'acceptation** :
+- après la capture, un écran intermédiaire affiche la photo + les zones OCR en overlay ;
+- les zones suivent fidèlement la photo quel que soit l'écran (conversion des coordonnées) ;
+- chaque zone est **cliquable** ;
+- aucune image n'est enregistrée.
+
+**Statut (M-12)** : backlog — [M12-05 (#209)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/209).
+
+**Priorité** : haute.
+
+### US-OCR-06 — Sélectionner une zone pour un champ et corriger vite
+> En tant que **Marc**, je veux **associer une zone au titre, au numéro/tome ou à l'année et remplacer rapidement une proposition** afin de **corriger sans ressaisir tout le formulaire**.
+
+**Critères d'acceptation** :
+- une zone peut être sélectionnée comme **titre**, **numéro/tome/issue** ou **année/date** ;
+- une proposition automatique peut être **remplacée** par une autre zone ou une saisie directe ;
+- les champs non identifiés restent vides (jamais de blocage) ;
+- la correction prend au plus 2-3 gestes par champ.
+
+**Statut (M-12)** : backlog — [M12-06 (#210)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/210).
+
+**Priorité** : haute.
+
+### US-OCR-07 — Rechercher / ajouter avec les valeurs validées
+> En tant que **Marc**, je veux **rechercher avec le titre+numéro validés ou ajouter même si une information manque** afin de **conclure en brocante sans refaire une saisie complète**.
+
+**Critères d'acceptation** :
+- les valeurs validées déclenchent la recherche → résultat Possédé / Absent ;
+- information absente → saisie manuelle **pré-remplie** avec ce qui est connu (pas de blocage) ;
+- plusieurs candidats possibles → l'utilisateur choisit (jamais de choix automatique hasardeux).
+
+**Statut (M-12)** : backlog — [M12-07 (#211)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/211).
+
+**Priorité** : moyenne.
+
+### US-OCR-08 — Fiabiliser sur de vraies couvertures (tests terrain + règles)
+> En tant que **Marc**, je veux **que l'OCR soit renforcé sur les magazines, BD, comics et couvertures stylisées, nombreux nombres ou textes inclinés** afin de **limiter les erreurs et corrections manuelles**.
+
+**Critères d'acceptation** :
+- un **jeu de test** de couvertures réelles est constitué (magazines, BD/comics, stylisées, textes inclinés, « plusieurs nombres ») ;
+- les **erreurs OCR** et les **erreurs de classification des champs** sont mesurées et consignées ;
+- les règles métier (US-OCR-03) et les seuils (US-OCR-04) sont ajustés à partir des mesures ;
+- la synthèse est documentée (`docs/12-TESTING.md`).
+
+**Statut (M-12)** : backlog — [M12-08 (#212)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/212).
+
+**Priorité** : moyenne.
+
+---
+
+## 12. Représentation graphique
 
 ```
 ┌─────────────────── ÉPIQUES ───────────────────┐
@@ -699,7 +811,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 
 ---
 
-## Récapitulatif des user stories
+## 13. Récapitulatif des user stories
 
 | Épique | Stories | Nb |
 |---|---|---|
@@ -714,4 +826,5 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 | UI/UX M-10R (retours terrain) | US-UX-07 à 12 | 6 |
 | UI/UX M-10R2 (2ᵉ passe retours) | US-UX-13 à 22 | 10 |
 | UI/UX M-09 (tests terrain) | US-UX-23 | 1 |
-| **Total** | | **61** |
+| OCR interactif & fiabilisation (M-12) | US-OCR-01 à 08 | 8 |
+| **Total** | | **69** |
