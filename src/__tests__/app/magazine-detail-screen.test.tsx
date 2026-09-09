@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 
 import MagazineDetailScreen from '@/app/collection/[id]';
@@ -28,14 +28,6 @@ const detail = {
   ocrText: null,
   createdAt: '2026-09-01T10:00:00.000Z',
   updatedAt: '2026-09-01T10:00:00.000Z',
-  copies: [
-    {
-      id: 'c1',
-      magazineId: 'mag-1',
-      notes: null,
-      dateAdded: '2026-09-01T10:00:00Z',
-    },
-  ],
 };
 
 describe('MagazineDetailScreen', () => {
@@ -68,37 +60,25 @@ describe('MagazineDetailScreen', () => {
 
     expect(screen.getByText('Picsou Magazine')).toBeTruthy();
     expect(screen.getByTestId('detail-issue')).toHaveTextContent('n° 547');
-    expect(screen.getAllByText('standard').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('FR').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('neuf').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('3271234567890').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId('detail-edition')).toHaveTextContent('standard');
+    expect(screen.getByTestId('detail-langue')).toHaveTextContent('FR');
+    expect(screen.getByTestId('detail-etat')).toHaveTextContent('neuf');
+    expect(screen.getByTestId('detail-code-barres')).toHaveTextContent('3271234567890');
   });
 
-  it('affiche le badge Possede avec le nombre d exemplaires', async () => {
+  it('affiche le badge Possédé', async () => {
     useCollectionStore.setState({ detail, detailLoading: false });
     render(<MagazineDetailScreen />);
 
     expect(screen.getByTestId('status-owned')).toBeTruthy();
-    expect(screen.getByTestId('detail-count')).toHaveTextContent('1 exemplaire');
   });
 
-  it('affiche la liste des exemplaires', async () => {
+  it('affiche les notes quand l édition en a', async () => {
     useCollectionStore.setState({ detail, detailLoading: false });
     render(<MagazineDetailScreen />);
 
-    expect(screen.getAllByTestId('detail-copy')).toHaveLength(1);
-    expect(screen.getAllByText('01/09/2026').length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('affiche Absent et un message quand aucun exemplaire', async () => {
-    useCollectionStore.setState({
-      detail: { ...detail, copies: [] },
-      detailLoading: false,
-    });
-    render(<MagazineDetailScreen />);
-
-    expect(screen.getByTestId('status-absent')).toBeTruthy();
-    expect(screen.getByTestId('detail-copies-empty')).toBeTruthy();
+    expect(screen.getByText('Notes')).toBeTruthy();
+    expect(screen.getByText('Mention bimestriel')).toBeTruthy();
   });
 
   it('affiche un etat de chargement en attente', () => {
@@ -135,20 +115,6 @@ describe('MagazineDetailScreen', () => {
     expect(mockRemoveMagazine).toHaveBeenCalledWith('mag-1');
     expect(mockBack).toHaveBeenCalled();
     alertSpy.mockRestore();
-  });
-
-  it('ajoute un exemplaire directement depuis la fiche', async () => {
-    const mockAddExistingCopy = jest.fn().mockResolvedValue(undefined);
-    useCollectionStore.setState({
-      detail,
-      detailLoading: false,
-      addExistingCopy: mockAddExistingCopy,
-    });
-    render(<MagazineDetailScreen />);
-
-    fireEvent.press(screen.getByTestId('detail-add-copy'));
-
-    await waitFor(() => expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1'));
   });
 
   it('affiche le header fiche (menu, titre, scan, fermeture) et ferme le modal', () => {

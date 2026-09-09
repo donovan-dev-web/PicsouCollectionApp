@@ -28,7 +28,6 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 1,
   },
   {
     id: 'm2',
@@ -43,7 +42,6 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 2,
   },
   {
     id: 'm3',
@@ -58,7 +56,6 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 0,
   },
 ];
 
@@ -177,13 +174,10 @@ describe('CollectionScreen', () => {
     expect(screen.getAllByTestId('magazine-card')).toHaveLength(3);
   });
 
-  it('affiche le badge Absent pour une edition sans exemplaire', () => {
+  it('affiche le badge Possédé sur chaque édition', () => {
     render(<CollectionScreen />);
 
-    const cards = screen.getAllByTestId('magazine-card');
-    expect(cards[2]).toBeTruthy();
-    expect(screen.getAllByText(/Absent/).length).toBe(1);
-    expect(screen.getAllByText(/Possédé/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByTestId('status-owned')).toHaveLength(3);
   });
 
   it('trie par numero decroissant', () => {
@@ -234,7 +228,6 @@ describe('CollectionScreen (pagination)', () => {
     ocrText: null,
     createdAt: `2026-09-01T10:00:0${i % 10}Z`,
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 1,
   }));
 
   const openFilters = () => fireEvent.press(screen.getByTestId('filter-toggle'));

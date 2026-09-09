@@ -7,11 +7,12 @@ const getOnboardingDoneMock = jest.fn().mockResolvedValue(false);
 const setOnboardingDoneMock = jest.fn().mockResolvedValue(undefined);
 const getReducedMotionMock = jest.fn().mockResolvedValue(false);
 const setReducedMotionMock = jest.fn().mockResolvedValue(undefined);
+const getOcrDebugMock = jest.fn().mockResolvedValue(false);
+const setOcrDebugMock = jest.fn().mockResolvedValue(undefined);
 
 function stubDeps(): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
     backupService: {} as Dependencies['backupService'],
@@ -23,6 +24,8 @@ function stubDeps(): Dependencies {
       setOnboardingDone: setOnboardingDoneMock,
       getReducedMotion: getReducedMotionMock,
       setReducedMotion: setReducedMotionMock,
+      getOcrDebug: getOcrDebugMock,
+      setOcrDebug: setOcrDebugMock,
     } as unknown as Dependencies['settingsRepository'],
   };
 }
@@ -42,6 +45,10 @@ describe('useSettingsStore', () => {
     getReducedMotionMock.mockResolvedValue(false);
     setReducedMotionMock.mockClear();
     setReducedMotionMock.mockResolvedValue(undefined);
+    getOcrDebugMock.mockClear();
+    getOcrDebugMock.mockResolvedValue(false);
+    setOcrDebugMock.mockClear();
+    setOcrDebugMock.mockResolvedValue(undefined);
   });
 
   it('initialise le colorScheme sur system', () => {
@@ -152,6 +159,29 @@ describe('useSettingsStore', () => {
     useSettingsStore.getState().setReducedMotion(true);
 
     expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('met à jour ocrDebug via setOcrDebug et persiste', () => {
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setOcrDebug(true);
+
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
+    expect(setOcrDebugMock).toHaveBeenCalledWith(true);
+  });
+
+  it('charge le flag ocrDebug via loadOcrDebug', async () => {
+    getOcrDebugMock.mockResolvedValue(true);
+    setDepsForTest(stubDeps());
+
+    await useSettingsStore.getState().loadOcrDebug();
+
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
+  });
+
+  it('met à jour ocrDebug sans dépendances initialisées', () => {
+    useSettingsStore.getState().setOcrDebug(true);
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
   });
 
   afterEach(() => {

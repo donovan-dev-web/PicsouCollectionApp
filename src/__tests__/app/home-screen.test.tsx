@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import HomeScreen from '@/app/(tabs)/index';
 import { useCollectionStore } from '@/store/use-collection-store';
+import type { Magazine } from '@/types';
 
 const mockPush = jest.fn();
 
@@ -13,23 +14,41 @@ jest.mock('expo-router', () => ({
   useFocusEffect: () => {},
 }));
 
+function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
+  return {
+    id: 'm1',
+    publication: 'Picsou Magazine',
+    issueNumber: 547,
+    edition: null,
+    language: null,
+    condition: null,
+    publicationDate: null,
+    barcode: null,
+    notes: null,
+    ocrText: null,
+    createdAt: '2026-09-01T10:00:00Z',
+    updatedAt: '2026-09-01T10:00:00Z',
+    ...overrides,
+  };
+}
+
 describe('HomeScreen (compteur)', () => {
   beforeEach(() => {
     mockPush.mockClear();
   });
 
-  it('affiche le nombre d exemplaires possedes', () => {
-    useCollectionStore.setState({ totalCopies: 12, loading: false, loaded: true });
+  it('affiche le nombre d éditions possedées', () => {
+    useCollectionStore.setState({ totalMagazines: 12, loading: false, loaded: true });
 
     render(<HomeScreen />);
 
     expect(screen.getByTestId('collection-counter')).toBeTruthy();
     expect(screen.getByText('12')).toBeTruthy();
-    expect(screen.getByText('exemplaires possédés')).toBeTruthy();
+    expect(screen.getByText('éditions possédées')).toBeTruthy();
   });
 
   it('affiche le chargement lorsque la collection est en cours de chargement', () => {
-    useCollectionStore.setState({ totalCopies: 0, loading: true, loaded: false });
+    useCollectionStore.setState({ totalMagazines: 0, loading: true, loaded: false });
 
     render(<HomeScreen />);
 
@@ -85,29 +104,18 @@ describe('HomeScreen (ajouts recents)', () => {
     mockPush.mockClear();
   });
 
-  it('affiche la liste des derniers exemplaires ajoutes', () => {
+  it('affiche la liste des dernieres editions ajoutees', () => {
     useCollectionStore.setState({
       loading: false,
       loaded: true,
-      recentCopies: [
-        {
-          copy: {
-            id: 'c1',
-            magazineId: 'm1',
-            notes: null,
-            dateAdded: '2026-09-01T10:00:00Z',
-          },
-          magazine: { id: 'm1', publication: 'Picsou Magazine', issueNumber: 547 },
-        },
-        {
-          copy: {
-            id: 'c2',
-            magazineId: 'm2',
-            notes: 'coffret',
-            dateAdded: '2026-08-20T10:00:00Z',
-          },
-          magazine: { id: 'm2', publication: 'Super Picsou Géant', issueNumber: null },
-        },
+      recent: [
+        makeMagazine(),
+        makeMagazine({
+          id: 'm2',
+          publication: 'Super Picsou Géant',
+          issueNumber: null,
+          createdAt: '2026-08-20T10:00:00Z',
+        }),
       ],
     });
 
@@ -123,17 +131,7 @@ describe('HomeScreen (ajouts recents)', () => {
     useCollectionStore.setState({
       loading: false,
       loaded: true,
-      recentCopies: [
-        {
-          copy: {
-            id: 'c1',
-            magazineId: 'm1',
-            notes: null,
-            dateAdded: '2026-09-01T10:00:00Z',
-          },
-          magazine: { id: 'm1', publication: 'Picsou Magazine', issueNumber: 547 },
-        },
-      ],
+      recent: [makeMagazine()],
     });
 
     render(<HomeScreen />);
@@ -144,7 +142,7 @@ describe('HomeScreen (ajouts recents)', () => {
   });
 
   it('affiche un etat vide sans ajouts', () => {
-    useCollectionStore.setState({ loading: false, loaded: true, recentCopies: [] });
+    useCollectionStore.setState({ loading: false, loaded: true, recent: [] });
 
     render(<HomeScreen />);
 
@@ -152,7 +150,7 @@ describe('HomeScreen (ajouts recents)', () => {
   });
 
   it('propose de scanner depuis l etat vide', () => {
-    useCollectionStore.setState({ loading: false, loaded: true, recentCopies: [] });
+    useCollectionStore.setState({ loading: false, loaded: true, recent: [] });
 
     render(<HomeScreen />);
 

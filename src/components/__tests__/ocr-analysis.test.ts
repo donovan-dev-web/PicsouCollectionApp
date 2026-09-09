@@ -1,10 +1,4 @@
-import {
-  buildManualParams,
-  confidenceLabel,
-  hasAnyDetected,
-  ANALYSIS_INTERVAL_MS,
-  OCR_STABLE_READS,
-} from '@/components/scan/ocr-analysis';
+import { buildManualParams, confidenceLabel, hasAnyDetected } from '@/components/scan/ocr-analysis';
 
 describe('ocr-analysis (logique pure extraite de camera.tsx)', () => {
   describe('buildManualParams', () => {
@@ -42,10 +36,5 @@ describe('ocr-analysis (logique pure extraite de camera.tsx)', () => {
       expect(hasAnyDetected({ publication: null, issueNumber: null, date: '2023' })).toBe(true);
       expect(hasAnyDetected({ publication: null, issueNumber: null, date: null })).toBe(false);
     });
-  });
-
-  it('expose les constantes d’analyse OCR', () => {
-    expect(ANALYSIS_INTERVAL_MS).toBe(500);
-    expect(OCR_STABLE_READS).toBe(2);
   });
 });

@@ -21,7 +21,6 @@ const mockGetDatabase = getDatabase as unknown as jest.Mock;
 
 const stubDeps: Dependencies = {
   magazineRepository: {} as Dependencies['magazineRepository'],
-  collectionRepository: {} as Dependencies['collectionRepository'],
   settingsRepository: {} as Dependencies['settingsRepository'],
   identificationService: {} as Dependencies['identificationService'],
   ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
@@ -41,7 +40,6 @@ describe('dependencies', () => {
 
     expect(migrate).toHaveBeenCalledWith({ id: 'db' });
     expect(deps.magazineRepository).toBeDefined();
-    expect(deps.collectionRepository).toBeDefined();
     expect(getDeps()).toBe(deps);
   });
 
