@@ -61,7 +61,7 @@ Phase 10R2 ███████████████████████
 Phase 10R3 ██████████████████████████████  Terminé ✓ (v0.9.3)
 Phase 9  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-09 → v1.0.0)
 Phase 11 ▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░  En cours (M-11 → v1.0.0)
-Phase 12 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  À venir (M-12 → v1.1.0)
+Phase 12 ██████████████████████████████  Terminé ✓ (M-12 → v1.0.0)
 ```
 
 ### 2.1 Correspondance phase ↔ milestone ↔ issues
@@ -87,7 +87,7 @@ Chaque phase de la roadmap correspond à un **milestone GitHub** (`M-0x`) et à 
 | 10R3 — Retours test v0.9.3 | `M-09 — Tests terrain & publication` | `US-UX-23` (#177), retours physiques v0.9.3 | 1 |
 | 9 — Tests & publication | `M-09 — Tests terrain & publication` | `US-QA-03` | 1 |
 | 11 — Review & Qualité | `M-11 — Review & Qualité v1.0.0` | issues M11-01..10 (#181-#190) | 10 |
-| 12 — OCR interactif | `M-12 — OCR interactif & fiabilisation (v1.1.0)` | `US-OCR-01..08` (issues M12-01..08, #205-#212) | 8 |
+| 12 — OCR interactif | `M-12 — OCR interactif & fiabilisation (livré v1.0.0)` | `US-OCR-01..08` (issues M12-01..08, #205-#212) | 8 |
 | **Total** | | | **122** |
 
 ---
@@ -477,32 +477,36 @@ Détail : [09-ISSUE.md §6 – Milestones](09-ISSUE.md#6-milestones).
 
 ---
 
-## 19. Phase 12 — OCR interactif & fiabilisation (M-12 → v1.1.0)
+## 19. Phase 12 — OCR interactif & fiabilisation (M-12 → livré v1.0.0)
 
 **Objectif** : rendre le flux OCR **fiable en brocante** pour tous les supports
 (magazines, BD, comics, couvertures stylisées). L'application fait le maximum
 automatiquement — prétraitement de la photo, OCR texte + positions, analyse de
 **candidats par champ** (titre, numéro/tome, année, pages, prix…) avec
 **niveau de confiance**, **propositions automatiques** au-dessus d'un seuil —
-et **n'implique Marc que pour les zones ambiguës**, qu'il sélectionne en
-touchant la photo. Démarrage **après la v1.0.0** (M-11).
+et **n'implique Marc que pour les zones ambiguës**, qu'il sélectionne parmi la
+liste des textes détectés. Réalisée avant la release finale : livrée dans la
+**v1.0.0** (M-12/M-12R intégrés à la release).
 
 | Tâche | Issue | Statut |
 |---|---|---|
-| Prétraitement de la photo avant reconnaissance (redimensionnement, contraste) | M12-01 (#205) | À faire |
-| Récupérer texte + bounding boxes (ML Kit) | M12-02 (#206) | À faire |
-| Analyse de candidats par champ + score de confiance (règles métier) | M12-03 (#207) | À faire |
-| Propositions automatiques et seuil de confiance | M12-04 (#208) | À faire |
-| Écran interactif : overlay photo + zones cliquables | M12-05 (#209) | À faire |
-| Sélection d'une zone pour un champ + correction rapide | M12-06 (#210) | À faire |
-| Brancher les valeurs validées à la recherche / l'ajout | M12-07 (#211) | À faire |
-| Jeu de test réel, mesure des erreurs, ajustement des règles/seuils | M12-08 (#212) | À faire |
+| Prétraitement de la photo avant reconnaissance (redimensionnement, contraste) | M12-01 (#205) | ✓ Livré |
+| Récupérer texte + bounding boxes (ML Kit) | M12-02 (#206) | ✓ Livré |
+| Analyse de candidats par champ + score de confiance (règles métier) | M12-03 (#207) | ✓ Livré |
+| Propositions automatiques et seuil de confiance | M12-04 (#208) | ✓ Livré |
+| Écran interactif : liste des zones de texte cliquables | M12-05 (#209) | ✓ Livré |
+| Sélection d'une zone pour un champ + correction rapide | M12-06 (#210) | ✓ Livré |
+| Brancher les valeurs validées à la recherche / l'ajout | M12-07 (#211) | ✓ Livré |
+| Jeu de test réel, mesure des erreurs, ajustement des règles/seuils | M12-08 (#212) | ✓ Livré |
 
 **Livrables** : 8 issues M12-01..08 (#205-#212) + 8 user stories US-OCR-01..08
 (`08-USER-STORIES.md` §11). Définition fonctionnelle : `04-FONCTIONAL-SPEC.md`
 §5.6 ; technique : `03-TECHNICAL-SPEC.md` §5.5.
 
-**Statut : À venir** — backlog ; ne démarre qu'à la fermeture du **M-11**.
+**Statut : Terminé ✓** — 8 issues closés (milestone GitHub #17 clos) ; passe de
+test physique (build v0.9.4) et corrections **M-12R** intégrées (PR #215) ;
+synthèse dans `12-TESTING.md` §5.4. Le tout est inclus dans la release
+**v1.0.0** (#189).
 
 ---
 
@@ -542,5 +546,5 @@ Pour chaque phase, les critères de sortie sont :
 | 10R3 — Retours test v0.9.3 | Recherche repliable, drawer scroll, renommage | US-UX-23 (M09-01) | 1 |
 | 9 — Publication | APK GitHub (release v1.0.0) | US-QA-03 | 1 |
 | 11 — Review & Qualité | Préparation v1.0.0 | M11-01..10 (#181-#190) | 10 |
-| 12 — OCR interactif | OCR interactif & fiabilisation (v1.1.0) | US-OCR-01..08 (M12-01..08, #205-#212) | 8 |
+| 12 — OCR interactif | OCR interactif & fiabilisation (livré v1.0.0) | US-OCR-01..08 (M12-01..08, #205-#212) | 8 |
 | **Total** | | | **122** |

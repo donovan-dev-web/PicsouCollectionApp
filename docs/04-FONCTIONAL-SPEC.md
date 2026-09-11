@@ -268,9 +268,10 @@ Valeurs validées → recherche (si suffisant)          ← US-OCR-07
 - l'application **ne présente jamais** une identification comme certaine ;
 - la fiabilisation est **mesurée** sur un jeu de couvertures réelles (jeu de données + taux d'erreurs, cf. `12-TESTING.md`).
 
-> **Statut M-12 : à venir (backlog)** — issues M12-01..08 (#205-#212), user
-> stories US-OCR-01..08 (`08-USER-STORIES.md` §11). Voir aussi
-> `03-TECHNICAL-SPEC.md` §5.5.
+> **Statut M-12 : livré ✅** — issues M12-01..08 (#205-#212) closés et intégrés
+> à la release **v1.0.0** ; corrections test physique (PR #215) et synthèse dans
+> `12-TESTING.md` §5.4. User stories US-OCR-01..08 (`08-USER-STORIES.md` §11).
+> Voir aussi `03-TECHNICAL-SPEC.md` §5.5.
 
 ---
 
@@ -556,7 +557,7 @@ L'application vérifie, **selon le format choisi dans la popup** :
 | Caméra / OCR | ✅ |
 | — Surcouche de scan ciblé | ✅ (v0.7.1, US-ID-08) |
 | — Validation / correction des infos détectées | ✅ (v0.7.1, US-ID-09) |
-| — OCR v2 interactif & fiabilisation | 🚧 (v1.1.0, M-12 — §5.6, US-OCR-01..08) |
+| — OCR v2 interactif & fiabilisation | ✅ (v1.0.0, M-12 — §5.6, US-OCR-01..08) |
 | Saisie manuelle | ✅ |
 | Résultat Possédé / Absent | ✅ |
 | Gestion des doublons | ✅ |
