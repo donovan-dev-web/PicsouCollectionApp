@@ -49,6 +49,10 @@ describe('MagazineForm', () => {
     expect(screen.queryByTestId('field-notes')).toBeNull();
     expect(screen.queryByTestId('select-month')).toBeNull();
 
+    // le code-barres fait partie des champs essentiels (toujours visible)
+    expect(screen.getByTestId('field-barcode')).toBeTruthy();
+    expect(screen.getByTestId('barcode-scan')).toBeTruthy();
+
     await user.press(screen.getByTestId('details-toggle'));
 
     expect(screen.getByTestId('field-notes')).toBeTruthy();
@@ -138,7 +142,6 @@ describe('MagazineForm', () => {
     const onSubmit = jest.fn();
     render(<MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} />);
 
-    fireEvent.press(screen.getByTestId('details-toggle'));
     fireEvent.press(screen.getByTestId('barcode-scan'));
     expect(mockPush).toHaveBeenCalledWith('/scan/form-barcode');
   });
@@ -148,7 +151,6 @@ describe('MagazineForm', () => {
     setPendingBarcode('3271234000011');
 
     render(<MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} />);
-    fireEvent.press(screen.getByTestId('details-toggle'));
 
     expect(screen.getByTestId('field-barcode').props.value).toBe('3271234000011');
   });
@@ -159,7 +161,6 @@ describe('MagazineForm', () => {
     render(
       <MagazineForm submitLabel="Enregistrer" onSubmit={onSubmit} initialBarcode="5901234123457" />,
     );
-    fireEvent.press(screen.getByTestId('details-toggle'));
 
     expect(screen.getByTestId('field-barcode').props.value).toBe('5901234123457');
   });
