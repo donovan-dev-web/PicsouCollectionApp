@@ -143,6 +143,33 @@ M12-03) et les **seuils de confiance** (M12-04) ; la synthèse et les chiffres
 sont consignés dans ce document au fil des passes. Les cas à fort risque sont
 **automatisés** (matrices de classification) pour éviter toute régression.
 
+#### Passe de test physique M-12 (build v0.9.4, device Android)
+
+Le flux OCR interactif a été passé en conditions réelles (couvertures Disney
+classiques, nombreux nombres). Résultats de la passe :
+
+- l'analyse de candidats et le seuillage (proposition automatique / sélection)
+  fonctionnent : titre, numéro et année sont proposés avec leur badge de
+  confiance et restent corrigeables (US-OCR-04/06) ;
+- les corrections issues de cette passe ont été intégrées via PR #215 :
+  1. le panneau d'informations détectées affiché en surcouche caméra
+     (Nom / Numéro / Édition-Date) a été **retiré** (bruit visuel) ;
+  2. la popup de résultat OCR a été **recalée** sur le modèle « carte centrée »
+     du scan code-barres (lisibilité petits écrans) ;
+  3. la sélection d'une zone se fait désormais par une **liste des textes
+     détectés** (le pointage des boîtes cliquables sur la photo s'est révélé
+     imprécis ; décision conservée, cf. M12-05) ;
+  4. le **réticule jaune** a été retiré des surcouches OCR et code-barres ;
+  5. le **champ code-barres** du formulaire d'ajout a été déplacé dans la
+     première partie (visible sans ouvrir Détails) ;
+  6. l'écran **Recherche** propose désormais une liste « Édition » + un numéro
+     (recherche directe dans la collection), à la place du champ « nom ».
+
+**Suivi** : la mesure chiffrée des taux d'erreurs OCR / classification sur un
+corpus élargi (`M12-08`) reste une activité de fiabilisation continue — elle
+alimentera l'ajustement des règles (`ocrCandidateAnalyzer`) et des seuils
+(`ocrProposals`) au prochain cycle.
+
 ---
 
 ## 6. Outillage
