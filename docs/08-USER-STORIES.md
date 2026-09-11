@@ -686,9 +686,9 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 > Évolution du flux OCR de l'Épique 4 : l'application lit la couverture,
 > **analyse des candidats** (titre, numéro/tome, année, pages, prix…) avec un
 > **niveau de confiance**, **propose automatiquement** les champs fiables et
-> ne fait **intervenir Marc que pour les zones ambiguës**, sélectionnées en
-> touchant directement la photo. Cible : après v1.0.0 (**M-12 → v1.1.0**,
-> issue #205-#212).
+> ne fait **intervenir Marc que pour les zones ambiguës**, sélectionnées parmi
+> la liste des textes détectés. Cible : livrée dans la **v1.0.0** (**M-12 / M-12R**,
+> issues #205-#212, #215).
 
 ### US-OCR-01 — Préparer la photo avant la lecture (prétraitement)
 > En tant que **Marc**, je veux **que la photo de la couverture soit retravaillée (redimensionnement, contraste) avant la reconnaissance** afin de **maximiser les chances de lecture, même sur une couverture stylisée**.
@@ -698,7 +698,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - aucune image n'est enregistrée (analyse éphémère, R14.2) ;
 - la lecture est plus fiable qu'à l'écran nu sur les couvertures fortement stylisées.
 
-**Statut (M-12)** : backlog — [M12-01 (#205)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/205).
+**Statut (M-12)** : livré ✅ ([M12-01 (#205)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/205), v1.0.0).
 
 **Priorité** : haute.
 
@@ -710,7 +710,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - les positions sont exprimées dans un référentiel exploitable par l'écran ;
 - le moteur reste abstrait (`OcrEngine`) et la CI reste verte sans module natif.
 
-**Statut (M-12)** : backlog — [M12-02 (#206)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/206).
+**Statut (M-12)** : livré ✅ ([M12-02 (#206)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/206), v1.0.0).
 
 **Priorité** : haute.
 
@@ -722,7 +722,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - les règles métier discriminent : `192 PAGES` ≠ numéro, `€8,50` = prix, `2026` = année, `TOME 12` / `N° 125` = numéro ;
 - le module est testable sans dépendance matérielle.
 
-**Statut (M-12)** : backlog — [M12-03 (#207)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/207).
+**Statut (M-12)** : livré ✅ ([M12-03 (#207)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/207), v1.0.0).
 
 **Priorité** : haute.
 
@@ -734,20 +734,19 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - en cas de candidats à confiance proche, **aucune** proposition automatique (validation utilisateur requise) ;
 - les propositions restent **toujours** modifiables.
 
-**Statut (M-12)** : backlog — [M12-04 (#208)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/208).
+**Statut (M-12)** : livré ✅ ([M12-04 (#208)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/208), v1.0.0).
 
 **Priorité** : moyenne.
 
 ### US-OCR-05 — Choisir la bonne zone sur la photo
-> En tant que **Marc**, je veux **voir la photo avec les zones de texte détectées et toucher directement la bonne zone** afin de **dire à l'application où se trouve l'information** quand un champ est ambigu ou multiple.
+> En tant que **Marc**, je veux **voir la photo avec les textes détectés et choisir le bon texte** afin de **dire à l'application où se trouve l'information** quand un champ est ambigu ou multiple.
 
 **Critères d'acceptation** :
-- après la capture, un écran intermédiaire affiche la photo + les zones OCR en overlay ;
-- les zones suivent fidèlement la photo quel que soit l'écran (conversion des coordonnées) ;
-- chaque zone est **cliquable** ;
+- après la capture, un écran intermédiaire affiche la photo + les textes détectés ;
+- chaque texte détecté est **cliquable** (choix par liste, validé sur device — le tap direct sur l'image étant imprécis) ;
 - aucune image n'est enregistrée.
 
-**Statut (M-12)** : backlog — [M12-05 (#209)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/209).
+**Statut (M-12)** : livré ✅ ([M12-05 (#209)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/209), v1.0.0).
 
 **Priorité** : haute.
 
@@ -760,7 +759,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - les champs non identifiés restent vides (jamais de blocage) ;
 - la correction prend au plus 2-3 gestes par champ.
 
-**Statut (M-12)** : backlog — [M12-06 (#210)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/210).
+**Statut (M-12)** : livré ✅ ([M12-06 (#210)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/210), v1.0.0).
 
 **Priorité** : haute.
 
@@ -772,7 +771,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - information absente → saisie manuelle **pré-remplie** avec ce qui est connu (pas de blocage) ;
 - plusieurs candidats possibles → l'utilisateur choisit (jamais de choix automatique hasardeux).
 
-**Statut (M-12)** : backlog — [M12-07 (#211)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/211).
+**Statut (M-12)** : livré ✅ ([M12-07 (#211)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/211), v1.0.0).
 
 **Priorité** : moyenne.
 
@@ -785,7 +784,7 @@ Chaque story est identifiée par un code (ex. `US-DB-01`) et possède :
 - les règles métier (US-OCR-03) et les seuils (US-OCR-04) sont ajustés à partir des mesures ;
 - la synthèse est documentée (`docs/12-TESTING.md`).
 
-**Statut (M-12)** : backlog — [M12-08 (#212)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/212).
+**Statut (M-12)** : livré ✅ ([M12-08 (#212)](https://github.com/donovan-dev-web/PicsouCollectionApp/issues/212), v1.0.0).
 
 **Priorité** : moyenne.
 

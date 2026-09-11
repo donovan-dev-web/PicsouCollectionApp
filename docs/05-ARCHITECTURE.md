@@ -290,16 +290,17 @@ module natif est **paresseux** (dans `recognize`) : sur CI / hors Development Bu
 retourne `null` sans bloquer les tests. `NoopOcrEngine` reste disponible comme repli.
 <b>La reconnaissance brute se valide sur téléphone physique</b> (Development Build).
 
-**Évolution M-12 — OCR interactif & fiabilisation (à venir, US-OCR-01..08)** :
-- `OcrFrameResult` ({ text }) évolue vers un résultat avec **zones** (`blocks` /
-  `lines` / `elements` + `boundingBox`) — gap à confirmer dans `expo-mlkit-ocr`
-  (issue M12-02 #206) ;
-- `ocrImagePreprocessor` (prétraitement éphémère : redimensionnement + contraste)
-  branché avant `recognize` (issue M12-01 #205) ;
+**Évolution M-12 — OCR interactif & fiabilisation (livré, US-OCR-01..08)** :
+- `OcrFrameResult` transporte le texte **et** les **zones** (`blocks`→`lines`,
+  niveau **ligne**, chacune avec sa `boundingBox` en pixels image d'origine) —
+  mappées par `ocrResultMapper` (issue M12-02 #206) ;
+- `ocrImagePreprocessor` (prétraitement éphémère : redimensionnement ≤ 2600 px +
+  ré-encodage JPEG, jamais d'écriture sur stockage) branché avant `recognize`
+  (issue M12-01 #205) ;
 - `ocrCandidateAnalyzer` produit des **candidats par champ** avec score de
   confiance (règles métier : pages/prix/année/numéro) (issue M12-03 #207) ;
-- nouvel écran `/scan/ocr-review` : overlay photo + zones cliquables + conversion
-  de coordonnées image→écran (issues M12-05 ../09) ;
+- écran `/scan/ocr-review` : photo + **liste des textes détectés** cliquables
+  (choix validé sur device à la place de l'overlay tap-image, M12-05/06) ;
 - intégration des valeurs validées à `identificationService.searchByOcrFields`
   (issue M12-07 #211).
 

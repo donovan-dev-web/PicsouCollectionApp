@@ -240,19 +240,20 @@ Les tests peuvent également être co-localisés au niveau du fichier couvert (c
 }
 ```
 
-| Zone | Couverture mesurée (M-11 copie 2) | Couverture cible |
+| Zone | Couverture mesurée (M-12) | Couverture cible |
 |---|---|---|
-| Global | **98,35 %** (statements), lines **97,84 %**, functions **96,83 %**, branches **92,99 %** | ≥ 80 % |
-| Services / repositories (`src/backup`, `src/database`, `src/store`) | ≥ 90 % sur les 4 métriques (100 % pour database & store) | ≥ 85 % |
-| Bibliothèque (`src/lib`) | 100 % lignes, 90 % functions | ≥ 80 % |
-| OCR (`src/identification`) | **96,82 %** branches, 100 % functions | ≥ 85 % |
-| Composants critiques (`src/components`) | **90,47 %** branches, 94,41 % lines | ≥ 70 % |
+| Global | **97,32 %** (statements), lines **97,62 %**, functions **96,73 %**, branches **90,58 %** | ≥ 80 % |
+| Services / repositories (`src/backup`, `src/database`, `src/store`) | database 100 %, store ≥ 94 % sur les 4 métriques ; backup ≥ 91 % | ≥ 85 % |
+| Bibliothèque (`src/lib`) | 97,36 % statements, 90,56 % branches | ≥ 80 % |
+| OCR (`src/identification`) | **96,66 %** branches, 100 % functions | ≥ 85 % |
+| Composants critiques (`src/components`) | **88,79 %** branches, 97,11 % lines | ≥ 70 % |
 
-> État M-11 (2e passe) : **416 tests / 46 suites**, couverture globale — statements
-> **98,35 %**, branches **92,99 %**, functions **96,83 %**, lines **97,84 %**
-> (seuil global CI ≥ 80 %). État M-11 (1re passe) : 346 tests / 40 suites et
-> statements 87,40 % — état mesuré en M-08 : 270 tests / 33 suites, statements
-> 90,24 %, branches 85,86 %.
+> État M-12 : **518 tests / 58 suites**, couverture globale — statements
+> **97,32 %**, branches **90,58 %**, functions **96,73 %**, lines **97,62 %**
+> (seuil global CI ≥ 80 %). État M-11 (2e passe) : 416 tests / 46 suites,
+> statements 98,35 %, branches 92,99 %, functions 96,83 %, lines 97,84 % — état
+> M-11 (1re passe) : 346 tests / 40 suites et statements 87,40 % — état mesuré
+> en M-08 : 270 tests / 33 suites, statements 90,24 %, branches 85,86 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :

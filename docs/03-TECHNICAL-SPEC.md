@@ -171,7 +171,9 @@ Photo (takePictureAsync)
   OCR (référentiel photo, `W×H` capturé) vers l'écran (proportions, `resizeMode`) ;
 - **Perf** (§8) : traitement borné hors bandeau UI, import paresseux conservé.
 
-> **Statut M-12 : à venir (backlog)** — issues M12-01..08 (#205-#212).
+> **Statut M-12 : livré ✅** — issues M12-01..08 (#205-#212) closés, intégrés à
+> la release **v1.0.0** (modules `ocrImagePreprocessor`, `ocrResultMapper`,
+> `ocrCandidateAnalyzer`, `ocrProposals`, écran `/scan/ocr-review`, PR #214/#215).
 
 ---
 
@@ -292,10 +294,11 @@ Priorités :
 ```
 Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.
 
-> **M-12 (engagé)** : `expo-image-manipulator` **installé** (prétraitement, M12-01 —
+> **M-12 (livré)** : `expo-image-manipulator` **installé** (prétraitement, M12-01 —
 > redimensionnement ≤ 2600 px + ré-encodage JPEG 0.85) ; les **bounding boxes**
 > sont exposées nativement par `expo-mlkit-ocr` (niveau *ligne*, M12-02), sans
-> wrapper : `mapRecognitionResult` les projette en `OcrTextZone`.
+> wrapper : `mapRecognitionResult` les projette en `OcrTextZone`. Les zones sont
+> proposées à la sélection en **liste cliquable** (M12-05, test physique).
 
 ---
 
