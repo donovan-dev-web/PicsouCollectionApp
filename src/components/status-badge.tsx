@@ -4,38 +4,21 @@ import { Feather } from '@expo/vector-icons';
 import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 
-type Props = {
-  owned: boolean;
-  quantity?: number;
-};
-
 /**
- * Badge Possédé / Absent — M10-01/M10-07 : sémantique inversée validée.
- * Possédé = vert positif (+ check), Absent = neutre. Thématisé clair/sombre,
- * `accessibilityRole="status"`, 13px min (M10-10).
+ * Badge Possédé — retours test physique : le système d'exemplaires a été
+ * supprimé, une édition en collection est donc toujours possédée. Le badge
+ * confirme simplement la présence (vert positif + check, thématisé clair/sombre).
  */
-export function StatusBadge({ owned, quantity = 0 }: Props) {
+export function StatusBadge() {
   const colors = useThemeColors();
   const styles = makeStyles();
-  return owned ? (
+  return (
     <View
       style={[styles.badge, { backgroundColor: colors.ownedBg }]}
       testID="status-owned"
-      accessibilityRole="summary"
-      accessibilityLabel={quantity > 0 ? `Possédé, ${quantity} exemplaires` : 'Possédé'}>
+      accessibilityLabel="Possédé">
       <Feather name="check-circle" size={14} color={colors.ownedText} />
-      <Text style={[styles.text, { color: colors.ownedText }]}>
-        Possédé{quantity > 0 ? ` (${quantity})` : ''}
-      </Text>
-    </View>
-  ) : (
-    <View
-      style={[styles.badge, { backgroundColor: colors.absentBg }]}
-      testID="status-absent"
-      accessibilityRole="summary"
-      accessibilityLabel="Absent de la collection">
-      <Feather name="x-circle" size={14} color={colors.absentText} />
-      <Text style={[styles.text, { color: colors.absentText }]}>Absent</Text>
+      <Text style={[styles.text, { color: colors.ownedText }]}>Possédé</Text>
     </View>
   );
 }

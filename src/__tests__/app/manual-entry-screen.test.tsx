@@ -78,4 +78,40 @@ describe('ManualEntryScreen', () => {
     await waitFor(() => expect(addMagazine).toHaveBeenCalledTimes(1));
     expect(mockBack).toHaveBeenCalled();
   });
+
+  it('bloque l’enregistrement tant que la publication est vide', () => {
+    const addMagazine = jest.fn().mockResolvedValue({ id: 'mag-1', publication: 'X', quantity: 1 });
+    useCollectionStore.setState({ addMagazine });
+
+    render(<ManualEntryScreen />);
+
+    const submit = screen.getByTestId('form-submit');
+    expect(submit.props.accessibilityState?.disabled).toBe(true);
+    fireEvent.press(submit);
+    expect(addMagazine).not.toHaveBeenCalled();
+    expect(screen.getByTestId('form-submit-hint')).toBeTruthy();
+  });
+
+  it('affiche un message quand l’enregistrement échoue', async () => {
+    useCollectionStore.setState({
+      addMagazine: jest.fn().mockRejectedValue(new Error('Code-barres déjà enregistré.')),
+    });
+
+    render(<ManualEntryScreen />);
+
+    fireEvent.changeText(screen.getByTestId('field-publication'), 'Picsou Magazine');
+    fireEvent.press(screen.getByTestId('form-submit'));
+
+    await waitFor(() => expect(screen.getByTestId('form-error')).toBeTruthy());
+    expect(screen.getByText('Code-barres déjà enregistré.')).toBeTruthy();
+  });
+
+  it('pré-remplit le code-barres scanné depuis le formulaire', () => {
+    mockLocalSearchParams.current = { barcode: '5901234123457' };
+
+    render(<ManualEntryScreen />);
+    fireEvent.press(screen.getByTestId('details-toggle'));
+
+    expect(screen.getByTestId('field-barcode')).toHaveProp('value', '5901234123457');
+  });
 });

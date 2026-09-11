@@ -1,11 +1,11 @@
 {
   "name": "picsoucollection",
   "main": "expo-router/entry",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "packageManager": "npm@10.9.4",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "expo": "~57.0.20",
+    "expo": "~57.0.21",
     "expo-build-properties": "~57.0.17",
     "expo-camera": "~57.0.4",
     "expo-constants": "~57.0.16",
@@ -13,9 +13,10 @@
     "expo-document-picker": "~57.0.1",
     "expo-file-system": "~57.0.6",
     "expo-font": "~57.0.3",
+    "expo-image-manipulator": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-mlkit-ocr": "^0.2.7",
-    "expo-router": "~57.0.19",
+    "expo-router": "~57.0.20",
     "expo-sharing": "~57.0.18",
     "expo-splash-screen": "~57.0.8",
     "expo-sqlite": "~57.0.2",
@@ -66,6 +67,7 @@
   "jest": {
     "preset": "jest-expo",
     "clearMocks": true,
+    "testTimeout": 15000,
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ],
@@ -78,7 +80,9 @@
       "!src/types/**",
       "!src/database/types.ts",
       "!src/test-utils/**",
-      "!src/**/*.d.ts"
+      "!src/**/*.d.ts",
+      "!src/backup/native-file-gateway.ts",
+      "!src/identification/ocr/mlKitOcrEngine.ts"
     ],
     "coverageThreshold": {
       "global": {
@@ -86,6 +90,42 @@
         "functions": 80,
         "lines": 80,
         "statements": 80
+      },
+      "src/backup/**": {
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
+      },
+      "src/identification/**": {
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
+      },
+      "src/database/**": {
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
+      },
+      "src/store/**": {
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
+      },
+      "src/lib/**": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      },
+      "src/components/**": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
       }
     }
   },

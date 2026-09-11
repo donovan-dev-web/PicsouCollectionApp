@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const MIGRATION_001 = `
 CREATE TABLE IF NOT EXISTS magazines (
@@ -75,4 +75,31 @@ export const MIGRATION_004 = `
 DROP INDEX IF EXISTS idx_magazines_barcode;
 CREATE INDEX IF NOT EXISTS idx_magazines_barcode
 ON magazines(barcode);
+`;
+
+/**
+ * v5 — Suppression du système d'exemplaires (retours test physique) :
+ * « un magazine en collection est possédé ». Le nombre d'exemplaires
+ * n'apporte rien à l'utilisateur.
+ * La note de la première copie (ex. « Acheté 0,50 € ») est reportée sur la
+ * note de l'édition si celle-ci est vide, puis la table `collection_items`
+ * est supprimée.
+ */
+export const MIGRATION_005 = `
+UPDATE magazines
+SET notes = (
+    SELECT ci.notes FROM collection_items ci
+    WHERE ci.magazine_id = magazines.id
+      AND ci.notes IS NOT NULL AND ci.notes != ''
+    ORDER BY ci.date_added ASC
+    LIMIT 1
+)
+WHERE (notes IS NULL OR notes = '')
+  AND EXISTS (
+    SELECT 1 FROM collection_items ci
+    WHERE ci.magazine_id = magazines.id
+      AND ci.notes IS NOT NULL AND ci.notes != ''
+  );
+
+DROP TABLE IF EXISTS collection_items;
 `;

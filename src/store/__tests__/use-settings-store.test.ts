@@ -5,11 +5,14 @@ const setColorSchemeMock = jest.fn().mockResolvedValue(undefined);
 const getColorSchemeMock = jest.fn().mockResolvedValue('system');
 const getOnboardingDoneMock = jest.fn().mockResolvedValue(false);
 const setOnboardingDoneMock = jest.fn().mockResolvedValue(undefined);
+const getReducedMotionMock = jest.fn().mockResolvedValue(false);
+const setReducedMotionMock = jest.fn().mockResolvedValue(undefined);
+const getOcrDebugMock = jest.fn().mockResolvedValue(false);
+const setOcrDebugMock = jest.fn().mockResolvedValue(undefined);
 
 function stubDeps(): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
     backupService: {} as Dependencies['backupService'],
@@ -19,13 +22,17 @@ function stubDeps(): Dependencies {
       setColorScheme: setColorSchemeMock,
       getOnboardingDone: getOnboardingDoneMock,
       setOnboardingDone: setOnboardingDoneMock,
+      getReducedMotion: getReducedMotionMock,
+      setReducedMotion: setReducedMotionMock,
+      getOcrDebug: getOcrDebugMock,
+      setOcrDebug: setOcrDebugMock,
     } as unknown as Dependencies['settingsRepository'],
   };
 }
 
 describe('useSettingsStore', () => {
   beforeEach(() => {
-    useSettingsStore.setState({ colorScheme: 'system', loaded: false });
+    useSettingsStore.setState({ colorScheme: 'system' });
     setColorSchemeMock.mockClear();
     setColorSchemeMock.mockResolvedValue(undefined);
     getColorSchemeMock.mockClear();
@@ -34,6 +41,14 @@ describe('useSettingsStore', () => {
     getOnboardingDoneMock.mockResolvedValue(false);
     setOnboardingDoneMock.mockClear();
     setOnboardingDoneMock.mockResolvedValue(undefined);
+    getReducedMotionMock.mockClear();
+    getReducedMotionMock.mockResolvedValue(false);
+    setReducedMotionMock.mockClear();
+    setReducedMotionMock.mockResolvedValue(undefined);
+    getOcrDebugMock.mockClear();
+    getOcrDebugMock.mockResolvedValue(false);
+    setOcrDebugMock.mockClear();
+    setOcrDebugMock.mockResolvedValue(undefined);
   });
 
   it('initialise le colorScheme sur system', () => {
@@ -64,7 +79,6 @@ describe('useSettingsStore', () => {
     await useSettingsStore.getState().loadColorScheme();
 
     expect(useSettingsStore.getState().colorScheme).toBe('dark');
-    expect(useSettingsStore.getState().loaded).toBe(true);
   });
 
   it('accepte le retour à system', () => {
@@ -95,6 +109,79 @@ describe('useSettingsStore', () => {
   it('marque l onboarding sans dependances initialisees', () => {
     useSettingsStore.getState().markOnboardingDone();
     expect(useSettingsStore.getState().onboardingDone).toBe(true);
+  });
+
+  it('met à jour reducedMotion via setReducedMotion et persiste', () => {
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setReducedMotion(true);
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+    expect(setReducedMotionMock).toHaveBeenCalledWith(true);
+  });
+
+  it('met à jour reducedMotion sans dépendances initialisées', () => {
+    useSettingsStore.getState().setReducedMotion(true);
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('charge le flag reducedMotion via loadReducedMotion', async () => {
+    getReducedMotionMock.mockResolvedValue(true);
+    setDepsForTest(stubDeps());
+
+    await useSettingsStore.getState().loadReducedMotion();
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('ignore un echec de persistance du colorScheme', async () => {
+    setColorSchemeMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setColorScheme('dark');
+
+    expect(useSettingsStore.getState().colorScheme).toBe('dark');
+  });
+
+  it('ignore un echec de persistance du flag onboarding', async () => {
+    setOnboardingDoneMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().markOnboardingDone();
+
+    expect(useSettingsStore.getState().onboardingDone).toBe(true);
+  });
+
+  it('ignore un echec de persistance de reducedMotion', async () => {
+    setReducedMotionMock.mockRejectedValue(new Error('disque plein'));
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setReducedMotion(true);
+
+    expect(useSettingsStore.getState().reducedMotion).toBe(true);
+  });
+
+  it('met à jour ocrDebug via setOcrDebug et persiste', () => {
+    setDepsForTest(stubDeps());
+
+    useSettingsStore.getState().setOcrDebug(true);
+
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
+    expect(setOcrDebugMock).toHaveBeenCalledWith(true);
+  });
+
+  it('charge le flag ocrDebug via loadOcrDebug', async () => {
+    getOcrDebugMock.mockResolvedValue(true);
+    setDepsForTest(stubDeps());
+
+    await useSettingsStore.getState().loadOcrDebug();
+
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
+  });
+
+  it('met à jour ocrDebug sans dépendances initialisées', () => {
+    useSettingsStore.getState().setOcrDebug(true);
+    expect(useSettingsStore.getState().ocrDebug).toBe(true);
   });
 
   afterEach(() => {

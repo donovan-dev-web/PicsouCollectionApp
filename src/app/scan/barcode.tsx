@@ -1,140 +1,37 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { CameraView } from 'expo-camera';
+import { useRouter } from 'expo-router';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CameraPermissionScreen } from '@/components/camera-permission-screen';
-import { Spacing, type ThemeColors } from '@/constants/theme';
-import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
-import { BarcodeStabilizer } from '@/identification/barcodeStabilizer';
-import { useCollectionStore } from '@/store/use-collection-store';
-import type { Magazine } from '@/types';
-
-type ScanState =
-  { status: 'idle' } | { status: 'searching' } | { status: 'invalid'; reason: string };
-
-type Pending =
-  | { kind: 'confirm'; magazine: Magazine; ownedCount: number }
-  | { kind: 'success'; publication: string; issueNumber: number | null }
-  | { kind: 'unknown'; barcode: string };
+import { BarcodeOverlayControls } from '@/components/scan/barcode-overlay-controls';
+import {
+  BarcodeContinuousBar,
+  BarcodePendingSheets,
+} from '@/components/scan/barcode-pending-sheets';
+import { makeBarcodeStyles } from '@/components/scan/barcode-styles';
+import { useBarcodeScanning } from '@/components/scan/use-barcode-scanning';
 
 export default function BarcodeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const styles = makeStyles(colors, insets);
+  const styles = makeBarcodeStyles(colors, insets);
 
-  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
-  const params = useLocalSearchParams<{ continuous?: string }>();
-
-  const [permission, requestPermission] = useCameraPermissions();
-  const [state, setState] = useState<ScanState>({ status: 'idle' });
-  const [scanning, setScanning] = useState(true);
-  const [continuous, setContinuous] = useState(params.continuous === '1');
-  const [torchOn, setTorchOn] = useState(false);
-  const [pending, setPending] = useState<Pending | null>(null);
-  const stabilizer = useRef(new BarcodeStabilizer(3));
-
-  const resume = () => {
-    stabilizer.current.reset();
-    setPending(null);
-    setScanning(true);
-    setState({ status: 'idle' });
-  };
-
-  const handleSingle = async (stabilized: string) => {
-    const { identificationService } = getDeps();
-    const result = await identificationService.identifyByBarcode(stabilized);
-
-    if (result.status === 'found') {
-      router.replace({
-        pathname: '/scan/result',
-        params: {
-          id: result.magazine.id,
-          publication: result.magazine.publication,
-          issueNumber:
-            result.magazine.issueNumber != null ? String(result.magazine.issueNumber) : '',
-          barcode: stabilized,
-        },
-      });
-    } else if (result.status === 'ambiguous') {
-      router.replace({ pathname: '/scan/multiple', params: { barcode: stabilized } });
-    } else if (result.status === 'unknown') {
-      router.replace({ pathname: '/scan/result', params: { barcode: stabilized } });
-    } else {
-      setState({ status: 'invalid', reason: result.reason });
-      setScanning(true);
-    }
-  };
-
-  const handleContinuous = async (stabilized: string) => {
-    const { identificationService, collectionRepository } = getDeps();
-    const result = await identificationService.identifyByBarcode(stabilized);
-
-    if (result.status === 'found') {
-      const ownedCount = await collectionRepository.countByMagazine(result.magazine.id);
-      if (ownedCount > 0) {
-        setPending({ kind: 'confirm', magazine: result.magazine, ownedCount });
-      } else {
-        await addExistingCopy(result.magazine.id);
-        setPending({
-          kind: 'success',
-          publication: result.magazine.publication,
-          issueNumber: result.magazine.issueNumber,
-        });
-      }
-    } else if (result.status === 'ambiguous') {
-      router.replace({ pathname: '/scan/multiple', params: { barcode: stabilized } });
-    } else if (result.status === 'unknown') {
-      setPending({ kind: 'unknown', barcode: stabilized });
-    } else {
-      setState({ status: 'invalid', reason: result.reason });
-      setScanning(true);
-    }
-  };
-
-  const handleScan = async ({ data }: { data: string; type: string }) => {
-    if (!scanning || state.status === 'searching' || pending) {
-      return;
-    }
-    const stabilized = stabilizer.current.push(data);
-    if (stabilized === null) {
-      return;
-    }
-    setScanning(false);
-    setState({ status: 'searching' });
-
-    if (continuous) {
-      await handleContinuous(stabilized);
-    } else {
-      await handleSingle(stabilized);
-    }
-  };
-
-  const reset = () => {
-    stabilizer.current.reset();
-    setScanning(true);
-    setState({ status: 'idle' });
-  };
-
-  const confirmAdd = async () => {
-    if (pending?.kind !== 'confirm') {
-      return;
-    }
-    await addExistingCopy(pending.magazine.id);
-    setPending({
-      kind: 'success',
-      publication: pending.magazine.publication,
-      issueNumber: pending.magazine.issueNumber,
-    });
-  };
-
-  const confirm = pending?.kind === 'confirm' ? pending : null;
-  const success = pending?.kind === 'success' ? pending : null;
-  const unknown = pending?.kind === 'unknown' ? pending : null;
+  const {
+    permission,
+    requestPermission,
+    state,
+    continuous,
+    torchOn,
+    pending,
+    setContinuous,
+    setTorchOn,
+    handleScan,
+    resume,
+    reset,
+  } = useBarcodeScanning();
 
   if (!permission || !permission.granted) {
     return (
@@ -162,390 +59,35 @@ export default function BarcodeScreen() {
       />
 
       {continuous && !pending && (
-        <View style={styles.continuousBar}>
-          <Text style={styles.continuousText}>Scan en continu — ajoute chaque exemplaire</Text>
-          <Pressable
-            style={({ pressed }) => [styles.continuousStop, pressed && styles.buttonPressed]}
-            onPress={() => {
-              setContinuous(false);
-              resume();
-            }}
-            testID="continuous-stop"
-            accessibilityRole="button"
-            accessibilityLabel="Arrêter le scan en continu">
-            <Text style={styles.continuousStopText}>Arrêter</Text>
-          </Pressable>
-        </View>
+        <BarcodeContinuousBar
+          styles={styles}
+          onStop={() => {
+            setContinuous(false);
+            resume();
+          }}
+        />
       )}
 
-      <View style={styles.overlay} pointerEvents="none">
-        <View style={styles.reticle} />
-        <View style={styles.hintRow}>
-          {state.status === 'searching' ? (
-            <ActivityIndicator
-              testID="scan-searching"
-              size="small"
-              color="#FFFFFF"
-              accessibilityLabel="Recherche en cours"
-            />
-          ) : null}
-          <Text style={styles.scanHint}>
-            {state.status === 'searching' ? 'Recherche…' : 'Alignez le code-barres dans le cadre'}
-          </Text>
-        </View>
-        {state.status === 'invalid' && (
-          <Text style={styles.invalidText} testID="invalid-reason">
-            {state.reason}
-          </Text>
-        )}
-      </View>
+      <BarcodeOverlayControls
+        styles={styles}
+        state={state}
+        showContinuousStart={state.status === 'idle' && !pending && !continuous}
+        showCameraButtons={state.status === 'idle' && !pending}
+        torchOn={torchOn}
+        onStartContinuous={() => setContinuous(true)}
+        onBack={() => router.back()}
+        onToggleTorch={() => setTorchOn((t) => !t)}
+        onRetry={reset}
+      />
 
-      {state.status === 'idle' && !pending && !continuous && (
-        <Pressable
-          style={({ pressed }) => [styles.startContinuousButton, pressed && styles.buttonPressed]}
-          onPress={() => setContinuous(true)}
-          testID="continuous-start"
-          accessibilityRole="button"
-          accessibilityLabel="Lancer le scan en continu">
-          <Text style={styles.startContinuousText}>Scan en continu</Text>
-        </Pressable>
-      )}
-
-      {state.status === 'idle' && !pending && (
-        <Pressable
-          style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}
-          onPress={() => router.back()}
-          testID="scan-back"
-          accessibilityRole="button"
-          accessibilityLabel="Annuler">
-          <Feather name="x" size={22} color="#FFFFFF" />
-        </Pressable>
-      )}
-
-      {state.status === 'idle' && !pending && (
-        <Pressable
-          style={({ pressed }) => [styles.torchButton, pressed && styles.buttonPressed]}
-          onPress={() => setTorchOn((t) => !t)}
-          testID="scan-torch"
-          accessibilityRole="button"
-          accessibilityLabel={torchOn ? 'Désactiver la torche' : 'Activer la torche'}>
-          <Feather name={torchOn ? 'zap' : 'zap-off'} size={20} color="#FFFFFF" />
-        </Pressable>
-      )}
-
-      {state.status === 'invalid' && (
-        <View style={styles.invalidActions}>
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={reset}
-            testID="invalid-retry"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Scanner à nouveau</Text>
-          </Pressable>
-        </View>
-      )}
-
-      {confirm && (
-        <View style={styles.backdrop}>
-          <ScrollView
-            contentContainerStyle={styles.sheetScroll}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.pendingCard} testID="pending-confirm">
-              <Pressable
-                style={({ pressed }) => [styles.sheetClose, pressed && styles.buttonPressed]}
-                onPress={resume}
-                testID="pending-close"
-                accessibilityRole="button"
-                accessibilityLabel="Fermer">
-                <Feather name="x" size={20} color={colors.textSecondary} />
-              </Pressable>
-              <Text style={styles.pendingTitle}>Vous possédez déjà ce magazine</Text>
-              <Text style={styles.pendingMagazine}>
-                {confirm.magazine.publication}
-                {confirm.magazine.issueNumber != null ? ` n° ${confirm.magazine.issueNumber}` : ''}
-              </Text>
-              <Text style={styles.pendingMessage}>
-                Exemplaires actuels : {confirm.ownedCount}. Ajouter un exemplaire ?
-              </Text>
-              <Pressable
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-                onPress={confirmAdd}
-                testID="pending-confirm-add"
-                accessibilityRole="button">
-                <Text style={styles.primaryButtonText}>Ajouter un exemplaire</Text>
-              </Pressable>
-              <Pressable
-                style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
-                onPress={resume}
-                testID="pending-confirm-cancel"
-                accessibilityRole="button">
-                <Text style={styles.pendingCancelText}>Annuler</Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {success && (
-        <View style={styles.backdrop}>
-          <ScrollView
-            contentContainerStyle={styles.sheetScroll}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.pendingCard} testID="pending-success">
-              <Text style={styles.pendingTitle}>Ajouté à la collection</Text>
-              <Text style={styles.pendingMagazine}>
-                {success.publication}
-                {success.issueNumber != null ? ` n° ${success.issueNumber}` : ''}
-              </Text>
-              <Pressable
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-                onPress={resume}
-                testID="pending-success-ok"
-                accessibilityRole="button">
-                <Text style={styles.primaryButtonText}>Scanner le suivant</Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {unknown && (
-        <View style={styles.backdrop}>
-          <ScrollView
-            contentContainerStyle={styles.sheetScroll}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.pendingCard} testID="pending-unknown">
-              <Text style={styles.pendingTitle}>Code-barres inconnu</Text>
-              <Text style={styles.pendingMessage}>{unknown.barcode}</Text>
-              <Text style={styles.pendingMessage}>
-                Le scan seul ne crée pas l&apos;édition. Saisissez-la manuellement.
-              </Text>
-              <Pressable
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-                onPress={() =>
-                  router.replace({ pathname: '/scan/manual', params: { barcode: unknown.barcode } })
-                }
-                testID="pending-unknown-manual"
-                accessibilityRole="button">
-                <Text style={styles.primaryButtonText}>Saisir manuellement</Text>
-              </Pressable>
-              <Pressable
-                style={({ pressed }) => [styles.pendingCancel, pressed && styles.buttonPressed]}
-                onPress={resume}
-                testID="pending-unknown-continue"
-                accessibilityRole="button">
-                <Text style={styles.pendingCancelText}>Continuer le scan</Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-        </View>
+      {pending && (
+        <BarcodePendingSheets
+          styles={styles}
+          pending={pending}
+          onResume={resume}
+          onManual={(barcode) => router.replace({ pathname: '/scan/manual', params: { barcode } })}
+        />
       )}
     </View>
   );
-}
-
-function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    camera: {
-      flex: 1,
-    },
-    reticle: {
-      width: 220,
-      height: 220,
-      borderWidth: 3,
-      borderColor: colors.accent,
-      borderRadius: 16,
-      backgroundColor: 'transparent',
-    },
-    hintRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-      marginTop: Spacing.three,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-    },
-    scanHint: {
-      fontSize: 14,
-      lineHeight: 20,
-      color: '#FFFFFF',
-      textAlign: 'center',
-    },
-    invalidText: {
-      marginTop: Spacing.two,
-      fontSize: 14,
-      color: '#FFD5D2',
-      textAlign: 'center',
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
-    invalidActions: {
-      position: 'absolute',
-      left: Spacing.four,
-      right: Spacing.four,
-      bottom: insets.bottom + 24,
-    },
-    continuousBar: {
-      position: 'absolute',
-      top: insets.top + 12,
-      left: Spacing.three,
-      right: Spacing.three,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.7)',
-      borderRadius: 10,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-    },
-    continuousText: {
-      flex: 1,
-      fontSize: 13,
-      color: '#FFFFFF',
-    },
-    continuousStop: {
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-      backgroundColor: colors.danger,
-    },
-    continuousStopText: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.onDanger,
-    },
-    startContinuousButton: {
-      position: 'absolute',
-      left: Spacing.four,
-      right: Spacing.four,
-      bottom: insets.bottom + 80,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'rgba(0,0,0,0.65)',
-      paddingVertical: Spacing.two,
-      borderRadius: 10,
-    },
-    startContinuousText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: '#FFFFFF',
-    },
-    pendingCard: {
-      marginHorizontal: Spacing.four,
-      backgroundColor: colors.backgroundElement,
-      borderRadius: 14,
-      padding: Spacing.four,
-      gap: Spacing.two,
-      alignItems: 'center',
-    },
-    sheetClose: {
-      alignSelf: 'flex-end',
-      minWidth: 44,
-      minHeight: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: -Spacing.three,
-      marginRight: -Spacing.three,
-    },
-    backdrop: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    sheetScroll: {
-      flexGrow: 1,
-      justifyContent: 'center',
-    },
-    pendingTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    pendingMagazine: {
-      fontSize: 17,
-      fontWeight: '600',
-      color: colors.accentTextOnLight,
-      textAlign: 'center',
-    },
-    pendingMessage: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 20,
-    },
-    pendingCancel: {
-      minHeight: 44,
-      justifyContent: 'center',
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-    },
-    pendingCancelText: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    primaryButton: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.accent,
-      minHeight: 48,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 12,
-      alignSelf: 'stretch',
-    },
-    primaryButtonText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: colors.accentText,
-      textAlign: 'center',
-    },
-    buttonPressed: {
-      opacity: 0.8,
-    },
-    backButton: {
-      position: 'absolute',
-      top: insets.top + 12,
-      left: Spacing.three,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    torchButton: {
-      position: 'absolute',
-      top: insets.top + 12,
-      right: Spacing.three,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
 }

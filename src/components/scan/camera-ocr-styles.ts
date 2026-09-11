@@ -1,0 +1,311 @@
+import { StyleSheet } from 'react-native';
+
+import { Spacing, type ThemeColors } from '@/constants/theme';
+
+export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; bottom: number }) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.four,
+    },
+    camera: {
+      flex: 1,
+    },
+    scanHint: {
+      marginTop: Spacing.three,
+      fontSize: 14,
+      color: '#FFFFFF',
+      textAlign: 'center',
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    processingPill: {
+      marginTop: Spacing.two,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 20,
+    },
+    processingText: {
+      fontSize: 14,
+      color: '#FFFFFF',
+    },
+    /**
+     * Popup de résultat calée sur le scan code-barres (retours test physique) :
+     * un voile plein écran (`backdrop`) avec une carte centrée, largeur et
+     * hauteur contraintes par des marges identiques horizontal / vertical.
+     */
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    sheetScroll: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    resultCard: {
+      alignSelf: 'center',
+      marginHorizontal: Spacing.four,
+      marginVertical: Spacing.four,
+      maxWidth: 520,
+      width: '88%',
+      backgroundColor: colors.backgroundElement,
+      borderRadius: 16,
+      padding: Spacing.three,
+    },
+    resultCardContent: {
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    mutedTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    magazine: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    issue: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    date: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    confidence: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    message: {
+      fontSize: 15,
+      color: colors.text,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    primaryButton: {
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.three,
+      borderRadius: 12,
+      marginTop: Spacing.two,
+    },
+    primaryButtonText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.accentText,
+      textAlign: 'center',
+    },
+    secondaryButton: {
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.backgroundElement,
+      paddingVertical: Spacing.three,
+      borderRadius: 12,
+      marginHorizontal: Spacing.four,
+      marginTop: Spacing.two,
+      marginBottom: insets.bottom + Spacing.three,
+    },
+    secondaryButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    buttonPressed: {
+      opacity: 0.8,
+    },
+    /**
+     * Bouton de prise de vue manuelle (retours test physique) : 1 appui → 1
+     * photo → 1 lecture, sans capture automatique périodique.
+     */
+    shutterButton: {
+      position: 'absolute',
+      bottom: insets.bottom + 28,
+      alignSelf: 'center',
+      width: 76,
+      height: 76,
+      borderRadius: 38,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 4,
+      borderColor: 'rgba(0,0,0,0.25)',
+    },
+    shutterButtonInner: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    shutterButtonDisabled: {
+      opacity: 0.55,
+    },
+    analyzingActions: {
+      position: 'absolute',
+      bottom: insets.bottom + 118,
+      left: Spacing.four,
+      right: Spacing.four,
+      flexDirection: 'row',
+      gap: Spacing.two,
+    },
+    analyzingActionButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.65)',
+      paddingVertical: Spacing.two,
+      borderRadius: 10,
+    },
+    analyzingActionText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#FFFFFF',
+      textAlign: 'center',
+    },
+    cancelButton: {
+      marginTop: Spacing.three,
+      alignSelf: 'center',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+    },
+    cancelButtonText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    backButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      left: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    torchButton: {
+      position: 'absolute',
+      top: insets.top + 12,
+      right: Spacing.three,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    guidanceCard: {
+      position: 'absolute',
+      left: Spacing.four,
+      right: Spacing.four,
+      bottom: insets.bottom + 168,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: Spacing.two,
+      backgroundColor: 'rgba(0,0,0,0.75)',
+      paddingVertical: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      borderRadius: 12,
+    },
+    guidanceText: {
+      flex: 1,
+      fontSize: 13,
+      color: '#FFFFFF',
+      lineHeight: 18,
+    },
+    guidanceActions: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+      width: '100%',
+    },
+    guidanceButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      paddingVertical: Spacing.two,
+      borderRadius: 8,
+    },
+    guidanceButtonText: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.accentText,
+    },
+    debugPanel: {
+      position: 'absolute',
+      top: insets.top + 60,
+      left: Spacing.three,
+      right: Spacing.three,
+      backgroundColor: 'rgba(0,0,0,0.82)',
+      borderRadius: 10,
+      padding: Spacing.two,
+      gap: 4,
+    },
+    debugTitle: {
+      fontSize: 12,
+      fontWeight: '800',
+      color: '#7FDBFF',
+      textAlign: 'center',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    debugRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: Spacing.two,
+    },
+    debugLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: 'rgba(255,255,255,0.85)',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    debugValue: {
+      flexShrink: 1,
+      fontSize: 12,
+      lineHeight: 16,
+      color: '#7FDBFF',
+      textAlign: 'right',
+    },
+    debugValueEmpty: {
+      color: 'rgba(255,255,255,0.6)',
+    },
+  });
+}
+
+export type CameraOcrStyles = ReturnType<typeof makeCameraOcrStyles>;

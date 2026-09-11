@@ -24,7 +24,7 @@
 
 ## 1. Objectif
 
-Garantir la **fiabilité** et la **robustesse** de l'application, élément crucial pour objectif de publication Play Store et de qualité professionnelle.
+Garantir la **fiabilité** et la **robustesse** de l'application, élément crucial pour l'objectif de **publication finale (v1.0.0, APK sur GitHub)** et de qualité professionnelle.
 
 > Vision : *qualité pro et bonnes pratiques*, avec un suivi continu de la santé du projet, mais aussi une **attention constante à l'expérience utilisateur**.
 
@@ -56,7 +56,7 @@ Les deux catégories sont **réalisées en parallèle et sont toutes deux néces
 Ces tests valident les **contrats de code** : entrées → sorties, gestion des cas limites, intégrité des données. Ils sont **indépendants de l'interface**.
 
 ### Exemples de volets vérifiés
-- le `collectionService` retourne le bon statut Possédé / Absent selon le nombre d'exemplaires ;
+- la logique de collection (`useCollectionStore`) retourne le bon statut Possédé / Absent selon le nombre d'exemplaires ;
 - le parseur EAN-13/ISBN lit correctement un code donné ;
 - la validation d'import rejette un fichier au mauvais format ;
 - l'export JSON produit un fichier bien formé ;
@@ -97,12 +97,12 @@ Ces tests s'appuient sur les **user stories** et leurs **critères d'acceptation
 Couvrent les **services** et **repositories** de façon isolée.
 
 **Cibles :**
-- `collectionService` : logique de possession (Possédé / Absent) ;
+- store Collection : logique de possession (Possédé / Absent) ;
 - `identificationService` : identification par barcode / OCR ;
-- `confidence` : calcul et seuils de confiance ;
-- `backup/export` : sérialisation JSON ;
-- `backup/import` : validation et import ;
-- `magazineRepository` : CRUD et requêtes ;
+- `ocrTextParser` : extraction et seuils de confiance ;
+- `backup-service` : sérialisation JSON / CSV ;
+- `backup-service` : validation et import ;
+- `magazine-repository` : CRUD et requêtes ;
 
 **But :** vérifier la logique métier sans dépendre de l'UI ni du matériel.
 
@@ -121,6 +121,55 @@ Couvrent le rendu et les interactions des **écrans et composants critiques**. I
 ### 5.3 Tests manuels (terrain) [catégorie B]
 Tests sur **téléphone physique** avec de vrais magazines, notamment pour caméra et OCR (difficilement automatisables). C'est le cas le plus évident de validation **du point de vue de l'utilisateur** : le résultat est-il réellement utilisable en brocante ?
 
+### 5.4 Jeu de test OCR interactif (M-12, US-OCR-08)
+Pour fiabiliser le flux OCR v2 (voir `04-FONCTIONAL-SPEC.md` §5.6), un **jeu de
+test sur couvertures réelles** est constitué et documenté (issue M12-08 #212) :
+
+**Couverture du corpus**
+- magazines classiques (ex. Disney) — texte standard, barre titre + numéro « N° » ;
+- BD / comics — titres et logos **fortement stylisés** ;
+- **nombreux nombres** sur la couverture (année, `192 PAGES`, `€8,50`, prix, numéro) ;
+- textes **inclinés** ou fonds complexes / faible contraste.
+
+**Mesures produites**
+- **taux d'erreurs OCR** : texte lu vs texte réel des zones ciblées ;
+- **taux d'erreurs de classification des champs** : un numéro pris pour une
+  année, un prix pour un numéro, etc. ;
+- répartition des décisions : propositions automatiques valides / corrélées /
+  échecs exigeant une sélection manuelle.
+
+**Boucle** : les erreurs alimentent les **règles métier** (`ocrCandidateAnalyzer`,
+M12-03) et les **seuils de confiance** (M12-04) ; la synthèse et les chiffres
+sont consignés dans ce document au fil des passes. Les cas à fort risque sont
+**automatisés** (matrices de classification) pour éviter toute régression.
+
+#### Passe de test physique M-12 (build v0.9.4, device Android)
+
+Le flux OCR interactif a été passé en conditions réelles (couvertures Disney
+classiques, nombreux nombres). Résultats de la passe :
+
+- l'analyse de candidats et le seuillage (proposition automatique / sélection)
+  fonctionnent : titre, numéro et année sont proposés avec leur badge de
+  confiance et restent corrigeables (US-OCR-04/06) ;
+- les corrections issues de cette passe ont été intégrées via PR #215 :
+  1. le panneau d'informations détectées affiché en surcouche caméra
+     (Nom / Numéro / Édition-Date) a été **retiré** (bruit visuel) ;
+  2. la popup de résultat OCR a été **recalée** sur le modèle « carte centrée »
+     du scan code-barres (lisibilité petits écrans) ;
+  3. la sélection d'une zone se fait désormais par une **liste des textes
+     détectés** (le pointage des boîtes cliquables sur la photo s'est révélé
+     imprécis ; décision conservée, cf. M12-05) ;
+  4. le **réticule jaune** a été retiré des surcouches OCR et code-barres ;
+  5. le **champ code-barres** du formulaire d'ajout a été déplacé dans la
+     première partie (visible sans ouvrir Détails) ;
+  6. l'écran **Recherche** propose désormais une liste « Édition » + un numéro
+     (recherche directe dans la collection), à la place du champ « nom ».
+
+**Suivi** : la mesure chiffrée des taux d'erreurs OCR / classification sur un
+corpus élargi (`M12-08`) reste une activité de fiabilisation continue — elle
+alimentera l'ajustement des règles (`ocrCandidateAnalyzer`) et des seuils
+(`ocrProposals`) au prochain cycle.
+
 ---
 
 ## 6. Outillage
@@ -130,10 +179,11 @@ Tests sur **téléphone physique** avec de vrais magazines, notamment pour camé
 | **Jest** | Framework de test (runner + assertions) |
 | **jest-expo** | Preset Jest pour React Native / Expo |
 | **@types/jest** | Types TS pour Jest (29.5.14, aligné Expo SDK 57) |
+| **@testing-library/react-native** | Rendu et interactions des composants en environnement de test |
 | **react-test-renderer** | Rendu des composants en environnement de test |
 | **expo-doctor** | Vérification de la santé du projet / écosystème Expo (21 checks) |
 
-> **À venir** : React Native Testing Library (tests de composants interactifs) et `ts-jest` seront ajoutés quand les écrans seront développés (M-03).
+> React Native Testing Library est utilisé pour les tests de composants et d'écrans (convention `*.test.tsx`).
 
 ---
 
@@ -143,24 +193,35 @@ Les tests sont placés **à côté du code source** qu'ils couvrent, convention 
 
 ```
 src/
-├── collection/
-│   ├── collectionService.ts
-│   └── __tests__/
-│       └── collectionService.test.ts
-│
 ├── identification/
 │   ├── scanBarcode.ts
 │   └── __tests__/
 │       └── scanBarcode.test.ts
+│
+├── backup/
+│   ├── backup-service.ts
+│   └── __tests__/
+│       └── backup-service.test.ts
+│
+└── app/
+    ├── settings/
+    │   ├── backup.tsx
+    │   └── backup.test.tsx
+    └── ...
 ```
 
-Alternativement, les tests peuvent être co-localisés `collectionService.test.ts` au même niveau.
+Les tests peuvent également être co-localisés au niveau du fichier couvert (convention `*.test.ts` / `*.test.tsx`).
 
 ---
 
 ## 8. Niveau de couverture
 
 ### 8.1 Seuils (Jest `coverageThreshold` — config dans `package.json`)
+
+> **Sémantique :** Jest applique `coverageThreshold` **fichier par fichier** : chaque
+> fichier d'une zone doit atteindre les seuils de la zone sur *chacune* des quatre
+> métriques (`branches`, `functions`, `lines`, `statements`). Un fichier isolé sous
+> le seuil fait échouer la CI même si la moyenne de la zone est au-dessus.
 
 ```json
 "coverageThreshold": {
@@ -169,23 +230,40 @@ Alternativement, les tests peuvent être co-localisés `collectionService.test.t
     "functions": 80,
     "lines": 80,
     "statements": 80
-  }
+  },
+  "src/backup/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/database/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/identification/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/lib/**": { "branches": 80, "functions": 80, "lines": 80, "statements": 80 },
+  "src/store/**": { "branches": 85, "functions": 85, "lines": 85, "statements": 85 },
+  "src/components/**": { "branches": 70, "functions": 70, "lines": 70, "statements": 70 }
 }
 ```
 
-| Zone | Couverture actuelle | Couverture cible |
+| Zone | Couverture mesurée (M-12) | Couverture cible |
 |---|---|---|
-| Global | **90,24 %** (seuil CI ≥ 80 %, M-08) | ≥ 80 % |
-| Services / repositories | consolidée (M-02) | ≥ 85 % |
-| Composants critiques | consolidée (M-03) | ≥ 70 % |
+| Global | **97,32 %** (statements), lines **97,62 %**, functions **96,73 %**, branches **90,58 %** | ≥ 80 % |
+| Services / repositories (`src/backup`, `src/database`, `src/store`) | database 100 %, store ≥ 94 % sur les 4 métriques ; backup ≥ 91 % | ≥ 85 % |
+| Bibliothèque (`src/lib`) | 97,36 % statements, 90,56 % branches | ≥ 80 % |
+| OCR (`src/identification`) | **96,66 %** branches, 100 % functions | ≥ 85 % |
+| Composants critiques (`src/components`) | **88,79 %** branches, 97,11 % lines | ≥ 70 % |
 
-> État M-08 : 270 tests / 33 suites, couverture globale 90,24 % (statements), branches 85,86 %, seuils globaux 80 %.
+> État M-12 : **518 tests / 58 suites**, couverture globale — statements
+> **97,32 %**, branches **90,58 %**, functions **96,73 %**, lines **97,62 %**
+> (seuil global CI ≥ 80 %). État M-11 (2e passe) : 416 tests / 46 suites,
+> statements 98,35 %, branches 92,99 %, functions 96,83 %, lines 97,84 % — état
+> M-11 (1re passe) : 346 tests / 40 suites et statements 87,40 % — état mesuré
+> en M-08 : 270 tests / 33 suites, statements 90,24 %, branches 85,86 %.
 
 ### 8.2 Exclusion de couverture
 Certains fichiers sont exclus du calcul :
 - fichiers de configuration ;
 - code purement de démarrage (entry points) ;
-- types uniquement.
+- types uniquement ;
+- **couche plateforme native** (`src/backup/native-file-gateway.ts`,
+  `src/identification/ocr/mlKitOcrEngine.ts`) : ponts dépendant d'un
+  Development Build / matériel physique (tests manuels ou tests physiques
+  prévus au §7), non exécutables sous Jest (import dynamique natif).
 
 ---
 

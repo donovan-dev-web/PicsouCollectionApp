@@ -6,6 +6,7 @@ const DEFAULT_COLOR_SCHEME: ColorSchemeSetting = 'system';
 const COLOR_SCHEME_KEY = 'color_scheme';
 const ONBOARDING_DONE_KEY = 'onboarding_done';
 const REDUCED_MOTION_KEY = 'reduced_motion';
+const OCR_DEBUG_KEY = 'ocr_debug';
 
 /**
  * Persistance des réglages clé/valeur (ex. le thème manuel) dans la table
@@ -66,6 +67,24 @@ export class SettingsRepository {
        ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
       REDUCED_MOTION_KEY,
       reduced ? 'true' : 'false',
+    );
+  }
+
+  /** Debug OCR (paramètres avancés) : surcouche caméra des données brutes OCR. */
+  async getOcrDebug(): Promise<boolean> {
+    const row = await this.db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM settings WHERE key = ?',
+      OCR_DEBUG_KEY,
+    );
+    return row?.value === 'true';
+  }
+
+  async setOcrDebug(enabled: boolean): Promise<void> {
+    await this.db.runAsync(
+      `INSERT INTO settings (key, value) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      OCR_DEBUG_KEY,
+      enabled ? 'true' : 'false',
     );
   }
 }

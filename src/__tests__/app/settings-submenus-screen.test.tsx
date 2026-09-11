@@ -21,7 +21,6 @@ jest.mock('expo-router', () => ({
 function stubDeps(): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     identificationService: {} as Dependencies['identificationService'],
     ocrEngine: { recognize: jest.fn() } as unknown as Dependencies['ocrEngine'],
     settingsRepository: {
@@ -57,6 +56,7 @@ describe('SettingsScreen (sous-menus M10R2-06)', () => {
     expect(screen.getByTestId('settings-backup')).toBeTruthy();
     expect(screen.getByTestId('settings-accessibility')).toBeTruthy();
     expect(screen.getByTestId('settings-help')).toBeTruthy();
+    expect(screen.getByTestId('settings-advanced')).toBeTruthy();
   });
 
   it('navigue vers Apparence', () => {
@@ -69,6 +69,12 @@ describe('SettingsScreen (sous-menus M10R2-06)', () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByTestId('settings-backup'));
     expect(mockPush).toHaveBeenCalledWith('/settings/backup');
+  });
+
+  it('navigue vers Paramètres avancés', () => {
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByTestId('settings-advanced'));
+    expect(mockPush).toHaveBeenCalledWith('/settings/advanced');
   });
 });
 

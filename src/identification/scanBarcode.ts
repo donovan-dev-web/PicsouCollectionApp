@@ -17,7 +17,6 @@ export type BarcodeValidation =
 
 const EAN_13_LENGTH = 13;
 const ISBN_10_LENGTH = 10;
-const ISBN_13_LENGTH = 13;
 
 /** Longueur minimale acceptable pour un code-barres au format non standard. */
 const GENERIC_MIN_LENGTH = 6;
@@ -50,16 +49,6 @@ function isValidIsbn10(isbn: string): boolean {
   return sum % 11 === 0;
 }
 
-function normalizeIsbn13(raw: string): string {
-  // ISBN-13 scanné : on enlève le préfixe "978" ou "979" et on garde 10 chiffres
-  if (raw.length === ISBN_13_LENGTH && (raw.startsWith('978') || raw.startsWith('979'))) {
-    // Retirer le préfixe + le checksum ISBN-13 resérialisé en ISBN-10 est complexe ;
-    // on conserve ici la forme ISBN-13 complète, canonique pour la recherche.
-    return raw;
-  }
-  return raw;
-}
-
 /**
  * Valide et normalise un code-barres.
  *
@@ -78,13 +67,17 @@ export function validateBarcode(raw: string): BarcodeValidation {
     return { valid: false, reason: 'Aucun chiffre détecté.' };
   }
 
-  // ISBN-10 (longueur exacte, peut contenir un 'X' en fin de checksum)
+  // ISBN-10 (longueur exacte, peut contenir un 'X' en position de checksum uniquement)
   const trimmedIsbn = s.toUpperCase();
-  if (trimmedIsbn.length === ISBN_10_LENGTH && /^[0-9X]{10}$/.test(trimmedIsbn)) {
+  if (trimmedIsbn.length === ISBN_10_LENGTH && /^[0-9]{9}[0-9X]$/.test(trimmedIsbn)) {
     if (isValidIsbn10(trimmedIsbn)) {
       return { valid: true, type: 'ISBN-10', normalized: trimmedIsbn };
     }
-    return { valid: false, reason: 'ISBN-10 invalide (checksum).' };
+    if (!/^\d{10}$/.test(trimmedIsbn)) {
+      return { valid: false, reason: 'ISBN-10 invalide (checksum).' };
+    }
+    // 10 chiffres dont la somme de contrôle ne valide pas l'ISBN-10 : ce peut
+    // être un codage non standard (CODE39/ITF…) — on tente GENERIC plus bas.
   }
 
   // EAN-13 / ISBN-13 (13 chiffres, éventuellement groupés par séparateurs)
@@ -95,7 +88,7 @@ export function validateBarcode(raw: string): BarcodeValidation {
       return {
         valid: true,
         type: isIsbn ? 'ISBN-13' : 'EAN-13',
-        normalized: normalizeIsbn13(digits),
+        normalized: digits,
       };
     }
     return { valid: false, reason: 'EAN-13 invalide (checksum).' };

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 type DrawerContextValue = {
   open: () => void;
@@ -21,9 +21,9 @@ export function DrawerProvider({ children }: { children: React.ReactNode }) {
   const open = useCallback(() => setVisible(true), []);
   const close = useCallback(() => setVisible(false), []);
 
-  return (
-    <DrawerContext.Provider value={{ open, close, visible }}>{children}</DrawerContext.Provider>
-  );
+  const value = useMemo(() => ({ open, close, visible }), [open, close, visible]);
+
+  return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
 }
 
 export { DrawerProvider as default };

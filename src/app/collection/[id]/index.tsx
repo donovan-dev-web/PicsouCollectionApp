@@ -11,17 +11,10 @@ import { StatusBadge } from '@/components/status-badge';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
 import { slug } from '@/lib/slug';
-import { toast } from '@/lib/toast';
 import { useCollectionStore } from '@/store/use-collection-store';
+import { formatDateShort } from '@/lib/date';
 
 type StyleSheetType = ReturnType<typeof makeStyles>;
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return 'Inconnue';
-  }
-  return new Date(iso).toLocaleDateString('fr-FR');
-}
 
 export default function MagazineDetailScreen() {
   const router = useRouter();
@@ -31,11 +24,10 @@ export default function MagazineDetailScreen() {
   const detail = useCollectionStore((s) => s.detail);
   const detailLoading = useCollectionStore((s) => s.detailLoading);
   const loadDetail = useCollectionStore((s) => s.loadDetail);
-  const addExistingCopy = useCollectionStore((s) => s.addExistingCopy);
   const removeMagazine = useCollectionStore((s) => s.removeMagazine);
 
   const confirmDelete = () => {
-    Alert.alert(`Supprimer l'édition`, `Retirer « ${detail?.publication} » et ses exemplaires ?`, [
+    Alert.alert(`Supprimer l'édition`, `Retirer « ${detail?.publication} » de la collection ?`, [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Supprimer',
@@ -46,14 +38,6 @@ export default function MagazineDetailScreen() {
         },
       },
     ]);
-  };
-
-  const handleAddCopy = async () => {
-    if (!detail) {
-      return;
-    }
-    await addExistingCopy(detail.id);
-    toast('Exemplaire ajouté à la collection');
   };
 
   const goBack = () => {
@@ -94,8 +78,6 @@ export default function MagazineDetailScreen() {
     );
   }
 
-  const quantity = detail.copies.length;
-
   return (
     <Screen>
       <AppHeader
@@ -119,21 +101,16 @@ export default function MagazineDetailScreen() {
         </Text>
 
         <View style={styles.statusRow}>
-          <StatusBadge owned={quantity > 0} quantity={quantity} />
-          {quantity > 0 && (
-            <Text style={styles.count} testID="detail-count">
-              {quantity} exemplaire{quantity > 1 ? 's' : ''}
-            </Text>
-          )}
+          <StatusBadge />
         </View>
 
         <View style={styles.card} testID="detail-info">
           <InfoRow styles={styles} label="Édition" value={detail.edition?.trim() || '—'} />
           <InfoRow styles={styles} label="Langue" value={detail.language?.trim() || '—'} />
           <InfoRow styles={styles} label="État" value={detail.condition?.trim() || '—'} />
-          <InfoRow styles={styles} label="Date" value={formatDate(detail.publicationDate)} />
+          <InfoRow styles={styles} label="Date" value={formatDateShort(detail.publicationDate)} />
           <InfoRow styles={styles} label="Code-barres" value={detail.barcode?.trim() || '—'} />
-          <InfoRow styles={styles} label="Ajouté le" value={formatDate(detail.createdAt)} />
+          <InfoRow styles={styles} label="Ajouté le" value={formatDateShort(detail.createdAt)} />
         </View>
 
         {detail.notes ? (
@@ -142,31 +119,6 @@ export default function MagazineDetailScreen() {
             <Text style={styles.notes}>{detail.notes}</Text>
           </View>
         ) : null}
-
-        <Text style={styles.sectionTitle}>Exemplaires</Text>
-        {detail.copies.length === 0 ? (
-          <Text style={styles.muted} testID="detail-copies-empty">
-            Aucun exemplaire pour l&apos;instant.
-          </Text>
-        ) : (
-          detail.copies.map((copy, index) => (
-            <View style={styles.copyRow} key={copy.id} testID="detail-copy">
-              <Text style={styles.copyIndex}>#{index + 1}</Text>
-              <Text style={styles.copyDate}>{formatDate(copy.dateAdded)}</Text>
-            </View>
-          ))
-        )}
-
-        <Pressable
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
-          onPress={handleAddCopy}
-          testID="detail-add-copy"
-          accessibilityRole="button"
-          accessibilityLabel="Ajouter un exemplaire de cette édition"
-          android_ripple={{ color: 'rgba(0,0,0,0.12)' }}>
-          <Feather name="plus" size={20} color={colors.accentText} />
-          <Text style={styles.addButtonText}>Ajouter un exemplaire</Text>
-        </Pressable>
 
         <Pressable
           style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
@@ -229,12 +181,6 @@ function makeStyles(colors: ThemeColors) {
       padding: Spacing.four,
       gap: Spacing.three,
     },
-    center: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: Spacing.four,
-    },
     publication: {
       fontSize: 24,
       lineHeight: 32,
@@ -250,11 +196,6 @@ function makeStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.two,
-    },
-    count: {
-      fontSize: 14,
-      lineHeight: 20,
-      color: colors.textSecondary,
     },
     card: {
       backgroundColor: colors.backgroundElement,
@@ -292,49 +233,6 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 14,
       lineHeight: 20,
       color: colors.text,
-    },
-    copyRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.three,
-      backgroundColor: colors.backgroundElement,
-      borderRadius: 8,
-      padding: Spacing.three,
-      minHeight: HitTarget.minHeight,
-    },
-    copyIndex: {
-      fontSize: 14,
-      lineHeight: 20,
-      fontWeight: '700',
-      color: colors.accentTextOnLight,
-    },
-    copyDate: {
-      fontSize: 13,
-      lineHeight: 18,
-      color: colors.textSecondary,
-    },
-    muted: {
-      fontSize: 15,
-      lineHeight: 22,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    addButton: {
-      flexDirection: 'row',
-      marginTop: Spacing.three,
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: Spacing.two,
-      backgroundColor: colors.accent,
-      minHeight: HitTarget.minHeight,
-      paddingVertical: Spacing.two,
-      borderRadius: 12,
-    },
-    addButtonText: {
-      fontSize: 18,
-      lineHeight: 24,
-      fontWeight: '700',
-      color: colors.accentText,
     },
     editButton: {
       flexDirection: 'row',

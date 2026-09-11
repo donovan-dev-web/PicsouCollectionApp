@@ -13,20 +13,13 @@ export type Magazine = {
   updatedAt: string;
 };
 
-export type MagazineListItem = Magazine & {
-  quantity: number;
-};
+/**
+ * Une édition en collection est toujours possédée (les exemplaires ont été
+ * supprimés — retours test physique) : l'élément de liste est l'édition.
+ */
+export type MagazineListItem = Magazine;
 
-export type MagazineDetail = Magazine & {
-  copies: CollectionItem[];
-};
-
-export type CollectionItem = {
-  id: string;
-  magazineId: string;
-  notes: string | null;
-  dateAdded: string;
-};
+export type MagazineDetail = Magazine;
 
 export type CreateMagazineInput = {
   publication: string;
@@ -38,13 +31,4 @@ export type CreateMagazineInput = {
   barcode?: string | null;
   notes?: string | null;
   ocrText?: string | null;
-};
-
-export type CreateCollectionItemInput = {
-  notes?: string | null;
-};
-
-export type RecentCopy = {
-  copy: CollectionItem;
-  magazine: Pick<Magazine, 'id' | 'publication' | 'issueNumber'>;
 };

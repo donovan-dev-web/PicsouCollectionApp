@@ -1,11 +1,10 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useImperativeHandle, useState, type Ref } from 'react';
+import { useCallback, useState, type Ref } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -14,28 +13,36 @@ import { Feather } from '@expo/vector-icons';
 
 import { AutocompleteInput } from '@/components/autocomplete-input';
 import { SelectField } from '@/components/select-field';
-import { Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
-import { consumePendingBarcode } from '@/lib/pending-barcode';
 import { useCollectionStore } from '@/store/use-collection-store';
 import type { CreateMagazineInput, Magazine } from '@/types';
+import { makeMagazineFormStyles } from './magazine-form-styles';
+import { useMagazineForm, type FormValues, type MagazineFormHandle } from './use-magazine-form';
 
-const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const;
+export {
+  publicationDateFrom,
+  buildMagazineInput,
+  initialFormValues,
+  MagazineFormHandle,
+} from './use-magazine-form';
+
+const MONTHS_OPTIONS = [
+  '01',
+  '02',
+  '03',
+  '04',
+  '05',
+  '06',
+  '07',
+  '08',
+  '09',
+  '10',
+  '11',
+  '12',
+] as const;
 
 /** Années dynamiques : année courante → -39 ans (M10-08, fini `2025` en dur). */
 const YEARS = Array.from({ length: 40 }, (_, i) => String(new Date().getFullYear() - i));
-
-type FormValues = {
-  publication: string;
-  issueNumber: string;
-  edition: string;
-  language: string;
-  condition: string;
-  month: string | null;
-  year: string | null;
-  barcode: string;
-  notes: string;
-};
 
 type Props = {
   initial?: Magazine;
@@ -45,23 +52,8 @@ type Props = {
   initialYear?: string | null;
   submitLabel: string;
   onSubmit: (input: CreateMagazineInput) => Promise<void> | void;
-  /**
-   * Poignée impérative permettant à l'écran d'hôte de déclencher la soumission
-   * depuis le header (icône Valider), tout en gardant le bouton pied de formulaire.
-   */
   ref?: Ref<MagazineFormHandle>;
 };
-
-export type MagazineFormHandle = {
-  submit: () => Promise<void>;
-};
-
-function publicationDateFrom(month: string | null, year: string | null): string | null {
-  if (!month || !year) {
-    return null;
-  }
-  return `${year}-${month}`;
-}
 
 export function MagazineForm({
   initial,
@@ -77,38 +69,18 @@ export function MagazineForm({
   const router = useRouter();
   const magazines = useCollectionStore((s) => s.magazines);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [values, setValues] = useState<FormValues>(() => {
-    const date = initial?.publicationDate ?? '';
-    const [year, month] = date.length === 7 ? date.split('-') : ['', ''];
-    const prefilledYear = initialYear ?? (year || null);
-    return {
-      publication: initialPublication ?? initial?.publication ?? '',
-      issueNumber:
-        initialIssueNumber != null
-          ? String(initialIssueNumber)
-          : initial?.issueNumber != null
-            ? String(initial.issueNumber)
-            : '',
-      edition: initial?.edition ?? '',
-      language: initial?.language ?? '',
-      condition: initial?.condition ?? '',
-      month: month || null,
-      year: prefilledYear || null,
-      barcode: initial?.barcode ?? initialBarcode ?? '',
-      notes: initial?.notes ?? '',
-    };
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const { values, set, submitting, formError, canSubmit, handleSubmit, consumeBarcode } =
+    useMagazineForm({
+      initial,
+      initialBarcode,
+      initialPublication,
+      initialIssueNumber,
+      initialYear,
+      onSubmit,
+      ref,
+    });
 
-  const styles = makeStyles(colors);
-
-  const set = (key: keyof FormValues, value: string | null) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-    if (formError) {
-      setFormError(null);
-    }
-  };
+  const styles = makeMagazineFormStyles(colors);
 
   const publications = [...new Set(magazines.map((m) => m.publication))];
   const editions = [...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e))];
@@ -120,45 +92,9 @@ export function MagazineForm({
 
   useFocusEffect(
     useCallback(() => {
-      const pending = consumePendingBarcode();
-      if (pending) {
-        setValues((prev) => ({ ...prev, barcode: pending }));
-      }
-    }, []),
+      consumeBarcode();
+    }, [consumeBarcode]),
   );
-
-  const canSubmit = values.publication.trim().length > 0 && !submitting;
-
-  const handleSubmit = useCallback(async () => {
-    if (!canSubmit) {
-      return;
-    }
-    const issueDigits = values.issueNumber.trim();
-    if (issueDigits && !/^\d+$/.test(issueDigits)) {
-      setFormError('Le numéro doit être composé uniquement de chiffres.');
-      return;
-    }
-    setSubmitting(true);
-    const input: CreateMagazineInput = {
-      publication: values.publication.trim(),
-      issueNumber: issueDigits ? Number(issueDigits) : null,
-      edition: values.edition.trim() || null,
-      language: values.language.trim() || null,
-      condition: values.condition.trim() || null,
-      publicationDate: publicationDateFrom(values.month, values.year),
-      barcode: values.barcode.trim() || null,
-      notes: values.notes.trim() || null,
-    };
-    try {
-      await onSubmit(input);
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Erreur lors de l’enregistrement.');
-    } finally {
-      setSubmitting(false);
-    }
-  }, [canSubmit, onSubmit, values]);
-
-  useImperativeHandle(ref, () => ({ submit: () => handleSubmit() }), [handleSubmit]);
 
   return (
     <KeyboardAvoidingView
@@ -201,6 +137,30 @@ export function MagazineForm({
           accessibilityLabel="Édition"
         />
 
+        <Text style={styles.label}>Code-barres</Text>
+        <View style={styles.barcodeRow}>
+          <TextInput
+            style={[styles.input, styles.barcodeInput]}
+            value={values.barcode}
+            onChangeText={(v) => set('barcode', v)}
+            placeholder="Ex : 3271234000011"
+            keyboardType="default"
+            autoCapitalize="characters"
+            placeholderTextColor={colors.textSecondary}
+            testID="field-barcode"
+            accessibilityLabel="Code-barres"
+          />
+          <Pressable
+            style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+            onPress={openBarcodeScanner}
+            testID="barcode-scan"
+            accessibilityRole="button"
+            accessibilityLabel="Scanner le code-barres">
+            <Feather name="crop" size={18} color={colors.text} />
+            <Text style={styles.scanButtonText}>Scanner</Text>
+          </Pressable>
+        </View>
+
         {/* Bouton « Plus de détails » */}
         <Pressable
           style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
@@ -219,90 +179,9 @@ export function MagazineForm({
           </Text>
         </Pressable>
 
-        {detailsOpen && (
-          <View style={styles.details}>
-            <AutocompleteInput
-              label="Langue"
-              value={values.language}
-              options={languages}
-              onChangeText={(v) => set('language', v)}
-              placeholder="Ex : FR"
-              testID="field-language"
-              accessibilityLabel="Langue"
-            />
-
-            <Text style={styles.label}>État</Text>
-            <TextInput
-              style={styles.input}
-              value={values.condition}
-              onChangeText={(v) => set('condition', v)}
-              placeholder="Ex : Neuf, usé, abîmé…"
-              placeholderTextColor={colors.textSecondary}
-              testID="field-condition"
-              accessibilityLabel="État"
-            />
-
-            <Text style={styles.label}>Date de publication</Text>
-            <View style={styles.dateRow}>
-              <View style={styles.dateCol}>
-                <SelectField
-                  label="Mois"
-                  placeholder="—"
-                  value={values.month}
-                  options={MONTHS}
-                  onSelect={(v) => set('month', v)}
-                  testID="select-month"
-                />
-              </View>
-              <View style={styles.dateCol}>
-                <SelectField
-                  label="Année"
-                  placeholder="—"
-                  value={values.year}
-                  options={YEARS}
-                  onSelect={(v) => set('year', v)}
-                  testID="select-year"
-                />
-              </View>
-            </View>
-
-            <Text style={styles.label}>Code-barres</Text>
-            <View style={styles.barcodeRow}>
-              <TextInput
-                style={[styles.input, styles.barcodeInput]}
-                value={values.barcode}
-                onChangeText={(v) => set('barcode', v)}
-                placeholder="Ex : 3271234000011"
-                keyboardType="default"
-                autoCapitalize="characters"
-                placeholderTextColor={colors.textSecondary}
-                testID="field-barcode"
-                accessibilityLabel="Code-barres"
-              />
-              <Pressable
-                style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
-                onPress={openBarcodeScanner}
-                testID="barcode-scan"
-                accessibilityRole="button"
-                accessibilityLabel="Scanner le code-barres">
-                <Feather name="crop" size={18} color={colors.text} />
-                <Text style={styles.scanButtonText}>Scanner</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.label}>Notes</Text>
-            <TextInput
-              style={[styles.input, styles.notesInput]}
-              value={values.notes}
-              onChangeText={(v) => set('notes', v)}
-              placeholder="Informations complémentaires…"
-              multiline
-              placeholderTextColor={colors.textSecondary}
-              testID="field-notes"
-              accessibilityLabel="Notes"
-            />
-          </View>
-        )}
+        {detailsOpen ? (
+          <DetailsSection values={values} set={set} editions={editions} languages={languages} />
+        ) : null}
 
         {formError ? (
           <Text style={styles.formError} testID="form-error">
@@ -330,124 +209,78 @@ export function MagazineForm({
   );
 }
 
-function makeStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    formScroll: {
-      flex: 1,
-    },
-    formKeyboard: {
-      flex: 1,
-    },
-    form: {
-      gap: Spacing.two,
-      paddingBottom: Spacing.four,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-      marginTop: Spacing.two,
-    },
-    input: {
-      backgroundColor: colors.backgroundElement,
-      borderRadius: 8,
-      paddingHorizontal: Spacing.three,
-      paddingVertical: Spacing.two,
-      minHeight: 44,
-      fontSize: 16,
-      color: colors.text,
-    },
-    notesInput: {
-      minHeight: 72,
-      textAlignVertical: 'top',
-    },
-    formError: {
-      marginTop: Spacing.two,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.danger,
-      textAlign: 'center',
-    },
-    detailsToggle: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-      marginTop: Spacing.three,
-      alignSelf: 'flex-start',
-      minHeight: 44,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      borderRadius: 8,
-      backgroundColor: colors.backgroundElement,
-    },
-    detailsToggleText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.accentTextOnLight,
-    },
-    details: {
-      gap: Spacing.two,
-    },
-    dateRow: {
-      flexDirection: 'row',
-      gap: Spacing.three,
-    },
-    dateCol: {
-      flex: 1,
-    },
-    barcodeRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.two,
-    },
-    barcodeInput: {
-      flex: 1,
-    },
-    scanButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      justifyContent: 'center',
-      backgroundColor: colors.backgroundElement,
-      borderWidth: 1,
-      borderColor: colors.accent,
-      borderRadius: 8,
-      minHeight: 44,
-      paddingHorizontal: Spacing.three,
-      paddingVertical: Spacing.two,
-    },
-    scanButtonText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    buttonPressed: {
-      opacity: 0.8,
-    },
-    submit: {
-      marginTop: Spacing.three,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.accent,
-      minHeight: 48,
-      paddingVertical: Spacing.three,
-      borderRadius: 12,
-    },
-    submitDisabled: {
-      opacity: 0.5,
-    },
-    submitText: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: colors.accentText,
-    },
-    submitHint: {
-      fontSize: 13,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    keyboardSpacer: {
-      height: 200,
-    },
-  });
+function DetailsSection({
+  values,
+  set,
+  editions,
+  languages,
+}: {
+  values: FormValues;
+  set: (key: keyof FormValues, value: string | null) => void;
+  editions: string[];
+  languages: string[];
+}) {
+  const colors = useThemeColors();
+  const styles = makeMagazineFormStyles(colors);
+
+  return (
+    <View style={styles.details}>
+      <AutocompleteInput
+        label="Langue"
+        value={values.language}
+        options={languages}
+        onChangeText={(v) => set('language', v)}
+        placeholder="Ex : FR"
+        testID="field-language"
+        accessibilityLabel="Langue"
+      />
+
+      <Text style={styles.label}>État</Text>
+      <TextInput
+        style={styles.input}
+        value={values.condition}
+        onChangeText={(v) => set('condition', v)}
+        placeholder="Ex : Neuf, usé, abîmé…"
+        placeholderTextColor={colors.textSecondary}
+        testID="field-condition"
+        accessibilityLabel="État"
+      />
+
+      <Text style={styles.label}>Date de publication</Text>
+      <View style={styles.dateRow}>
+        <View style={styles.dateCol}>
+          <SelectField
+            label="Mois"
+            placeholder="—"
+            value={values.month}
+            options={MONTHS_OPTIONS}
+            onSelect={(v) => set('month', v)}
+            testID="select-month"
+          />
+        </View>
+        <View style={styles.dateCol}>
+          <SelectField
+            label="Année"
+            placeholder="—"
+            value={values.year}
+            options={YEARS}
+            onSelect={(v) => set('year', v)}
+            testID="select-year"
+          />
+        </View>
+      </View>
+
+      <Text style={styles.label}>Notes</Text>
+      <TextInput
+        style={[styles.input, styles.notesInput]}
+        value={values.notes}
+        onChangeText={(v) => set('notes', v)}
+        placeholder="Informations complémentaires…"
+        multiline
+        placeholderTextColor={colors.textSecondary}
+        testID="field-notes"
+        accessibilityLabel="Notes"
+      />
+    </View>
+  );
 }

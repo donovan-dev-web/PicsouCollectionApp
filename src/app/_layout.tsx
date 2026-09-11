@@ -53,6 +53,7 @@ function RootLayoutInner() {
               <Stack.Screen name="scan/index" options={{ title: 'Identifier' }} />
               <Stack.Screen name="scan/barcode" options={{ title: 'Scanner code-barres' }} />
               <Stack.Screen name="scan/camera" options={{ title: 'Caméra OCR' }} />
+              <Stack.Screen name="scan/ocr-review" options={{ title: 'Affiner la lecture' }} />
               <Stack.Screen name="scan/manual" options={{ title: 'Saisie manuelle' }} />
               <Stack.Screen name="scan/search" options={{ title: 'Rechercher un magazine' }} />
               <Stack.Screen name="scan/form-barcode" options={{ title: 'Scanner code-barres' }} />

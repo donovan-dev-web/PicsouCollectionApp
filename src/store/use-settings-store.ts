@@ -1,29 +1,30 @@
 import { create } from 'zustand';
 
 import { getDeps } from '@/dependencies';
-
-export type ColorSchemeSetting = 'light' | 'dark' | 'system';
+import type { ColorSchemeSetting } from '@/database/repositories/settings-repository';
 
 interface SettingsState {
   colorScheme: ColorSchemeSetting;
-  loaded: boolean;
   onboardingDone: boolean;
   onboardingLoaded: boolean;
   reducedMotion: boolean;
+  ocrDebug: boolean;
   setColorScheme: (colorScheme: ColorSchemeSetting) => void;
   loadColorScheme: () => Promise<void>;
   loadOnboardingDone: () => Promise<void>;
   markOnboardingDone: () => void;
   setReducedMotion: (reduced: boolean) => void;
   loadReducedMotion: () => Promise<void>;
+  setOcrDebug: (enabled: boolean) => void;
+  loadOcrDebug: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   colorScheme: 'system',
-  loaded: false,
   onboardingDone: false,
   onboardingLoaded: false,
   reducedMotion: false,
+  ocrDebug: false,
 
   setColorScheme: (colorScheme) => {
     set({ colorScheme });
@@ -38,7 +39,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   loadColorScheme: async () => {
     const colorScheme = await getDeps().settingsRepository.getColorScheme();
-    set({ colorScheme, loaded: true });
+    set({ colorScheme });
   },
 
   loadOnboardingDone: async () => {
@@ -71,5 +72,21 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   loadReducedMotion: async () => {
     const reducedMotion = await getDeps().settingsRepository.getReducedMotion();
     set({ reducedMotion });
+  },
+
+  setOcrDebug: (enabled) => {
+    set({ ocrDebug: enabled });
+    try {
+      void getDeps()
+        .settingsRepository.setOcrDebug(enabled)
+        .catch(() => undefined);
+    } catch {
+      // dépendances pas encore initialisées : on ignore la persistance
+    }
+  },
+
+  loadOcrDebug: async () => {
+    const ocrDebug = await getDeps().settingsRepository.getOcrDebug();
+    set({ ocrDebug });
   },
 }));

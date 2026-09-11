@@ -24,14 +24,14 @@
 
 | Domaine | Technologie | Version cible |
 |---|---|---|
-| Framework | React Native | via Expo (SDK ~52) |
+| Framework | React Native | via Expo (SDK ~57) |
 | Runtime | Expo (Development Build) | — |
-| Langage | TypeScript | ~5.x |
+| Langage | TypeScript | ~6.x |
 | Navigation | Expo Router | — |
 | Base de données | SQLite (`expo-sqlite`) | — |
 | Gestion d'état | Zustand | — |
 | Caméra | `expo-camera` | — |
-| Scan code-barres | `expo-barcode-scanner` ou `expo-camera` (scan) | — |
+| Scan code-barres | `expo-camera` (scan EAN-13 / ISBN) | — |
 | OCR | Google ML Kit Text Recognition (module natif) | — |
 | Fichiers | `expo-file-system` + `expo-document-picker` + `expo-sharing` | — |
 | Tests | Jest + React Native Testing Library | — |
@@ -75,8 +75,8 @@ Navigation par fichiers, alignée sur la structure décrite dans `05-ARCHITECTUR
 | Store | Responsabilité |
 |---|---|
 | `useCollectionStore` | Liste de la collection, compteur, opérations CRUD sur magazines/exemplaires |
-| `useSettingsStore` | Thème, langue (FR), préférences |
-| `useIdentificationStore` | État du flux d'identification (méthode courante, résultat, confiance) |
+| `useSettingsStore` | Thème (système / clair / sombre), langue (FR) |
+| `useBackupStore` | État du flux export / import (fichier choisi, busy, erreurs) |
 
 > La source de vérité de la collection reste **SQLite** : les stores Zustand servent de cache/état UI synchronisé avec la base via les repositories.
 
@@ -137,6 +137,44 @@ Un **niveau de confiance** (0..1) est calculé. En cas de confiance insuffisante
 
 > **Note technique (M-05) :** le pipeline logique (parsing `ocrTextParser.ts`, confiance, rapprochement base `findByPublicationAndIssue`) est livré et **testé**, et dépend d'une interface `OcrEngine` injectée. Le moteur natif est **branché par défaut** (`MlKitOcrEngine`) via `expo-mlkit-ocr` (Google ML Kit Text Recognition, on-device, hors ligne) : `dependencies.initialize()` l'utilise, l'écran `/scan/camera` capture une photo via `expo-camera` (`takePictureAsync`) puis appelle `recognizeText(uri)`. L'import du module natif est **paresseux** pour ne pas bloquer la CI. `expo-build-properties` force le iOS `deploymentTarget` à 16.4 (exigence ML Kit). La reconnaissance a été **validée sur téléphone physique** (v0.5.0) ; hors bibliothèque native, `recognize` retourne `null` (repli `NoopOcrEngine`).
 
+### 5.5 Flux OCR v2 interactif & fiabilisation (M-12 → v1.1.0)
+
+Évolution cible du pipeline (voir `04-FONCTIONAL-SPEC.md` §5.6, US-OCR-01..08) :
+
+```
+Photo (takePictureAsync)
+   → Prétraitement image (redimensionnement + contraste, éphémère)     [M12-01]
+   → reconnaître : texte + bounding boxes (blocks/lines/elements)      [M12-02]
+   → analyser des candidats par champ (titre, numéro/tome, année, …)
+     avec score de confiance (règles métier + positions spatiales)     [M12-03]
+   → seuiller les propositions automatiques                            [M12-04]
+   → écran intermédiaire : overlay photo + zones cliquables
+     (conversion coordonnées image → écran)                            [M12-05]
+   → associer une zone à un champ / corriger rapidement                [M12-06]
+   → intégrer à findByPublicationAndIssue / saisie pré-remplie         [M12-07]
+   → fiabiliser sur jeu de couvertures réelles (mesure des erreurs)    [M12-08]
+```
+
+**Décisions structurantes (à confirmer en implémentation, M12-02/03)** :
+- **Données** : faire évoluer `OcrFrameResult` (actuellement `{ text }`) vers un
+  résultat avec zones `{ blocks, lines, elements }`, chacune avec sa
+  `boundingBox` (gap à vérifier dans `expo-mlkit-ocr` — un wrapper natif ou un
+  changement de module peut être nécessaire) ;
+- **Prétraitement** : évaluer `expo-image-manipulator` (candidat, §9) pour le
+  redimensionnement/contraste ; traitement en mémoire, jamais enregistré (R14.2) ;
+- **Analyse** : le classifier `ocrTextParser.ts` évolue vers un module de
+  **candidats** (une liste par champ) + règles de discrimination
+  (`192 PAGES`, `€8,50`, `2026`, `TOME 12` / `N° 125`) ;
+- **Seuils** : un score de confiance ≥ seuil ⇒ proposition automatique ; scores
+  proches ⇒ validation utilisateur ;
+- **Écran** : nouvelle route (`/scan/ocr-review`) ; conversion des coordonnées
+  OCR (référentiel photo, `W×H` capturé) vers l'écran (proportions, `resizeMode`) ;
+- **Perf** (§8) : traitement borné hors bandeau UI, import paresseux conservé.
+
+> **Statut M-12 : livré ✅** — issues M12-01..08 (#205-#212) closés, intégrés à
+> la release **v1.0.0** (modules `ocrImagePreprocessor`, `ocrResultMapper`,
+> `ocrCandidateAnalyzer`, `ocrProposals`, écran `/scan/ocr-review`, PR #214/#215).
+
 ---
 
 ## 6. Scan code-barres
@@ -165,8 +203,8 @@ Deux modes de build :
 - Gradle local pour générer un APK de test.
 
 ### 7.2 EAS Build (release)
-- Configuration de `eas.json` pour les builds de production (AAB) ;
-- Génère l'**AAB** (Android App Bundle) pour le Play Store.
+- Le profil `preview` (`buildType: apk`) génère l'**APK** de la release finale ;
+- L'**APK** est publié comme **GitHub Release** téléchargeable (pas de Play Store, ni d'AAB).
 
 ### 7.3 Configuration `eas.json` (indicative)
 
@@ -181,15 +219,11 @@ Deux modes de build :
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
-    },
-    "production": {
-      "channel": "production",
-      "autoIncrement": true
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
 ```
@@ -224,16 +258,16 @@ Priorités :
 
 ```json
 {
-  "expo": "^52.0.0",
-  "expo-router": "^4.0.0",
-  "expo-sqlite": "^15.0.0",
-  "expo-camera": "^16.0.0",
-  "expo-file-system": "^18.0.0",
-  "expo-document-picker": "^13.0.0",
-  "expo-sharing": "^13.0.0",
-  "react-native": "0.76.x",
-  "react": "18.3.x",
-  "zustand": "^5.0.0"
+  "expo": "~57.0.20",
+  "expo-router": "~57.0.19",
+  "expo-sqlite": "~57.0.2",
+  "expo-camera": "~57.0.4",
+  "expo-file-system": "~57.0.6",
+  "expo-document-picker": "~57.0.1",
+  "expo-sharing": "~57.0.18",
+  "react-native": "0.86.3",
+  "react": "19.2.3",
+  "zustand": "^5.0.15"
 }
 ```
 
@@ -241,12 +275,13 @@ Priorités :
 
 ```json
 {
-  "typescript": "^5.x",
-  "jest": "^29.x",
-  "jest-expo": "~52.0.0",
-  "@testing-library/react-native": "^12.x",
-  "eslint": "^8.x",
-  "eslint-config-expo": "~8.0.0"
+  "typescript": "~6.0.3",
+  "jest": "^29.7.0",
+  "jest-expo": "^57.0.5",
+  "@testing-library/react-native": "13.2.0",
+  "eslint": "^9.39.5",
+  "eslint-config-expo": "~57.0.2",
+  "prettier": "^3.9.6"
 }
 ```
 
@@ -254,10 +289,16 @@ Priorités :
 ```json
 {
   "expo-mlkit-ocr": "^0.2.7",
-  "expo-build-properties": "~57.0.16"
+  "expo-build-properties": "~57.0.17"
 }
 ```
 Plugins (`app.json`) : `["expo-mlkit-ocr", { "iosEngine": "auto" }]` et `["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }]`.
+
+> **M-12 (livré)** : `expo-image-manipulator` **installé** (prétraitement, M12-01 —
+> redimensionnement ≤ 2600 px + ré-encodage JPEG 0.85) ; les **bounding boxes**
+> sont exposées nativement par `expo-mlkit-ocr` (niveau *ligne*, M12-02), sans
+> wrapper : `mapRecognitionResult` les projette en `OcrTextZone`. Les zones sont
+> proposées à la sélection en **liste cliquable** (M12-05, test physique).
 
 ---
 

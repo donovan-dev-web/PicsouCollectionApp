@@ -9,7 +9,7 @@
 ![Database](https://img.shields.io/badge/Base%20de%20donne%CC%81es-Locale%20SQLite-orange?style=for-the-badge&logo=sqlite&logoColor=white&color=47A248)
 ![Offline](https://img.shields.io/badge/Offline%20First-100%25-brightgreen?style=for-the-badge&logo=cloud-offline&color=2E7D32)
 ![Status](https://img.shields.io/badge/Statut-En%20de%CC%81veloppement-informational?style=for-the-badge&color=00629E)
-![Version](https://img.shields.io/badge/Version-0.9.3-yellow?style=for-the-badge&color=FDD835)
+![Version](https://img.shields.io/badge/Version-1.0.0-yellow?style=for-the-badge&color=FDD835)
 
 <br/>
 
@@ -110,7 +110,7 @@ PicsouCollectionApp/
 │   ├── store/             # Zustand stores
 │   └── __tests__/         # Tests Jest (co-localisés)
 │
-├── eas.json               # Profils EAS Build (development / preview / production)
+├── eas.json               # Profils EAS Build (development / preview)
 ├── package.json           # Scripts & dépendances
 └── CONTRIBUTING.md        # Conventions de contribution
 ```
@@ -129,8 +129,8 @@ PicsouCollectionApp/
 | **Caméra** | `expo-camera` |
 | **OCR** | Google ML Kit Text Recognition (`expo-mlkit-ocr`) |
 | **Fichiers** | `expo-file-system` + `expo-sharing` |
-| **Tests** | Jest (`jest-expo`) + `expo-doctor` |
-| **Build / CI** | EAS Build (development / preview / production) + Git Flow, GitHub Actions |
+| **Tests** | Jest (`jest-expo`) + React Native Testing Library + `expo-doctor` |
+| **Build / CI** | EAS Build (development / preview) + Git Flow, GitHub Actions |
 
 ---
 
@@ -153,7 +153,7 @@ PicsouCollectionApp/
 | **10R — Retours test** | Drawer + tabs, formulaire au clavier, torche, import CSV | ✅ Terminé — **v0.9.1** |
 | **10R2 — Retours test** | Drawer SafeZone, onboard + permission, paramètres sous-menus, header fiche, tri, OCR numéro, recherche | ✅ Terminé — **v0.9.2** |
 | **10R3 — Retours test** | Panneau de recherche repliable Collection, drawer scrollable, popup/form, renommage **Mag Collection** | ✅ Terminé — **v0.9.3** |
-| **9 — Tests terrain & publication** | Vrais magazines, Play Store | ⬜ À venir |
+| **9 — Tests terrain & publication** | Vrais magazines, release **APK sur GitHub** (v1.0.0) | ✅ Terminé — **v1.0.0** |
 
 Détail complet : [docs/11-ROADMAP.md](docs/11-ROADMAP.md)
 
@@ -172,7 +172,7 @@ La documentation complète du projet se trouve dans [`docs/`](docs/), organisée
 | [04-FONCTIONAL-SPEC.md](docs/04-FONCTIONAL-SPEC.md) | Spécifications fonctionnelles |
 | [05-ARCHITECTURE.md](docs/05-ARCHITECTURE.md) | Architecture logicielle |
 | [06-DATA-MODEL.md](docs/06-DATA-MODEL.md) | Modèle de données |
-| [07-DATABASE-SCHEMA.md](docs/07-DATABASE-SCHEMA.md) | Schéma SQLite (2 tables) |
+| [07-DATABASE-SCHEMA.md](docs/07-DATABASE-SCHEMA.md) | Schéma SQLite (3 tables) |
 | [08-USER-STORIES.md](docs/08-USER-STORIES.md) | User stories |
 | [09-ISSUE.md](docs/09-ISSUE.md) | Workflow agile |
 | [10-CI-CD.md](docs/10-CI-CD.md) | Pipeline CI/CD |

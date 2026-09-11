@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-
 
 import MultipleBarcodeScreen from '@/app/scan/multiple';
 import { setDepsForTest, type Dependencies } from '@/dependencies';
-import type { Magazine, MagazineListItem } from '@/types';
+import type { Magazine } from '@/types';
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
@@ -39,16 +39,11 @@ function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
   };
 }
 
-function asListItem(magazine: Magazine, quantity = 0): MagazineListItem {
-  return { ...magazine, quantity };
-}
-
-function stubDeps(findMany: jest.Mock<Promise<MagazineListItem[]>, [string]>): Dependencies {
+function stubDeps(findMany: jest.Mock<Promise<Magazine[]>, [string]>): Dependencies {
   return {
     magazineRepository: {
       findManyByBarcode: findMany,
     } as unknown as Dependencies['magazineRepository'],
-    collectionRepository: {} as Dependencies['collectionRepository'],
     settingsRepository: {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: jest.fn().mockResolvedValue(undefined),
@@ -81,8 +76,8 @@ describe('MultipleBarcodeScreen', () => {
     const findMany = jest
       .fn()
       .mockResolvedValue([
-        asListItem(makeMagazine({ id: 'mag-1', issueNumber: 547 }), 1),
-        asListItem(makeMagazine({ id: 'mag-2', issueNumber: 548 }), 0),
+        makeMagazine({ id: 'mag-1', issueNumber: 547 }),
+        makeMagazine({ id: 'mag-2', issueNumber: 548 }),
       ]);
     setDepsForTest(stubDeps(findMany));
 

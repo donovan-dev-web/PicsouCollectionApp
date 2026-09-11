@@ -124,7 +124,7 @@ create_milestone "M-05 — Caméra / OCR" "Identification par OCR" "2027-01-31"
 create_milestone "M-06 — Parcours complet" "Identification → Possédé / Absent" "2027-02-28"
 create_milestone "M-07 — Export / Import" "Sauvegarde et restauration JSON" "2027-03-31"
 create_milestone "M-08 — Optimisation & qualité" "Performance, tests, couverture" "2027-04-30"
-create_milestone "M-09 — Tests terrain & publication" "Validation réelle, build Play Store" "2027-05-31"
+create_milestone "M-09 — Tests terrain & publication" "Validation réelle, publication APK GitHub (release v1.0.0)" "2027-05-31"
 
 # ---------------------------------------------------------
 # 4. ISSUES (1 issue = 1 user story)
@@ -170,7 +170,7 @@ declare -a ISSUES=(
   # ---- Épique 6 — Qualité & publication ----
   "US-QA-01|[Quality] Respect du design system|M-03 — Interface principale|epic/quality,priority-medium,to-do|En tant que **developpeur**, je veux **respecter le design system** (clair/sombre) afin de **garantir une cohérence visuelle**.|- Les couleurs et typographies du design system sont appliquées||- Le mode clair et le mode sombre fonctionnent"
   "US-QA-02|[Quality] Couverture de tests|M-08 — Optimisation & qualité|epic/quality,priority-high,to-do|En tant que **developpeur**, je veux **des tests unitaires et composants** afin de **garantir la fiabilité du code**.|- Les services/repositories sont testés||- Les écrans critiques sont testés||- Un rapport de coverage est généré"
-  "US-QA-03|[Quality] Build de production|M-09 — Tests terrain & publication|epic/quality,priority-medium,to-do|En tant que **developpeur**, je veux **générer un build de production** afin de **préparer la publication Play Store**.|- EAS Build produit un AAB||- Le build local produit un APK||- L'application fonctionne en production"
+  "US-QA-03|[Quality] Build de production|M-09 — Tests terrain & publication|epic/quality,priority-medium,to-do|En tant que **developpeur**, je veux **générer un build de production (APK de release)** afin de **publier la version finale (v1.0.0)**.|- Le build local produit un APK installable||- Le profil EAS preview produit l'APK de la release finale||- L'application fonctionne en production||- L'APK est publié comme GitHub Release téléchargeable"
 )
 
 # ---------------------------------------------------------
@@ -208,7 +208,7 @@ declare -a ISSUES_EXTRA=(
   "SETUP-05|Installer Zustand (gestion d'état)|M-01 — Initialisation technique|infra,to-do|Installer Zustand pour la gestion d'état global.||- Ajouter la dépendance||- Définir les stores de base"
   "SETUP-06|Configurer ESLint + Prettier|M-01 — Initialisation technique|infra,to-do|Configurer les outils de qualité de code.||- Configurer ESLint||- Configurer Prettier||- Ajouter le script lint"
   "SETUP-07|Configurer Jest et la couverture|M-01 — Initialisation technique|test,to-do|Configurer Jest + React Native Testing Library.||- Initialiser la config Jest||- Ajouter une config de couverture (>80 %)"
-  "SETUP-08|Configurer EAS Build (eas.json)|M-01 — Initialisation technique|infra,to-do|Configurer le build de production EAS.||- Créer eas.json (profils dev/preview/production)||- Vérifier la génération d'un AAB"
+  "SETUP-08|Configurer EAS Build (eas.json)|M-01 — Initialisation technique|infra,to-do|Configurer le build EAS (APK de release).||- Créer eas.json (profils dev/preview)||- Vérifier la génération d'un APK (buildType apk)"
   "SETUP-09|Configurer le setup GitHub (script kanban)|M-01 — Initialisation technique|infra,done|Automatiser la création des labels, milestones, issues et l'association au kanban.|- Créer le script d'initialisation idempotent||- Créer labels, milestones, 27 user stories + issues complémentaires||- Associer toutes les issues au GitHub Project v2"
   "SETUP-10|Tester l'installation sur téléphone|M-01 — Initialisation technique|infra,to-do|Vérifier l'installation et le débogage sur un téléphone Android physique.|- Lancer le développement build sur téléphone||- Valider le fonctionnement de base"
 )

@@ -210,7 +210,10 @@ Les milestones correspondent aux **phases de la roadmap** (`11-ROADMAP.md`).
 | `M-10` | Refonte UI/UX « Vault Lisible » | SafeZone, contraste AA, TabBar icônes, parcours <3s → v0.9.0 |
 | `M-10R` | Retours test physique (M-10) | Import CSV, drawer + tabs, form clavier, torche/FAB/safezone → v0.9.1 |
 | `M-10R2` | 2ᵉ passe retours test physique | SafeZone drawer, permission caméra + onboarding 1er lancement, popup résultat, form valider header, paramètres sous-menus, header fiche, tri collection, OCR numéro, écran Recherche → v0.9.2 (livrée, PR #176) |
-| `M-09` | Tests terrain & publication | Validation réelle, build Play Store → v1.0.0 (M09-01 panneau recherche #177) |
+| `M-09` | Tests terrain & publication | Validation réelle, retours physique → v0.9.3 (M09-01 panneau recherche #177) |
+| `M-11` | Review & Qualité v1.0.0 | Audit doc ↔ code, revue, refactor, tests, retrait Play Store, publication APK GitHub → v1.0.0 (#181-#190) |
+| `M-12` | OCR interactif & fiabilisation (v1.1.0) | Prétraitement de la photo, OCR texte + bounding boxes, analyse de candidats par champ (titre, numéro/tome, année, pages, prix) avec confiance, propositions automatiques, sélection interactive des zones, correction rapide, intégration à la recherche, jeu de test réel → livré dans **v1.0.0** (#205-#212) |
+| `M-12R` | Corrections test physique M-12 | Corrections post-test physique M-12 (PR #215) : panneau d'infos caméra retiré, popup résultat reconstruite, zones cliquables → liste de textes, réticule retiré, code-barres en 1ʳᵉ partie de formulaire, écran Recherche édition + numéro → **v1.0.0** |
 
 ### Règle d'attribution
 - Chaque milestone a une **date de fin cible** (indicative) et une **description** ;
@@ -291,6 +294,26 @@ M-10/M-10R/M-10R2 terminées, correction issues ouvertes pendant la Phase 9
 |---|---|---|---|
 | M09-01 | Collection : panneau de recherche repliable (bouton Rechercher) | #177 | En cours (PR #178) |
 
+**Milestone M-12 « OCR interactif & fiabilisation » (v1.1.0)** — réalisé avant la
+release finale et **livré dans v1.0.0** · milestone GitHub #17 (clos) · issues
+**#205 à #212** · project #5
+
+| Issue | Titre | GitHub | Statut |
+|---|---|---|---|
+| M12-01 | OCR : prétraitement de la photo avant reconnaissance | #205 | Done |
+| M12-02 | OCR : récupérer texte + bounding boxes (ML Kit) | #206 | Done |
+| M12-03 | OCR : analyse de candidats par champ + score de confiance | #207 | Done |
+| M12-04 | OCR : propositions automatiques et seuil de confiance | #208 | Done |
+| M12-05 | OCR : écran interactif — zones de texte cliquables (liste) | #209 | Done |
+| M12-06 | OCR : sélection d'une zone pour un champ + correction rapide | #210 | Done |
+| M12-07 | OCR : brancher les valeurs validées à la recherche / l'ajout | #211 | Done |
+| M12-08 | OCR : jeu de test réel, mesure des erreurs, ajustement des règles | #212 | Done |
+
+Livré : 8 issues closes (PR #214 M-12 ; PR #215 M-12R corrections du test
+physique) → incluses dans la release **v1.0.0** (#189). Voir
+`08-USER-STORIES.md` §11 (US-OCR-01..08) et `12-TESTING.md` §5.4 (synthèse de la
+passe device).
+
 ### 6.2 Décisions de conception et causes racines (retours terrain)
 
 Les retours test physique ont produit des choix structurants conservés ici.
@@ -350,6 +373,32 @@ Les retours test physique ont produit des choix structurants conservés ici.
   (publication + numéro, `findByPublicationAndIssue`) ; **trouvé** → résultat
   (Possédé/Absent) ; **non trouvé** → repli `/scan/manual` pré-rempli. Le bouton
   « Ajouter » de l'accueil reste un ajout.
+
+**M-12 / M-12R (v1.0.0)**
+
+*Décisions (implémentation et test physique M-12)*
+- **M12-01 Prétraitement** : `expo-image-manipulator` en local, borné
+  (≤ 2600 px, ré-encodage JPEG 0.85) et **éphémère** (aucune image stockée) ;
+  le contraste n'est pas exposé nativement → reporté (documenté §8).
+- **M12-02 Granularité** : niveau **ligne** ML Kit (texte + bounding boxes en
+  pixels de l'image d'origine) ; mappé par `mapRecognitionResult` → `OcrTextZone`.
+- **M12-05 Sélection des zones** : remplacement de l'overlay cliquable sur la
+  photo par une **liste des textes détectés** (choix validé sur device : tap
+  image imprécis sur couvertures) — la photo reste affichée, chaque zone reste
+  cliquable.
+- **M12-R1 Panneau caméra** : le panneau d'informations détectées (Nom /
+  Numéro / Édition-Date) affiché en standard est **retiré** (bruit visuel).
+- **M12-R2 Popup résultat** : recalculée sur le modèle « carte centrée » du scan
+  code-barres (backdrop + feuille, lisible sur petits écrans).
+- **M12-R4 Réticule** : le réticule jaune est retiré des surcouches OCR et
+  code-barres (non informatif, inutile sans overlay).
+- **M12-R5 Formulaire** : le champ **code-barres** rejoint la 1ʳᵉ partie du
+  formulaire d'ajout (visible sans ouvrir la section Détails).
+- **M12-R6 Recherche** : liste déroulante **« Édition »** (défaut : toutes les
+  éditions) + **numéro**, recherche directe dans la collection (fini le champ
+  « nom » inefficace en brocante).
+- **CSV v2** : une ligne = une édition ; les doublons d'exemplaires sont
+  **ignorés** à l'import et retirés de l'exemple (`collection-exemple.csv`).
 
 ---
 
@@ -538,7 +587,7 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 À l'initialisation du dépôt GitHub, configurer :
 
 - [ ] **Labels** : types, priorités, épiques, complexité (section 5) ;
-- [ ] **Milestones** : M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
+- [ ] **Milestones** : M-01 à M-12 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (section 6) ;
 - [ ] **Project** : board Kanban "Picsou Collection" (section 10) ;
 - [ ] **Branch protection** sur `main` et `develop` (section 7) ;
 - [ ] **Templates d'issue** (bug + tâche) via `.github/ISSUE_TEMPLATE/` ;
@@ -556,6 +605,6 @@ Utiliser les **workflows natifs de GitHub Projects** pour déplacer automatiquem
 | Outil de suivi | GitHub Projects (Kanban) |
 | Découpage | User story → issues → tasks |
 | Labels | types, priorités, épiques, complexité, statuts |
-| Milestones | M-01 à M-10 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
+| Milestones | M-01 à M-12 (+ `M-04R`, `M-07R`, `M-10R`, `M-10R2`) (phases roadmap) |
 | Versionnage | Semantic Versioning |
 | PR | Template + CI + revue + DoD |

@@ -1,19 +1,21 @@
 import type { Database } from '@/database/types';
 import { getDatabase } from '@/database/db';
+// Migration avant création des dépôts : toutes les tables sont à jour.
 import { migrate } from '@/database/migrations';
-import { CollectionRepository } from '@/database/repositories/collection-repository';
 import { MagazineRepository } from '@/database/repositories/magazine-repository';
 import { SettingsRepository } from '@/database/repositories/settings-repository';
 import { IdentificationService } from '@/identification/identificationService';
 import type { OcrEngine } from '@/identification/ocr/ocrTypes';
 import { MlKitOcrEngine } from '@/identification/ocr/mlKitOcrEngine';
+import { NoopOcrEngine } from '@/identification/ocr/ocrEngine';
+import { ExpoImagePreprocessor } from '@/identification/ocr/ocrImagePreprocessor';
+import { Platform } from 'react-native';
 import { BackupService } from '@/backup/backup-service';
 import { NativeFileGateway } from '@/backup/native-file-gateway';
 import type { FileGateway } from '@/backup/file-gateway';
 
 export interface Dependencies {
   magazineRepository: MagazineRepository;
-  collectionRepository: CollectionRepository;
   settingsRepository: SettingsRepository;
   identificationService: IdentificationService;
   ocrEngine: OcrEngine;
@@ -43,14 +45,19 @@ export async function initialize(): Promise<Dependencies> {
   }
   const db = await dbPromise;
   if (!deps) {
-    // Moteur OCR natif (ML Kit via expo-mlkit-ocr). Sur CI / hors Dev Build,
-    // l'import est paresseux dans `recognize` : il ne casse pas les tests.
-    const ocrEngine: OcrEngine = new MlKitOcrEngine();
+    // Moteur OCR natif (ML Kit via expo-mlkit-ocr) sur Android/iOS, avec
+    // prétraitement M-12 (redimensionnement + ré-encodage) ; sur le web
+    // (aucun module natif) on utilise un moteur inerte : le flux caméra reste
+    // câblé et la CI démarre sans blocage.
+    const ocrEngine: OcrEngine =
+      Platform.OS === 'android' || Platform.OS === 'ios'
+        ? new MlKitOcrEngine(new ExpoImagePreprocessor())
+        : new NoopOcrEngine();
+    const magazineRepository = new MagazineRepository(db);
     deps = {
-      magazineRepository: new MagazineRepository(db),
-      collectionRepository: new CollectionRepository(db),
+      magazineRepository,
       settingsRepository: new SettingsRepository(db),
-      identificationService: new IdentificationService(new MagazineRepository(db)),
+      identificationService: new IdentificationService(magazineRepository),
       ocrEngine,
       backupService: new BackupService(db),
       fileGateway: new NativeFileGateway(),

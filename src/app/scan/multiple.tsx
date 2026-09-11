@@ -111,7 +111,7 @@ export default function MultipleBarcodeScreen() {
                         <Text style={styles.issue}>n° {item.issueNumber}</Text>
                       ) : null}
                     </View>
-                    <StatusBadge owned={item.quantity > 0} quantity={item.quantity} />
+                    <StatusBadge />
                   </Pressable>
                 )}
               />
@@ -156,18 +156,6 @@ function makeStyles(colors: ThemeColors) {
       fontSize: 14,
       color: colors.textSecondary,
       textAlign: 'center',
-    },
-    message: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      marginTop: Spacing.four,
-    },
-    error: {
-      fontSize: 15,
-      color: colors.danger,
-      textAlign: 'center',
-      marginTop: Spacing.four,
     },
     list: {
       gap: Spacing.two,

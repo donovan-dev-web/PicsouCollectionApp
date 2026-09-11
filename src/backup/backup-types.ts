@@ -4,12 +4,6 @@ export const BACKUP_VERSION = 1;
 /** Format de fichier de sauvegarde choisi par l'utilisateur (US-BK-04/05). */
 export type BackupFormat = 'json' | 'csv';
 
-export type BackupCopy = {
-  id: string;
-  notes: string | null;
-  dateAdded: string;
-};
-
 export type BackupMagazine = {
   id: string;
   publication: string;
@@ -21,7 +15,8 @@ export type BackupMagazine = {
   barcode: string | null;
   notes: string | null;
   ocrText: string | null;
-  copies: BackupCopy[];
+  createdAt: string | null;
+  updatedAt: string | null;
 };
 
 export type BackupFile = {
@@ -34,5 +29,4 @@ export type BackupFile = {
 
 export type ImportSummary = {
   magazines: number;
-  copies: number;
 };

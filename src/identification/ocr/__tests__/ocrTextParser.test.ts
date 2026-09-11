@@ -142,7 +142,7 @@ describe('parseOcrText — M10R2-09 exclusions renforcées', () => {
 });
 
 describe('isConfident', () => {
-  it('exige nom + numéro pour déclencher la recherche (US-ID-08)', () => {
+  it('exige à la fois publication et numéro pour déclencher la recherche', () => {
     const publicationOnly = parseOcrText('Picsou Magazine');
     const numberOnly = parseOcrText('547');
     const complete = parseOcrText('Picsou Magazine\nN° 547');
@@ -164,5 +164,19 @@ describe('isConfident', () => {
 
   it('le seuil MIN_CONFIDENCE reste disponible pour l’étiquette', () => {
     expect(MIN_CONFIDENCE).toBe(0.5);
+  });
+});
+
+describe('parseOcrText — repli « nombre isolé »', () => {
+  it('rejette un nombre isolé précédé dans le texte d’un nombre de pages', () => {
+    const result = parseOcrText('Spirou\n10 pages\n7');
+
+    expect(result).toMatchObject({ issueNumber: null });
+  });
+
+  it('ignore un repli de 4 chiffres ressemblant à une date complète', () => {
+    const result = parseOcrText('Le Journal de Mickey\n1200');
+
+    expect(result).toMatchObject({ issueNumber: null });
   });
 });

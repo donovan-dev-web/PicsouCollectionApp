@@ -7,9 +7,6 @@ import type { Magazine } from '@/types';
 
 const mockReplace = jest.fn();
 const mockBack = jest.fn();
-const mockAddCopy = jest.fn();
-const mockCountByMagazine = jest.fn();
-const mockAddExistingCopy = jest.fn();
 
 let mockContinuousParam: Record<string, string> = {};
 
@@ -32,12 +29,6 @@ jest.mock('expo-camera', () => {
   };
 });
 
-const mockUseCollectionStore = jest.fn().mockReturnValue(mockAddExistingCopy);
-
-jest.mock('@/store/use-collection-store', () => ({
-  useCollectionStore: (selector: (s: unknown) => unknown) => mockUseCollectionStore(selector),
-}));
-
 function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
   return {
     id: 'mag-1',
@@ -59,10 +50,6 @@ function makeMagazine(overrides: Partial<Magazine> = {}): Magazine {
 function stubDeps(overrides: Partial<Dependencies> = {}): Dependencies {
   return {
     magazineRepository: {} as Dependencies['magazineRepository'],
-    collectionRepository: {
-      addCopy: mockAddCopy,
-      countByMagazine: mockCountByMagazine,
-    } as unknown as Dependencies['collectionRepository'],
     settingsRepository: {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: jest.fn().mockResolvedValue(undefined),
@@ -97,19 +84,8 @@ describe('BarcodeScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
     mockReplace.mockClear();
-    mockAddCopy.mockClear();
-    mockCountByMagazine.mockClear();
-    mockAddExistingCopy.mockClear();
     mockContinuousParam = {};
     mockPermission = { granted: true, canAskAgain: true, status: 'granted' };
-    mockAddCopy.mockResolvedValue({
-      id: 'c1',
-      magazineId: 'mag-1',
-      notes: null,
-      dateAdded: '2026-09-02T00:00:00Z',
-    });
-    mockCountByMagazine.mockResolvedValue(1);
-    mockAddExistingCopy.mockResolvedValue(undefined);
     setDepsForTest(stubDeps());
   });
 
@@ -119,7 +95,7 @@ describe('BarcodeScreen', () => {
     expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('ne lance la recherche qu’après stabilisation de la lecture (3 lectures identiques)', async () => {
+  it('ne cherche le magazine qu’après plusieurs lectures identiques du même code', async () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(
       stubDeps({
@@ -210,8 +186,8 @@ describe('BarcodeScreen', () => {
     const identifyByBarcode = jest.fn().mockResolvedValue({
       status: 'ambiguous',
       magazines: [
-        { ...makeMagazine({ id: 'mag-1', issueNumber: 547 }), quantity: 1 },
-        { ...makeMagazine({ id: 'mag-2', issueNumber: 548 }), quantity: 0 },
+        { ...makeMagazine({ id: 'mag-1', issueNumber: 547 }) },
+        { ...makeMagazine({ id: 'mag-2', issueNumber: 548 }) },
       ],
     });
     setDepsForTest(
@@ -286,11 +262,10 @@ describe('BarcodeScreen', () => {
     expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('en mode continu, demande la confirmation doublon puis ajoute et reprend le scan', async () => {
+  it('en mode continu, une édition possédée affiche « Déjà dans votre collection » puis continue', async () => {
     mockContinuousParam = { continuous: '1' };
     const magazine = makeMagazine();
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'found', magazine });
-    mockCountByMagazine.mockResolvedValue(1);
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -302,23 +277,20 @@ describe('BarcodeScreen', () => {
     render(<BarcodeScreen />);
 
     await scanTimes('5901234123457');
-    await waitFor(() => expect(screen.getByTestId('pending-confirm')).toBeTruthy());
-    expect(screen.getByTestId('pending-confirm')).toHaveTextContent(/Exemplaires actuels : 1/);
+    await waitFor(() => expect(screen.getByTestId('pending-owned')).toBeTruthy());
+    expect(screen.getByText('Déjà dans votre collection')).toBeTruthy();
+    expect(screen.getByText('Picsou Magazine n° 547')).toBeTruthy();
     expect(mockReplace).not.toHaveBeenCalled();
 
-    fireEvent.press(screen.getByTestId('pending-confirm-add'));
-    await waitFor(() => expect(screen.getByTestId('pending-success')).toBeTruthy());
-    expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1');
-
-    fireEvent.press(screen.getByTestId('pending-success-ok'));
-    await waitFor(() => expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy());
+    fireEvent.press(screen.getByTestId('pending-owned-ok'));
+    await waitFor(() => expect(screen.queryByTestId('pending-owned')).toBeNull());
+    expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('en mode continu, ajoute directement une édition non possédée puis confirme', async () => {
+  it('en mode continu, le panier déjà en collection peut être fermé via la croix', async () => {
     mockContinuousParam = { continuous: '1' };
     const magazine = makeMagazine();
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'found', magazine });
-    mockCountByMagazine.mockResolvedValue(0);
     setDepsForTest(
       stubDeps({
         identificationService: {
@@ -330,13 +302,14 @@ describe('BarcodeScreen', () => {
     render(<BarcodeScreen />);
 
     await scanTimes('5901234123457');
+    await waitFor(() => expect(screen.getByTestId('pending-owned')).toBeTruthy());
 
-    await waitFor(() => expect(screen.getByTestId('pending-success')).toBeTruthy());
-    expect(screen.queryByTestId('pending-confirm')).toBeNull();
-    expect(mockAddExistingCopy).toHaveBeenCalledWith('mag-1');
+    fireEvent.press(screen.getByTestId('pending-close'));
+    await waitFor(() => expect(screen.queryByTestId('pending-owned')).toBeNull());
+    expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
-  it('en mode continu, un code inconnu propose la saisie manuelle', async () => {
+  it('en mode continu, un code inconnu propose la saisie manuelle ou de continuer', async () => {
     mockContinuousParam = { continuous: '1' };
     const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'unknown' });
     setDepsForTest(
@@ -357,6 +330,10 @@ describe('BarcodeScreen', () => {
       pathname: '/scan/manual',
       params: { barcode: '5901234123457' },
     });
+
+    fireEvent.press(screen.getByTestId('pending-unknown-continue'));
+    await waitFor(() => expect(screen.queryByTestId('pending-unknown')).toBeNull());
+    expect(screen.getByText(/Alignez le code-barres/)).toBeTruthy();
   });
 
   it('permission définitivement refusée : propose d ouvrir les réglages', () => {
@@ -369,28 +346,5 @@ describe('BarcodeScreen', () => {
     fireEvent.press(screen.getByTestId('permission-settings'));
     expect(openSettings).toHaveBeenCalled();
     openSettings.mockRestore();
-  });
-
-  it('la fiche doublon peut être fermée via la croix et reprend le scan', async () => {
-    mockContinuousParam = { continuous: '1' };
-    const magazine = makeMagazine();
-    const identifyByBarcode = jest.fn().mockResolvedValue({ status: 'found', magazine });
-    mockCountByMagazine.mockResolvedValue(1);
-    setDepsForTest(
-      stubDeps({
-        identificationService: {
-          identifyByBarcode,
-        } as unknown as Dependencies['identificationService'],
-      }),
-    );
-
-    render(<BarcodeScreen />);
-
-    await scanTimes('5901234123457');
-    await waitFor(() => expect(screen.getByTestId('pending-confirm')).toBeTruthy());
-
-    fireEvent.press(screen.getByTestId('pending-close'));
-    await waitFor(() => expect(screen.queryByTestId('pending-confirm')).toBeNull());
-    expect(mockAddExistingCopy).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 
 import CollectionScreen from '@/app/(tabs)/collection/index';
 import { useCollectionStore } from '@/store/use-collection-store';
@@ -6,10 +6,11 @@ import type { MagazineListItem } from '@/types';
 
 const mockUseFocusEffect = jest.fn();
 const mockUseLocalSearchParams = jest.fn<Record<string, string | string[] | undefined>, []>();
+const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => mockUseFocusEffect(cb),
-  useRouter: () => ({ push: jest.fn(), setParams: jest.fn() }),
+  useRouter: () => ({ push: mockPush, setParams: jest.fn() }),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 
@@ -27,7 +28,6 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 1,
   },
   {
     id: 'm2',
@@ -42,7 +42,6 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 2,
   },
   {
     id: 'm3',
@@ -57,13 +56,13 @@ const magazines: MagazineListItem[] = [
     ocrText: null,
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 0,
   },
 ];
 
 describe('CollectionScreen', () => {
   beforeEach(() => {
     mockUseFocusEffect.mockClear();
+    mockPush.mockClear();
     mockUseFocusEffect.mockImplementation((cb: () => void) => cb());
     mockUseLocalSearchParams.mockReturnValue({});
     useCollectionStore.setState({
@@ -71,7 +70,6 @@ describe('CollectionScreen', () => {
       loading: false,
       error: null,
       load: jest.fn(),
-      loadRecent: jest.fn(),
     });
   });
 
@@ -176,13 +174,10 @@ describe('CollectionScreen', () => {
     expect(screen.getAllByTestId('magazine-card')).toHaveLength(3);
   });
 
-  it('affiche le badge Absent pour une edition sans exemplaire', () => {
+  it('affiche le badge Possédé sur chaque édition', () => {
     render(<CollectionScreen />);
 
-    const cards = screen.getAllByTestId('magazine-card');
-    expect(cards[2]).toBeTruthy();
-    expect(screen.getAllByText(/Absent/).length).toBe(1);
-    expect(screen.getAllByText(/Possédé/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByTestId('status-owned')).toHaveLength(3);
   });
 
   it('trie par numero decroissant', () => {
@@ -192,12 +187,8 @@ describe('CollectionScreen', () => {
     fireEvent.press(screen.getByTestId('filter-sort'));
     fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
 
-    const data = screen.getByTestId('collection-list').props.data;
-    expect(data.map((m: MagazineListItem) => m.publication)).toEqual([
-      'Picsou Magazine',
-      'Mickey Parade',
-      'Super Picsou Géant',
-    ]);
+    const cards = screen.getAllByTestId('magazine-card');
+    expect(within(cards[0]).getByText('Picsou Magazine')).toBeTruthy();
   });
 
   it('combine tri decroissant et filtre edition', () => {
@@ -209,9 +200,17 @@ describe('CollectionScreen', () => {
     fireEvent.press(screen.getByTestId('filter-sort'));
     fireEvent.press(screen.getByTestId('filter-sort-option-Numéro ↓'));
 
-    const data = screen.getByTestId('collection-list').props.data;
-    expect(data).toHaveLength(1);
-    expect(data[0].publication).toBe('Mickey Parade');
+    const cards = screen.getAllByTestId('magazine-card');
+    expect(cards).toHaveLength(1);
+    expect(within(cards[0]).getByText('Mickey Parade')).toBeTruthy();
+  });
+
+  it('propose un accès rapide au scan dans l’en-tête (FAB)', () => {
+    render(<CollectionScreen />);
+
+    fireEvent.press(screen.getByTestId('header-scan'));
+
+    expect(mockPush).toHaveBeenCalledWith('/scan');
   });
 });
 
@@ -229,7 +228,6 @@ describe('CollectionScreen (pagination)', () => {
     ocrText: null,
     createdAt: `2026-09-01T10:00:0${i % 10}Z`,
     updatedAt: '2026-09-01T10:00:00Z',
-    quantity: 1,
   }));
 
   const openFilters = () => fireEvent.press(screen.getByTestId('filter-toggle'));
@@ -240,7 +238,6 @@ describe('CollectionScreen (pagination)', () => {
       loading: false,
       error: null,
       load: jest.fn(),
-      loadRecent: jest.fn(),
     });
   });
 

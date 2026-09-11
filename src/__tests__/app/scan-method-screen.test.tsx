@@ -55,7 +55,7 @@ describe('ScanMethodScreen', () => {
     expect(mockBack).toHaveBeenCalled();
   });
 
-  it('redirige vers l accueil si aucune navigation arrière (deep-link)', () => {
+  it('revient à l’accueil quand l’écran est ouvert directement sans historique', () => {
     mockCanGoBack.mockReturnValueOnce(false);
     render(<ScanMethodScreen />);
     fireEvent.press(screen.getByTestId('method-cancel'));

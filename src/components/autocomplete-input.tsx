@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Spacing, type ThemeColors } from '@/constants/theme';
@@ -36,17 +37,17 @@ export function AutocompleteInput({
   const styles = makeStyles(colors);
 
   const normalizedInput = normalize(value);
-  const suggestions =
-    normalizedInput.length > 0
-      ? [...new Set(options)]
-          .filter((option) => {
-            const normalizedOption = normalize(option);
-            return (
-              normalizedOption !== normalizedInput && normalizedOption.includes(normalizedInput)
-            );
-          })
-          .slice(0, 5)
-      : [];
+  const suggestions = useMemo(() => {
+    if (normalizedInput.length === 0) {
+      return [];
+    }
+    return [...new Set(options)]
+      .filter((option) => {
+        const normalizedOption = normalize(option);
+        return normalizedOption !== normalizedInput && normalizedOption.includes(normalizedInput);
+      })
+      .slice(0, 5);
+  }, [normalizedInput, options]);
 
   return (
     <View style={styles.field}>
@@ -66,6 +67,7 @@ export function AutocompleteInput({
           data={suggestions}
           keyExtractor={(item) => item}
           keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
           renderItem={({ item }) => (
             <Pressable
               style={({ pressed }) => [styles.suggestion, pressed && styles.pressed]}
