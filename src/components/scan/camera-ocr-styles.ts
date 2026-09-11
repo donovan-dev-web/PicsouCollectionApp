@@ -21,22 +21,6 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
     camera: {
       flex: 1,
     },
-    /**
-     * Retours test physique : le cadre de détection est un guide visuel ré-ancré
-     * en haut de l'écran. L'OCR analyse toujours l'image entière.
-     */
-    analyzingLayout: {
-      justifyContent: 'flex-start',
-      paddingTop: insets.top + 110,
-    },
-    reticle: {
-      width: 200,
-      height: 200,
-      borderWidth: 3,
-      borderColor: colors.accent,
-      borderRadius: 16,
-      backgroundColor: 'transparent',
-    },
     scanHint: {
       marginTop: Spacing.three,
       fontSize: 14,
@@ -62,39 +46,29 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
       fontSize: 14,
       color: '#FFFFFF',
     },
-    detectedBoard: {
-      alignSelf: 'stretch',
-      marginTop: Spacing.three,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      borderRadius: 12,
-      paddingVertical: Spacing.two,
-      paddingHorizontal: Spacing.three,
-      gap: 6,
+    /**
+     * Popup de résultat calée sur le scan code-barres (retours test physique) :
+     * un voile plein écran (`backdrop`) avec une carte centrée, largeur et
+     * hauteur contraintes par des marges identiques horizontal / vertical.
+     */
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
     },
-    detectedRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: Spacing.two,
-    },
-    detectedLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    detectedValue: {
-      fontSize: 14,
-      lineHeight: 20,
-      fontWeight: '600',
-      color: colors.accent,
-    },
-    detectedValueEmpty: {
-      color: 'rgba(255,255,255,0.75)',
-      fontWeight: '400',
+    sheetScroll: {
+      flexGrow: 1,
+      justifyContent: 'center',
     },
     resultCard: {
       alignSelf: 'center',
+      marginHorizontal: Spacing.four,
+      marginVertical: Spacing.four,
+      maxWidth: 520,
       width: '88%',
       backgroundColor: colors.backgroundElement,
       borderRadius: 16,
@@ -134,26 +108,6 @@ export function makeCameraOcrStyles(colors: ThemeColors, insets: { top: number; 
       color: colors.text,
       textAlign: 'center',
       lineHeight: 22,
-    },
-    fieldWrap: {
-      alignSelf: 'stretch',
-      gap: 6,
-    },
-    fieldLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    input: {
-      alignSelf: 'stretch',
-      backgroundColor: colors.background,
-      borderRadius: 10,
-      paddingVertical: Spacing.three,
-      paddingHorizontal: Spacing.three,
-      fontSize: 16,
-      color: colors.text,
     },
     primaryButton: {
       alignSelf: 'stretch',

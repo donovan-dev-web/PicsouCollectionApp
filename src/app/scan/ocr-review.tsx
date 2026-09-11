@@ -8,7 +8,6 @@ import { getDeps } from '@/dependencies';
 import { extractFieldValue, type OcrField } from '@/identification/ocr/ocrCandidateAnalyzer';
 import type { OcrProposals } from '@/identification/ocr/ocrProposals';
 import { buildManualParams } from '@/components/scan/ocr-analysis';
-import { mapBoxToViewRect } from '@/components/scan/ocr-coords';
 import { consumePendingOcrReview, type OcrReviewPayload } from '@/lib/ocr-pending';
 import { HitTarget, Spacing, type ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/hooks/use-theme';
@@ -61,7 +60,6 @@ export default function OcrReviewScreen() {
   );
   const [activeField, setActiveField] = useState<OcrField | null>(null);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
-  const [viewSize, setViewSize] = useState<{ width: number; height: number } | null>(null);
   const [searching, setSearching] = useState(false);
 
   const setField = (field: OcrField, value: string, source: FieldValue['source']) => {
@@ -166,22 +164,6 @@ export default function OcrReviewScreen() {
     router.replace({ pathname: '/scan/manual', params: buildManualParams(detected) });
   };
 
-  const zoneBoxes =
-    viewSize !== null && viewSize.width > 0
-      ? payload.zones
-          .map((zone) => ({
-            zone,
-            box: mapBoxToViewRect(
-              zone.boundingBox,
-              payload.width,
-              payload.height,
-              viewSize.width,
-              viewSize.height,
-            ),
-          }))
-          .filter((z) => z.box !== null)
-      : [];
-
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
@@ -199,15 +181,12 @@ export default function OcrReviewScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.help}>
-          Touchez un texte sur la photo dans le champ à compléter, ou utilisez la barre de zones.
+          Corrigez les champs ci-dessous, ou choisissez un texte détecté dans la liste pour remplir
+          le champ à compléter.
         </Text>
 
         <View
           style={[styles.photoFrame, { aspectRatio: payload.width / Math.max(payload.height, 1) }]}
-          onLayout={(e) => {
-            const { width, height } = e.nativeEvent.layout;
-            setViewSize({ width, height });
-          }}
           testID="ocr-review-photo">
           <Image
             source={{ uri: payload.uri }}
@@ -215,29 +194,42 @@ export default function OcrReviewScreen() {
             resizeMode="contain"
             testID="ocr-review-image"
           />
-          {zoneBoxes.map(({ zone, box }) => {
-            if (box === null) {
-              return null;
-            }
-            const isSelected = selectedZoneId === zone.id;
-            return (
-              <Pressable
-                key={zone.id}
-                style={[styles.zone, box, isSelected && styles.zoneSelected]}
-                onPress={() => {
-                  if (activeField) {
-                    assignZone(activeField, zone.text, zone.id);
-                  } else {
-                    setSelectedZoneId(zone.id === selectedZoneId ? null : zone.id);
-                  }
-                }}
-                testID={`ocr-zone-${zone.id}`}
-                accessibilityRole="button"
-                accessibilityLabel={`Zone : ${zone.text}`}
-              />
-            );
-          })}
         </View>
+
+        {payload.zones.length > 0 && (
+          <View style={styles.zoneList} testID="ocr-zone-list">
+            <Text style={styles.zoneListTitle}>Textes détectés</Text>
+            {payload.zones.map((zone) => {
+              const isSelected = selectedZoneId === zone.id;
+              return (
+                <Pressable
+                  key={zone.id}
+                  style={({ pressed }) => [
+                    styles.zoneRow,
+                    isSelected && styles.zoneRowSelected,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() => {
+                    if (activeField) {
+                      assignZone(activeField, zone.text, zone.id);
+                    } else {
+                      setSelectedZoneId(zone.id === selectedZoneId ? null : zone.id);
+                    }
+                  }}
+                  testID={`ocr-zone-${zone.id}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Zone : ${zone.text}`}>
+                  <Feather
+                    name={isSelected ? 'check-square' : 'square'}
+                    size={16}
+                    color={isSelected ? '#e0a800' : colors.textSecondary}
+                  />
+                  <Text style={styles.zoneText}>{zone.text}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
 
         {selectedZoneId && !activeField && (
           <View style={styles.zoneToolbar} testID="ocr-zone-toolbar">
@@ -304,7 +296,7 @@ export default function OcrReviewScreen() {
                   </Pressable>
                 </View>
                 {activeField === field && (
-                  <Text style={styles.armingHint}>Touchez la bonne zone sur la photo.</Text>
+                  <Text style={styles.armingHint}>Choisissez un texte dans la liste.</Text>
                 )}
               </View>
             );
@@ -383,16 +375,37 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
       position: 'relative' as const,
     },
     photo: { width: '100%' as const, height: '100%' as const },
-    zone: {
-      position: 'absolute' as const,
-      borderWidth: 2,
-      borderColor: colors.accent,
-      backgroundColor: 'rgba(0, 122, 255, 0.15)',
-      borderRadius: 4,
+    zoneList: {
+      marginTop: Spacing.three,
+      gap: Spacing.two,
     },
-    zoneSelected: {
-      borderColor: '#ffd21f',
-      backgroundColor: 'rgba(255, 210, 31, 0.25)',
+    zoneListTitle: {
+      fontSize: 13,
+      fontWeight: '700' as const,
+      color: colors.textSecondary,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.5,
+    },
+    zoneRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: Spacing.two,
+      minHeight: HitTarget.minHeight,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+      borderRadius: 8,
+      backgroundColor: colors.backgroundElement,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    zoneRowSelected: {
+      borderColor: '#e0a800',
+      backgroundColor: 'rgba(224, 168, 0, 0.12)',
+    },
+    zoneText: {
+      flex: 1,
+      fontSize: 15,
+      color: colors.text,
     },
     zoneToolbar: {
       marginTop: Spacing.three,

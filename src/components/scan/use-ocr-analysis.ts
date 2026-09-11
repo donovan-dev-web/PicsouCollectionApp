@@ -30,7 +30,6 @@ export function useOcrAnalysis() {
     status: 'analyzing',
     detected: EMPTY_DETECTED,
   });
-  const [draft, setDraft] = useState<DetectedInfo>(EMPTY_DETECTED);
   const [torchOn, setTorchOn] = useState(false);
   const [weakCycles, setWeakCycles] = useState(0);
   const [capturing, setCapturing] = useState(false);
@@ -170,13 +169,6 @@ export function useOcrAnalysis() {
     setState({ status: 'analyzing', detected: EMPTY_DETECTED });
   };
 
-  const openConfirm = () => {
-    const detected =
-      state.status === 'analyzing' || state.status === 'confirm' ? state.detected : EMPTY_DETECTED;
-    setDraft(detected);
-    setState({ status: 'confirm', detected });
-  };
-
   const goManual = (detected: Partial<DetectedInfo>) => {
     router.replace({ pathname: '/scan/manual', params: buildManualParams(detected) });
   };
@@ -185,64 +177,20 @@ export function useOcrAnalysis() {
     router.replace('/scan/barcode');
   };
 
-  /** US-ID-09 : recherche en outrepassant la confiance (champs validés/corrigés). */
-  const searchFromDraft = async () => {
-    const publication = draft.publication?.trim() ?? '';
-    const rawNumber = draft.issueNumber?.toString().trim() ?? '';
-    const issueNumber = rawNumber ? Number(rawNumber) : null;
-    const date = draft.date?.trim() || null;
-
-    if (!publication || issueNumber === null || !Number.isFinite(issueNumber)) {
-      // Impossible de rechercher : on oriente vers la saisie manuelle pré-remplie.
-      goManual({ publication: publication || undefined, issueNumber, date });
-      return;
-    }
-
-    const { identificationService } = getDeps();
-    const result = await identificationService.searchByOcrFields(publication, issueNumber, date);
-
-    if (result.status === 'weak' || result.status === 'no-text') {
-      goManual({ publication, issueNumber, date });
-      return;
-    }
-    if (result.status === 'unknown') {
-      setState({
-        status: 'unknown',
-        publication: result.publication,
-        issueNumber: result.issueNumber,
-        date: result.date,
-        confidence: result.confidence,
-      });
-      return;
-    }
-    setState({
-      status: 'found',
-      id: result.magazine.id,
-      publication: result.publication,
-      issueNumber: result.issueNumber,
-      date: result.date,
-      confidence: result.confidence,
-    });
-  };
-
   return {
     cameraRef,
     permission,
     requestPermission,
     state,
-    draft,
     torchOn,
     weakCycles,
     capturing,
     debugFrame,
     ocrDebug,
     setTorchOn,
-    setDraft,
     capture,
     stopAndRetry,
-    openConfirm,
     goManual,
     goBarcode,
-    searchFromDraft,
   };
 }

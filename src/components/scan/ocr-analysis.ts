@@ -24,7 +24,6 @@ export type OcrDebugFrame = {
 
 export type OcrUiState =
   | { status: 'analyzing'; detected: DetectedInfo; noText?: boolean }
-  | { status: 'confirm'; detected: DetectedInfo }
   | {
       status: 'found';
       id: string;

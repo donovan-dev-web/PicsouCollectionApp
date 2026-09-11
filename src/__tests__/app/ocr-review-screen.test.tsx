@@ -73,12 +73,6 @@ function makeMagazine(): Magazine {
   };
 }
 
-function layoutPhoto(): void {
-  fireEvent(screen.getByTestId('ocr-review-photo'), 'layout', {
-    nativeEvent: { layout: { width: 400, height: 560 } },
-  });
-}
-
 describe('OcrReviewScreen (M-12, US-OCR-05/06)', () => {
   beforeEach(() => {
     mockReplace.mockClear();
@@ -123,13 +117,12 @@ describe('OcrReviewScreen (M-12, US-OCR-05/06)', () => {
   });
 
   it('sélectionne une zone après activation : zone → champ (US-OCR-06)', () => {
-    // Titre non reconnu (confiance basse) : on doit le pointer sur la photo.
+    // Titre non reconnu (confiance basse) : on doit le pointer depuis la liste.
     seedPayload(['La Gazette du Quartier', 'N° 123']);
     render(<OcrReviewScreen />);
-    layoutPhoto();
 
     fireEvent.press(screen.getByTestId('ocr-review-pick-title'));
-    expect(screen.getByText(/Touchez la bonne zone/)).toBeTruthy();
+    expect(screen.getByText(/Choisissez un texte/)).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('ocr-zone-b0-l0'));
     expect(screen.getByTestId('ocr-review-input-title').props.value).toBe('La Gazette du Quartier');
@@ -138,7 +131,6 @@ describe('OcrReviewScreen (M-12, US-OCR-05/06)', () => {
   it('utilise la barre de zones pour affecter un numéro (badge photo)', () => {
     seedPayload(['Picsou Magazine', 'N° 547']);
     render(<OcrReviewScreen />);
-    layoutPhoto();
 
     fireEvent.changeText(screen.getByTestId('ocr-review-input-issueNumber'), '');
     fireEvent.press(screen.getByTestId('ocr-zone-b0-l1'));

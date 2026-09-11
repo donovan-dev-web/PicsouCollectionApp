@@ -7,7 +7,6 @@ import { Feather } from '@expo/vector-icons';
 import { CameraPermissionScreen } from '@/components/camera-permission-screen';
 import { useThemeColors } from '@/hooks/use-theme';
 import { OcrAnalyzingOverlay } from '@/components/scan/ocr-analyzing-overlay';
-import { OcrConfirmOverlay } from '@/components/scan/ocr-confirm-overlay';
 import { OcrDebugPanel } from '@/components/scan/ocr-debug-panel';
 import { OcrResultOverlay } from '@/components/scan/ocr-result-overlay';
 import { makeCameraOcrStyles } from '@/components/scan/camera-ocr-styles';
@@ -23,20 +22,16 @@ export default function CameraOcrScreen() {
     permission,
     requestPermission,
     state,
-    draft,
     torchOn,
     weakCycles,
     capturing,
     debugFrame,
     ocrDebug,
     setTorchOn,
-    setDraft,
     capture,
     stopAndRetry,
-    openConfirm,
     goManual,
     goBarcode,
-    searchFromDraft,
   } = useOcrAnalysis();
 
   if (!permission || !permission.granted) {
@@ -52,9 +47,7 @@ export default function CameraOcrScreen() {
   }
 
   const isAnalyzing = state.status === 'analyzing';
-  const isConfirming = state.status === 'confirm';
-  const detected =
-    state.status === 'analyzing' || state.status === 'confirm' ? state.detected : null;
+  const detected = state.status === 'analyzing' ? state.detected : null;
 
   const hint =
     state.status === 'analyzing'
@@ -67,19 +60,19 @@ export default function CameraOcrScreen() {
 
   const debugFields = {
     publication:
-      state.status === 'analyzing' || state.status === 'confirm'
+      state.status === 'analyzing'
         ? state.detected.publication
         : state.status === 'found' || state.status === 'unknown'
           ? state.publication
           : null,
     issueNumber:
-      state.status === 'analyzing' || state.status === 'confirm'
+      state.status === 'analyzing'
         ? state.detected.issueNumber
         : state.status === 'found' || state.status === 'unknown'
           ? state.issueNumber
           : null,
     date:
-      state.status === 'analyzing' || state.status === 'confirm'
+      state.status === 'analyzing'
         ? state.detected.date
         : state.status === 'found' || state.status === 'unknown'
           ? state.date
@@ -104,7 +97,6 @@ export default function CameraOcrScreen() {
           weakCycles={weakCycles}
           capturing={capturing}
           torchOn={torchOn}
-          onOpenConfirm={openConfirm}
           onGoBarcode={goBarcode}
           onGoManual={goManual}
           onBack={() => router.back()}
@@ -128,17 +120,6 @@ export default function CameraOcrScreen() {
             <Feather name="camera" size={26} color={colors.accentText} />
           </View>
         </Pressable>
-      )}
-
-      {isConfirming && (
-        <OcrConfirmOverlay
-          styles={styles}
-          draft={draft}
-          onDraftChange={setDraft}
-          onSearch={searchFromDraft}
-          onGoManual={() => goManual(draft)}
-          onBack={stopAndRetry}
-        />
       )}
 
       {state.status === 'found' && (

@@ -20,14 +20,6 @@ export function makeBarcodeStyles(colors: ThemeColors, insets: { top: number; bo
     camera: {
       flex: 1,
     },
-    reticle: {
-      width: 220,
-      height: 220,
-      borderWidth: 3,
-      borderColor: colors.accent,
-      borderRadius: 16,
-      backgroundColor: 'transparent',
-    },
     hintRow: {
       flexDirection: 'row',
       alignItems: 'center',
