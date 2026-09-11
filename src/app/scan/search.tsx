@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { AutocompleteInput } from '@/components/autocomplete-input';
 import { Screen } from '@/components/screen';
+import { SelectField } from '@/components/select-field';
 import { HitTarget } from '@/constants/theme';
 import {
   SearchFoundResult,
@@ -12,12 +12,19 @@ import {
   makeSearchResultStyles,
   makeSearchScreenStyles,
 } from '@/components/scan-search-views';
-import { getDeps } from '@/dependencies';
 import { useThemeColors } from '@/hooks/use-theme';
 import { useCollectionStore } from '@/store/use-collection-store';
-import type { OcrLookupResult } from '@/identification/identificationService';
 
 const EMPTY_ISSUE = '';
+const ALL_EDITIONS = 'Toutes les éditions';
+
+type FoundResult = {
+  status: 'found';
+  magazineId: string;
+  publication: string;
+  issueNumber: number;
+};
+type UnknownResult = { status: 'unknown'; edition: string | null; issueNumber: number };
 
 export default function ScanSearchScreen() {
   const router = useRouter();
@@ -25,43 +32,41 @@ export default function ScanSearchScreen() {
   const screenStyles = makeSearchScreenStyles(colors);
   const magazines = useCollectionStore((s) => s.magazines);
 
-  const [publication, setPublication] = useState('');
+  const [edition, setEdition] = useState<string | null>(null);
   const [issueNumber, setIssueNumber] = useState(EMPTY_ISSUE);
   const [searching, setSearching] = useState(false);
-  const [result, setResult] = useState<Extract<
-    OcrLookupResult,
-    { status: 'found' | 'unknown' }
-  > | null>(null);
+  const [result, setResult] = useState<FoundResult | UnknownResult | null>(null);
 
-  const publications = [...new Set(magazines.map((m) => m.publication))];
-
-  const foundId = result?.status === 'found' ? result.magazine.id : null;
+  const editions = [...new Set(magazines.map((m) => m.edition).filter((e): e is string => !!e))];
 
   const issue = issueNumber.replace(/[^0-9]/g, '');
-  const canSearch = publication.trim().length > 0 && issue.length > 0 && !searching;
+  const canSearch = issue.length > 0 && !searching;
 
-  const search = async () => {
+  const search = () => {
     if (!canSearch) {
       return;
     }
     setSearching(true);
-    const { identificationService } = getDeps();
-    const resultNow = await identificationService.searchByOcrFields(
-      publication.trim(),
-      Number(issue),
-      null,
+    const query = Number(issue);
+    const matches = magazines.filter(
+      (m) => m.issueNumber === query && (edition === null || m.edition === edition),
     );
-    if (resultNow.status === 'found' || resultNow.status === 'unknown') {
-      setResult(resultNow);
+    if (matches.length > 0) {
+      setResult({
+        status: 'found',
+        magazineId: matches[0].id,
+        publication: matches[0].publication,
+        issueNumber: query,
+      });
     } else {
-      setResult(null);
+      setResult({ status: 'unknown', edition, issueNumber: query });
     }
     setSearching(false);
   };
 
   const resetForm = () => {
     setResult(null);
-    setPublication('');
+    setEdition(null);
     setIssueNumber(EMPTY_ISSUE);
   };
 
@@ -76,8 +81,7 @@ export default function ScanSearchScreen() {
   const handleManual = () => {
     router.replace({
       pathname: '/scan/manual',
-      params:
-        publication.trim() || issue ? { publication: publication.trim(), issueNumber: issue } : {},
+      params: issue ? { issueNumber: issue } : {},
     });
   };
 
@@ -102,12 +106,12 @@ export default function ScanSearchScreen() {
 
         {!result ? (
           <SearchForm
-            publication={publication}
-            publications={publications}
+            edition={edition}
+            editions={editions}
             issueNumber={issueNumber}
             canSearch={canSearch}
             searching={searching}
-            onPublicationChange={setPublication}
+            onEditionChange={setEdition}
             onIssueChange={setIssueNumber}
             onSearch={search}
           />
@@ -115,12 +119,12 @@ export default function ScanSearchScreen() {
           <SearchFoundResult
             publication={result.publication}
             issueNumber={result.issueNumber}
-            onView={() => router.replace(`/collection/${foundId}`)}
+            onView={() => router.replace(`/collection/${result.magazineId}`)}
             onRescan={() => router.replace('/scan/barcode')}
           />
         ) : (
           <SearchUnknownResult
-            publication={result.publication}
+            edition={result.edition}
             issueNumber={result.issueNumber}
             onManual={handleManual}
             onAgain={resetForm}
@@ -132,21 +136,21 @@ export default function ScanSearchScreen() {
 }
 
 function SearchForm({
-  publication,
-  publications,
+  edition,
+  editions,
   issueNumber,
   canSearch,
   searching,
-  onPublicationChange,
+  onEditionChange,
   onIssueChange,
   onSearch,
 }: {
-  publication: string;
-  publications: string[];
+  edition: string | null;
+  editions: string[];
   issueNumber: string;
   canSearch: boolean;
   searching: boolean;
-  onPublicationChange: (v: string) => void;
+  onEditionChange: (v: string | null) => void;
   onIssueChange: (v: string) => void;
   onSearch: () => void;
 }) {
@@ -156,14 +160,14 @@ function SearchForm({
 
   return (
     <View style={screenStyles.form}>
-      <AutocompleteInput
-        label="Publication *"
-        value={publication}
-        options={publications}
-        onChangeText={onPublicationChange}
-        placeholder="Ex : Picsou Magazine"
-        testID="search-publication"
-        accessibilityLabel="Publication"
+      <SelectField
+        label="Édition"
+        placeholder={ALL_EDITIONS}
+        value={edition}
+        options={editions}
+        onSelect={onEditionChange}
+        noneLabel={ALL_EDITIONS}
+        testID="search-edition"
       />
 
       <Text style={screenStyles.label}>Numéro</Text>
@@ -194,7 +198,7 @@ function SearchForm({
       </Pressable>
       {!canSearch && !searching ? (
         <Text style={screenStyles.hint} testID="search-hint">
-          Renseignez la publication et le numéro pour rechercher.
+          Renseignez le numéro pour rechercher.
         </Text>
       ) : null}
     </View>

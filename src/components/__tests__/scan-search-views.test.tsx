@@ -61,17 +61,17 @@ describe('SearchUnknownResult', () => {
   const onManual = jest.fn();
   const onAgain = jest.fn();
 
-  it('affiche la publication, avec ou sans numéro', async () => {
+  it('affiche le numéro et l’édition recherchés, avec ou sans édition', async () => {
     const user = userEvent.setup();
     render(
       <SearchUnknownResult
-        publication="Picsou Magazine"
         issueNumber={547}
+        edition="géant"
         onManual={onManual}
         onAgain={onAgain}
       />,
     );
-    expect(screen.getByText(/Picsou Magazine/)).toBeTruthy();
+    expect(screen.getByText(/Édition « géant »/)).toBeTruthy();
     expect(screen.getByText('N° 547')).toBeTruthy();
 
     await user.press(screen.getByTestId('search-manual'));
@@ -80,15 +80,9 @@ describe('SearchUnknownResult', () => {
     expect(onAgain).toHaveBeenCalled();
   });
 
-  it('s’affiche sans numéro quand celui-ci est absent', () => {
-    render(
-      <SearchUnknownResult
-        publication="Picsou Magazine"
-        issueNumber={null}
-        onManual={onManual}
-        onAgain={onAgain}
-      />,
-    );
-    expect(screen.queryByText('N° 547')).toBeNull();
+  it('s’affiche sans édition ni numéro', () => {
+    render(<SearchUnknownResult issueNumber={547} onManual={onManual} onAgain={onAgain} />);
+    expect(screen.queryByText(/\u00C9dition/)).toBeNull();
+    expect(screen.getByText('N° 547')).toBeTruthy();
   });
 });
