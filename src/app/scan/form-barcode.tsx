@@ -69,7 +69,6 @@ export default function FormBarcodeScreen() {
       />
 
       <View style={styles.overlay} pointerEvents="none">
-        <View style={styles.reticle} />
         <Text style={styles.scanHint}>Scannez le code-barres du magazine</Text>
         {invalidCount > 0 ? (
           <Text style={styles.invalidText} testID="form-invalid">
@@ -107,14 +106,6 @@ function makeStyles(colors: ThemeColors, insets: { top: number; bottom: number }
     },
     camera: {
       flex: 1,
-    },
-    reticle: {
-      width: 220,
-      height: 220,
-      borderWidth: 3,
-      borderColor: colors.accent,
-      borderRadius: 16,
-      backgroundColor: 'transparent',
     },
     scanHint: {
       marginTop: Spacing.three,

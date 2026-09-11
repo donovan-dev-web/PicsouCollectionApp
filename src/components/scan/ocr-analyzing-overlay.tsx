@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { useThemeColors } from '@/hooks/use-theme';
-import { hasAnyDetected, type DetectedInfo } from './ocr-analysis';
+import type { DetectedInfo } from './ocr-analysis';
 import type { CameraOcrStyles } from './camera-ocr-styles';
 
 type Props = {
@@ -12,7 +12,6 @@ type Props = {
   weakCycles: number;
   capturing: boolean;
   torchOn: boolean;
-  onOpenConfirm: () => void;
   onGoBarcode: () => void;
   onGoManual: (detected: Partial<DetectedInfo>) => void;
   onBack: () => void;
@@ -26,7 +25,6 @@ export function OcrAnalyzingOverlay({
   weakCycles,
   capturing,
   torchOn,
-  onOpenConfirm,
   onGoBarcode,
   onGoManual,
   onBack,
@@ -36,8 +34,7 @@ export function OcrAnalyzingOverlay({
 
   return (
     <>
-      <View style={[styles.overlay, styles.analyzingLayout]}>
-        <View style={styles.reticle} testID="ocr-reticle" />
+      <View style={styles.overlay}>
         <Text style={styles.scanHint} testID="ocr-hint">
           {hint}
         </Text>
@@ -46,50 +43,6 @@ export function OcrAnalyzingOverlay({
             <ActivityIndicator color={colors.accent} />
             <Text style={styles.processingText}>Lecture…</Text>
           </View>
-        )}
-
-        {/* Surcouche US-ID-08 : champs détectés en direct. */}
-        <View style={styles.detectedBoard} testID="ocr-detected-board">
-          <View style={styles.detectedRow}>
-            <Text style={styles.detectedLabel}>Nom</Text>
-            <Text
-              style={[
-                styles.detectedValue,
-                detected.publication === null && styles.detectedValueEmpty,
-              ]}
-              testID="ocr-field-publication">
-              {detected.publication ?? '…'}
-            </Text>
-          </View>
-          <View style={styles.detectedRow}>
-            <Text style={styles.detectedLabel}>Numéro</Text>
-            <Text
-              style={[
-                styles.detectedValue,
-                detected.issueNumber === null && styles.detectedValueEmpty,
-              ]}
-              testID="ocr-field-issue">
-              {detected.issueNumber?.toString() ?? '…'}
-            </Text>
-          </View>
-          <View style={styles.detectedRow}>
-            <Text style={styles.detectedLabel}>Édition / date</Text>
-            <Text
-              style={[styles.detectedValue, detected.date === null && styles.detectedValueEmpty]}
-              testID="ocr-field-date">
-              {detected.date ?? '…'}
-            </Text>
-          </View>
-        </View>
-
-        {hasAnyDetected(detected) && (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-            onPress={onOpenConfirm}
-            testID="ocr-confirm-detected"
-            accessibilityRole="button">
-            <Text style={styles.primaryButtonText}>Valider ces informations détectées</Text>
-          </Pressable>
         )}
       </View>
 

@@ -137,6 +137,30 @@ export function MagazineForm({
           accessibilityLabel="Édition"
         />
 
+        <Text style={styles.label}>Code-barres</Text>
+        <View style={styles.barcodeRow}>
+          <TextInput
+            style={[styles.input, styles.barcodeInput]}
+            value={values.barcode}
+            onChangeText={(v) => set('barcode', v)}
+            placeholder="Ex : 3271234000011"
+            keyboardType="default"
+            autoCapitalize="characters"
+            placeholderTextColor={colors.textSecondary}
+            testID="field-barcode"
+            accessibilityLabel="Code-barres"
+          />
+          <Pressable
+            style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
+            onPress={openBarcodeScanner}
+            testID="barcode-scan"
+            accessibilityRole="button"
+            accessibilityLabel="Scanner le code-barres">
+            <Feather name="crop" size={18} color={colors.text} />
+            <Text style={styles.scanButtonText}>Scanner</Text>
+          </Pressable>
+        </View>
+
         {/* Bouton « Plus de détails » */}
         <Pressable
           style={({ pressed }) => [styles.detailsToggle, pressed && styles.buttonPressed]}
@@ -156,13 +180,7 @@ export function MagazineForm({
         </Pressable>
 
         {detailsOpen ? (
-          <DetailsSection
-            values={values}
-            set={set}
-            editions={editions}
-            languages={languages}
-            onScanBarcode={openBarcodeScanner}
-          />
+          <DetailsSection values={values} set={set} editions={editions} languages={languages} />
         ) : null}
 
         {formError ? (
@@ -196,13 +214,11 @@ function DetailsSection({
   set,
   editions,
   languages,
-  onScanBarcode,
 }: {
   values: FormValues;
   set: (key: keyof FormValues, value: string | null) => void;
   editions: string[];
   languages: string[];
-  onScanBarcode: () => void;
 }) {
   const colors = useThemeColors();
   const styles = makeMagazineFormStyles(colors);
@@ -252,30 +268,6 @@ function DetailsSection({
             testID="select-year"
           />
         </View>
-      </View>
-
-      <Text style={styles.label}>Code-barres</Text>
-      <View style={styles.barcodeRow}>
-        <TextInput
-          style={[styles.input, styles.barcodeInput]}
-          value={values.barcode}
-          onChangeText={(v) => set('barcode', v)}
-          placeholder="Ex : 3271234000011"
-          keyboardType="default"
-          autoCapitalize="characters"
-          placeholderTextColor={colors.textSecondary}
-          testID="field-barcode"
-          accessibilityLabel="Code-barres"
-        />
-        <Pressable
-          style={({ pressed }) => [styles.scanButton, pressed && styles.buttonPressed]}
-          onPress={onScanBarcode}
-          testID="barcode-scan"
-          accessibilityRole="button"
-          accessibilityLabel="Scanner le code-barres">
-          <Feather name="crop" size={18} color={colors.text} />
-          <Text style={styles.scanButtonText}>Scanner</Text>
-        </Pressable>
       </View>
 
       <Text style={styles.label}>Notes</Text>

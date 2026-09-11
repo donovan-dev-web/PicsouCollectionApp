@@ -7,7 +7,6 @@ import type { Magazine } from '@/types';
 
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
-const mockSearchByOcrFields = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: mockBack, replace: mockReplace, canGoBack: () => true }),
@@ -17,7 +16,7 @@ const magazine: Magazine = {
   id: 'mag-1',
   publication: 'Picsou Magazine',
   issueNumber: 547,
-  edition: null,
+  edition: 'standard',
   language: null,
   condition: null,
   publicationDate: null,
@@ -35,9 +34,7 @@ function stubDeps() {
       getColorScheme: jest.fn().mockResolvedValue('system'),
       setColorScheme: jest.fn().mockResolvedValue(undefined),
     } as unknown as Dependencies['settingsRepository'],
-    identificationService: {
-      searchByOcrFields: mockSearchByOcrFields,
-    } as unknown as Dependencies['identificationService'],
+    identificationService: {} as Dependencies['identificationService'],
     ocrEngine: {} as Dependencies['ocrEngine'],
     backupService: {} as Dependencies['backupService'],
     fileGateway: {} as Dependencies['fileGateway'],
@@ -48,60 +45,55 @@ describe('ScanSearchScreen', () => {
   beforeEach(() => {
     mockBack.mockClear();
     mockReplace.mockClear();
-    mockSearchByOcrFields.mockResolvedValue({ status: 'no-text' });
     stubDeps();
     useCollectionStore.setState({
       magazines: [magazine],
     });
   });
 
-  it('désactive la recherche tant que publication et numéro sont vides', () => {
+  it('désactive la recherche tant que le numéro est vide', () => {
     render(<ScanSearchScreen />);
 
     expect(screen.getByTestId('search-hint')).toBeTruthy();
     fireEvent.press(screen.getByTestId('search-submit'));
-    expect(mockSearchByOcrFields).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it('recherche par publication + numéro et affiche le résultat trouvé (possédé)', async () => {
-    mockSearchByOcrFields.mockResolvedValue({
-      status: 'found',
-      magazine,
-      publication: 'Picsou Magazine',
-      issueNumber: 547,
-      date: null,
-      confidence: 1,
-    });
-
+  it('recherche par numéro toutes éditions confondues et affiche le résultat trouvé', async () => {
     render(<ScanSearchScreen />);
     await act(async () => {
-      fireEvent(screen.getByTestId('search-publication'), 'onChangeText', 'Picsou Magazine');
       fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '547');
     });
     await act(async () => {
       fireEvent.press(screen.getByTestId('search-submit'));
     });
 
-    expect(mockSearchByOcrFields).toHaveBeenCalledWith('Picsou Magazine', 547, null);
     expect(screen.getByTestId('search-magazine')).toHaveTextContent('Picsou Magazine');
     expect(screen.getByTestId('search-status-owned')).toHaveTextContent('✓ Possédé');
     fireEvent.press(screen.getByTestId('search-view'));
     expect(mockReplace).toHaveBeenCalledWith('/collection/mag-1');
   });
 
-  it('propose le repli vers la saisie manuelle pré-remplie quand rien n est trouvé', async () => {
-    mockSearchByOcrFields.mockResolvedValue({
-      status: 'unknown',
-      publication: 'Picsou Magazine',
-      issueNumber: 547,
-      date: null,
-      confidence: 1,
+  it('recherche par numéro + édition spécifique', async () => {
+    render(<ScanSearchScreen />);
+    fireEvent.press(screen.getByTestId('search-edition'));
+    fireEvent.press(screen.getByTestId('search-edition-option-standard'));
+    await act(async () => {
+      fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '547');
+    });
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('search-submit'));
     });
 
+    expect(screen.getByTestId('search-magazine')).toHaveTextContent('Picsou Magazine');
+  });
+
+  it('propose le repli vers la saisie manuelle pré-remplie quand rien n est trouvé', async () => {
     render(<ScanSearchScreen />);
+    fireEvent.press(screen.getByTestId('search-edition'));
+    fireEvent.press(screen.getByTestId('search-edition-option-standard'));
     await act(async () => {
-      fireEvent(screen.getByTestId('search-publication'), 'onChangeText', 'Picsou Magazine');
-      fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '547');
+      fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '972');
     });
     await act(async () => {
       fireEvent.press(screen.getByTestId('search-submit'));
@@ -111,23 +103,14 @@ describe('ScanSearchScreen', () => {
     fireEvent.press(screen.getByTestId('search-manual'));
     expect(mockReplace).toHaveBeenCalledWith({
       pathname: '/scan/manual',
-      params: { publication: 'Picsou Magazine', issueNumber: '547' },
+      params: { issueNumber: '972' },
     });
   });
 
   it('relance une recherche après un résultat non référencé', async () => {
-    mockSearchByOcrFields.mockResolvedValue({
-      status: 'unknown',
-      publication: 'Picsou Magazine',
-      issueNumber: 547,
-      date: null,
-      confidence: 1,
-    });
-
     render(<ScanSearchScreen />);
     await act(async () => {
-      fireEvent(screen.getByTestId('search-publication'), 'onChangeText', 'Picsou Magazine');
-      fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '547');
+      fireEvent(screen.getByTestId('search-issue'), 'onChangeText', '972');
     });
     await act(async () => {
       fireEvent.press(screen.getByTestId('search-submit'));

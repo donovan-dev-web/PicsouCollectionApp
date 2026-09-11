@@ -13,7 +13,7 @@
 3. [Entités persistées](#3-entités-persistées)
 4. [Types TypeScript](#4-types-typescript)
 5. [Requêtes principales](#5-requêtes-principales)
-6. [Format d'export JSON v1](#6-format-dexport-json-v1) (CSV v1 en 6.1)
+6. [Format d'export JSON v1](#6-format-dexport-json-v1) (CSV v2 en 6.1)
 7. [Index et performance](#7-index-et-performance)
 8. [Récapitulatif](#8-récapitulatif)
 
@@ -281,23 +281,23 @@ JSON v1  →  migration  →  SQLite actuelle
 
 Toute modification de structure incrémente `version` et documente la migration.
 
-### 6.1 Export CSV v1 (livré M-07R, v0.7.1)
+### 6.1 Export CSV v2 (livré M-12R, v0.9.4+)
 
-Un **export tabulaire** `CSV` est proposé en complément du JSON (fichier exploitable dans un tableur). Il reprend une ligne par **exemplaire** (une édition à plusieurs exemplaires apparaît sur plusieurs lignes).
+Un **export tabulaire** `CSV` est proposé en complément du JSON (fichier exploitable dans un tableur). Il reprend **une ligne par édition** (les exemplaires multiples ont été supprimés — retours test physique).
 
-**En-têtes** : `publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded`
+**En-têtes** : `publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,createdAt,updatedAt`
 
 **Exemple** :
 ```csv
-publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,copyNotes,dateAdded
-Picsou Magazine,547,standard,FR,good,2023-03,3271234567890,,,Acheté 0,50 € en brocante à Lille,2026-08-30T14:30:00Z
+publication,issueNumber,edition,language,condition,publicationDate,barcode,notes,ocrText,createdAt,updatedAt
+Picsou Magazine,547,standard,FR,good,2023-03,3271234567890,,PICSOU MAGAZINE 547,2026-08-30T14:30:00Z,2026-08-30T14:30:00Z
 ```
 
 **Règles** :
 - **séparateur** : virgule (`,`), valeurs entre guillemets si besoin ;
 - caractère d'échappement : `"` (doublé à l'intérieur d'une valeur) ;
-- **une ligne = un exemplaire** (dénormalisation des `copies[]` JSON) ; les éditions **sans exemplaire** sont conservées via une ligne aux champs exemplaire vides ;
-- **l'import CSV est validé sur la présence des en-têtes attendus** (§13.2 FONCTIONNAL-SPEC) ;
+- **une ligne = une édition** : deux lignes ne définissent la même édition que si tous les champs métier coïncident (publication, numéro, édition, langue, état) — les doublons sont alors ignorés à l'import ;
+- l'**import CSV est validé sur la présence des en-têtes attendus** (§13.2 FONCTIONNAL-SPEC) ;
 - les champs vides sont exportés vides (pas de `null`).
 
 > Le **JSON reste le format complet** (structure, métadonnées, version) et le seul garanti pour une **restauration fidèle** ; le CSV est un format d'exploitation/échange.
@@ -333,6 +333,6 @@ Pour une collection de quelques milliers de magazines, SQLite reste très perfor
 | `magazine_barcodes` | Simplifiée en colonne `barcode` (non unique) |
 | Code-barres | EAN-13 / ISBN, index non unique (doublons permis) |
 | Export JSON | Format `picsou-collection` v1 |
-| Export CSV | v1 (livré M-07R) — une ligne = un exemplaire |
+| Export CSV | v2 (livré M-12R) — une ligne = une édition (doublons ignorés) |
 | TypeScript | camelCase, mapping explicit dans les repositories |
 | Index | barcode (non unique), (publication, issue_number), collection_items.magazine_id |

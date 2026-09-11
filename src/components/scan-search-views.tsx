@@ -139,14 +139,14 @@ export function SearchFoundResult({
 }
 
 type SearchUnknownResultProps = {
-  publication: string;
+  edition?: string | null;
   issueNumber: number | null;
   onManual: () => void;
   onAgain: () => void;
 };
 
 export function SearchUnknownResult({
-  publication,
+  edition,
   issueNumber,
   onManual,
   onAgain,
@@ -154,12 +154,16 @@ export function SearchUnknownResult({
   const colors = useThemeColors();
   const styles = makeSearchResultStyles(colors);
 
+  const editionLabel = edition ? ` · Édition « ${edition} »` : '';
+  const numberLabel = issueNumber != null ? ` N° ${issueNumber}` : '';
+
   return (
     <View style={styles.form}>
       <Text style={styles.resultTitle}>Non référencé</Text>
       <View style={styles.card}>
         <Text style={styles.message}>
-          « {publication} » n&apos;est pas encore dans votre collection.
+          Aucun magazine ne correspond au numéro{numberLabel}
+          {editionLabel} dans votre collection.
         </Text>
         {issueNumber != null ? <Text style={styles.issue}>N° {issueNumber}</Text> : null}
       </View>

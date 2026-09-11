@@ -11,7 +11,6 @@ function renderOverlay(
   overrides: Partial<{ detected: DetectedInfo; weakCycles: number; capturing: boolean }> = {},
 ) {
   const callbacks = {
-    onOpenConfirm: jest.fn(),
     onGoBarcode: jest.fn(),
     onGoManual: jest.fn(),
     onBack: jest.fn(),
@@ -25,7 +24,6 @@ function renderOverlay(
       weakCycles={overrides.weakCycles ?? 0}
       capturing={overrides.capturing ?? false}
       torchOn={false}
-      onOpenConfirm={callbacks.onOpenConfirm}
       onGoBarcode={callbacks.onGoBarcode}
       onGoManual={callbacks.onGoManual}
       onBack={callbacks.onBack}
@@ -49,37 +47,13 @@ describe('OcrAnalyzingOverlay', () => {
     expect(screen.queryByText('Lecture…')).toBeNull();
   });
 
-  it('affiche des champs détectés avec leurs valeurs', () => {
+  it('n’affiche aucun panneau d’informations détectées entre le guide et les actions', () => {
     renderOverlay({
       detected: { publication: 'Picsou Magazine', issueNumber: 547, date: '2024-06' },
     });
 
-    expect(screen.getByTestId('ocr-field-publication')).toHaveTextContent('Picsou Magazine');
-    expect(screen.getByTestId('ocr-field-issue')).toHaveTextContent('547');
-    expect(screen.getByTestId('ocr-field-date')).toHaveTextContent('2024-06');
-  });
-
-  it('affiche des points de suspension tant qu’un champ est vide', () => {
-    renderOverlay();
-
-    expect(screen.getByTestId('ocr-field-publication')).toHaveTextContent('…');
-    expect(screen.getByTestId('ocr-field-issue')).toHaveTextContent('…');
-    expect(screen.getByTestId('ocr-field-date')).toHaveTextContent('…');
-  });
-
-  it('masque la validation tant qu’aucune information n’est détectée', () => {
-    renderOverlay();
-
+    expect(screen.queryByTestId('ocr-detected-board')).toBeNull();
     expect(screen.queryByTestId('ocr-confirm-detected')).toBeNull();
-  });
-
-  it('valide les informations détectées', () => {
-    const callbacks = renderOverlay({
-      detected: { publication: 'Picsou Magazine', issueNumber: null, date: null },
-    });
-
-    fireEvent.press(screen.getByTestId('ocr-confirm-detected'));
-    expect(callbacks.onOpenConfirm).toHaveBeenCalled();
   });
 
   it('propose code-barres, retour et torche', () => {
@@ -105,7 +79,6 @@ describe('OcrAnalyzingOverlay', () => {
         weakCycles={0}
         capturing={false}
         torchOn
-        onOpenConfirm={jest.fn()}
         onGoBarcode={jest.fn()}
         onGoManual={jest.fn()}
         onBack={jest.fn()}

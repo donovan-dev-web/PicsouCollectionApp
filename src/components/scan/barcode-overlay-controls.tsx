@@ -30,7 +30,6 @@ export function BarcodeOverlayControls({
   return (
     <>
       <View style={styles.overlay} pointerEvents="none">
-        <View style={styles.reticle} />
         <View style={styles.hintRow}>
           {state.status === 'searching' ? (
             <ActivityIndicator
