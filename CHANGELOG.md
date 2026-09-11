@@ -13,6 +13,52 @@
 
 ---
 
+## [1.0.0] — 2026-09-11
+
+> **Première release majeure stable** : clôture du chantier **M-11** (Review &
+> Qualité) et livraison de **M-12 — OCR interactif & fiabilisation** (#205-#212,
+> v1.0.0). Le modèle « une édition possédée = une ligne » remplace le système
+> d'exemplaires, le backup s'étoffe (CSV v2, 11 colonnes), et le flux OCR devient
+> dialogué : prétraitement, zones détectées, candidats par champ avec confiance,
+> propositions automatiques, revue photo interactive et recherche édition + numéro.
+
+### Added
+- **OCR interactif & fiabilisation (M-12, #205-#212, US-OCR-01..08)** :
+  - prétraitement de la photo avant reconnaissance (redimensionnement ≤ 2600 px + ré-encodage JPEG, **analyse éphémère** sans écriture stockage) — `ocrImagePreprocessor`, M12-01 #205 ;
+  - OCR avec **zones** : texte + position (`boundingBox`) au niveau **ligne** détectée — `ocrResultMapper`, M12-02 #206 ;
+  - **candidats par champ** (titre, numéro/tome, année, pages, prix) avec **niveau de confiance** et règles métier dynamiques (`192 PAGES` ≠ numéro, `€` = prix, années, `N°`/`TOME`) — `ocrCandidateAnalyzer`, M12-03 #207 ;
+  - **propositions automatiques** des champs fiables (seuil 0,7 ; aucune proposition si confiance proche), **toujours modifiables** — `ocrProposals`, M12-04 #208 ;
+  - **écran de revue photo** `/scan/ocr-review` : liste des textes détectés **cliquables**, sélection par champ et correction en 2-3 gestes — M12-05 #209, M12-06 #210 ;
+  - recherche / ajout avec les valeurs validées → résultat Possédé / Absent, saisie manuelle **pré-remplie** si info manquante — M12-07 #211 ;
+  - **jeu de test** de couvertures réelles + erreurs mesurées et consignées (`docs/12-TESTING.md` §5.4) — M12-08 #212 ;
+  - synthèse documentaire de la passe de test physique (M-12R, PR #215).
+- **Recherche par édition + numéro** directement dans la collection (`/scan/search`), résultat édition avec N°/année et panier associé (M-12R, PR #215).
+- **Exemple de collection au format v2**, une ligne par édition — `collection-exemple.csv` + docs/06-DATA-MODEL (M-12R).
+- **OCR manuel** (un appui = une photo), panneau de debug et sous-menu **paramètres avancés** (M-11, PR #204).
+- Champ **code-barres** remonté en première partie du formulaire d'édition (M-12R).
+
+### Changed
+- **Modèle « une édition possédée »** : le système d'exemplaires est retiré — une édition en collection est possédée (migration v5, M-11) ; compteurs, fiche, sauvegardes et imports v1 mis en cohérence.
+- **Backup CSV v2** : export 11 colonnes compatible tableur + validation des anciens exports v1 (M-11) ; backup sans exemplaires.
+- **Scan code-barres** : panier possédé/continu, états replié et recherche sans quantité (M-11).
+- **Version 1.0.0** alignée (app.json + package.json + `APP_VERSION` des backups).
+- **Découpage** des écrans de scan caméra/code-barres et des services/composants métier (M-11) ; tests et couverture alignés sur la doc (M11-07/08).
+- Expo/expo-router alignés sur les patchs du SDK 57 + concurrent React (M-11).
+
+### Fixed
+- Caméra OCR **épurée** (retours test physique, M-12R, PR #215) : fini les boîtes cliquables, le panneau d'informations et le réticule — le texte détecté est choisi depuis la revue photo.
+- Popup « Couverture reconnue » **recalée** sur l'écran après les retours terrain (M-12R).
+- Purge du code mort, conventions de code (dates, a11y, perfs) et revue des tests US (M-11).
+
+### Removed
+- **Système d'exemplaires** (migration v5) — remplacé par le modèle « une édition possédée ».
+- `collection-fictive.csv` — remplacé par `collection-exemple.csv` (format v2).
+
+### Validation
+- **518 tests / 58 suites** vertes (statements 97,32 %, branches 90,58 %, functions 96,73 %, lines 97,62 % ; seuil CI ≥ 80 %), tsc OK, lint 0 erreur, prettier OK, couverture documentée `docs/12-TESTING.md` §8.
+
+---
+
 ## [0.9.3] — 2026-09-07
 
 > Treizième release : **retours test physique v0.9.2** — panneau de recherche
